@@ -29,11 +29,12 @@ public class Drive extends SubsystemBase {
         gyro.setYaw(0);
 
         mSwerveMods = new Module[] {
-            new Module(0, Constants.Swerve.Mod0.constants),
-            new Module(1, Constants.Swerve.Mod1.constants),
-            new Module(2, Constants.Swerve.Mod2.constants),
-            new Module(3, Constants.Swerve.Mod3.constants)
+            new Module(0, Constants.Swerve.FrontLeftMod.constants),
+            new Module(1, Constants.Swerve.FrontRightMod.constants),
+            new Module(2, Constants.Swerve.BackLeftMod.constants),
+            new Module(3, Constants.Swerve.BackRightMod.constants)
         };
+        
 
         swerveOdometry = new SwerveDriveOdometry(Constants.Swerve.swerveKinematics, getGyroYaw(), getModulePositions());
     }
