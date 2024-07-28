@@ -57,7 +57,7 @@ public class COTSTalonFXSwerveConstants {
                 double wheelDiameter = Units.inchesToMeters(4.0);
         
                 /** (396 / 35) : 1 */
-                double angleGearRatio = ((396.0 / 35.0) / 1.0);
+                double angleGearRatio = ((150.0/7.0) / 1.0);
         
                 double angleKP = 1.0;
                 double angleKI = 0.0;
@@ -236,8 +236,8 @@ public class COTSTalonFXSwerveConstants {
                 double wheelDiameter = Units.inchesToMeters(4.0);
         
                 /** 12.8 : 1 */
-                double angleGearRatio = (12.8 / 1.0);
-        
+                double angleGearRatio = ((150.0/7.0) / 1.0);
+                
                 double angleKP = 1.0;
                 double angleKI = 0.0;
                 double angleKD = 0.0;
@@ -290,7 +290,7 @@ public class COTSTalonFXSwerveConstants {
                 double angleKI = 0.0;
                 double angleKD = 0.0;
         
-                InvertedValue driveMotorInvert = InvertedValue.CounterClockwise_Positive;
+                InvertedValue driveMotorInvert = InvertedValue.Clockwise_Positive;
                 InvertedValue angleMotorInvert = InvertedValue.Clockwise_Positive;
                 SensorDirectionValue cancoderInvert = SensorDirectionValue.CounterClockwise_Positive;
                 return new COTSTalonFXSwerveConstants(wheelDiameter, angleGearRatio, driveGearRatio, angleKP, angleKI, angleKD, driveMotorInvert, angleMotorInvert, cancoderInvert);
