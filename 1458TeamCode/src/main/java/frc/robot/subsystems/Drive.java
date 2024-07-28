@@ -24,7 +24,7 @@ public class Drive extends SubsystemBase {
     public Pigeon2 gyro;
 
     public Drive() {
-        gyro = new Pigeon2(Constants.Swerve.pigeonID);
+        gyro = new Pigeon2(Constants.Swerve.pigeonID, "CV");
         gyro.getConfigurator().apply(new Pigeon2Configuration());
         gyro.setYaw(0);
 

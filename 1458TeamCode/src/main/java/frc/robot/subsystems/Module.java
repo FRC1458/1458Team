@@ -49,6 +49,12 @@ public class Module {
         /* Drive Motor Config */
         mDriveMotor = new TalonFX(moduleConstants.driveMotorID, "CV");
         mDriveMotor.getConfigurator().apply(Robot.ctreConfigs.swerveDriveFXConfig);
+        if(moduleNumber == 0 || moduleNumber == 2) {
+            mDriveMotor.setInverted(false);
+        }
+        if(moduleNumber == 1 || moduleNumber == 3) {
+            mAngleMotor.setInverted(false);
+        }
         mDriveMotor.getConfigurator().setPosition(0.0);
     }
 
