@@ -10,6 +10,7 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.lib.math.Conversions;
 import frc.robot.lib.util.SwerveModuleConstants;
 import frc.robot.Constants;
@@ -20,7 +21,7 @@ public class Module {
     public int moduleNumber;
     private Rotation2d angleOffset;
 
-    private TalonFX mAngleMotor;
+    TalonFX mAngleMotor;
     private TalonFX mDriveMotor;
     private CANcoder angleEncoder;
 
@@ -49,6 +50,7 @@ public class Module {
         /* Drive Motor Config */
         mDriveMotor = new TalonFX(moduleConstants.driveMotorID, "CV");
         mDriveMotor.getConfigurator().apply(Robot.ctreConfigs.swerveDriveFXConfig);
+
         if(moduleNumber == 0 || moduleNumber == 2) {
             mDriveMotor.setInverted(false);
         }
@@ -58,10 +60,12 @@ public class Module {
         mDriveMotor.getConfigurator().setPosition(0.0);
     }
 
-    public void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop){
-        desiredState = SwerveModuleState.optimize(desiredState, getState().angle); 
+    public void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop) {
+        desiredState = SwerveModuleState.optimize(desiredState, getState().angle);
         mAngleMotor.setControl(anglePosition.withPosition(desiredState.angle.getRotations()));
         setSpeed(desiredState, isOpenLoop);
+
+        SmartDashboard.putNumber("Module " + moduleNumber + " Actual Angle", mAngleMotor.getPosition().getValue()); // Debugging
     }
 
     private void setSpeed(SwerveModuleState desiredState, boolean isOpenLoop){
