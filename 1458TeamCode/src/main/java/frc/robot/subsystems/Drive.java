@@ -125,12 +125,14 @@ public class Drive extends SubsystemBase {
         swerveOdometry.update(getGyroYaw(), getModulePositions());
 
         for (Module mod : mSwerveMods) {
-//            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " CANcoder", mod.getCANcoder().getDegrees());
-            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Angle", mod.getPosition().angle.getDegrees());
+            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " CANcoder", (mod.getCANcoder().getDegrees()+180)%360); // This works
+
+
+//            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Angle", ((mod.mAngleMotor.getPosition().getValue()%22.0)*360/22-180));
+            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Angle", (((mod.mAngleMotor.getPosition().getValue()*360+52)%360)+360)%360);
 //            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);
         }
         for(Module mod : mSwerveMods) {
-            SmartDashboard.putNumber("Raw mod " + mod.moduleNumber + " Angle", mod.mAngleMotor.getPosition().getValue());
         }
     }
 }

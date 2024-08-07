@@ -51,9 +51,9 @@ public class Module {
         mDriveMotor = new TalonFX(moduleConstants.driveMotorID, "CV");
         mDriveMotor.getConfigurator().apply(Robot.ctreConfigs.swerveDriveFXConfig);
 
-        if(moduleNumber == 0 || moduleNumber == 2) {
-            mDriveMotor.setInverted(false);
-        }
+//        if(moduleNumber == 0 || moduleNumber == 2) {
+//            mDriveMotor.setInverted(false);
+//        }
         if(moduleNumber == 1 || moduleNumber == 3) {
             mAngleMotor.setInverted(false);
         }
@@ -84,7 +84,9 @@ public class Module {
         return Rotation2d.fromRotations(angleEncoder.getAbsolutePosition().getValue());
     }
 
-    public void resetToAbsolute(){
+    public void resetToAbsolute() {
+        SmartDashboard.putNumber("Module " + moduleNumber + " getRotations", getCANcoder().getRotations());
+        SmartDashboard.putNumber("Module " + moduleNumber + " AngleOffset getRotations", angleOffset.getRotations());
         double absolutePosition = getCANcoder().getRotations() - angleOffset.getRotations();
         mAngleMotor.setPosition(absolutePosition);
     }
