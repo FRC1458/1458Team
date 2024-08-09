@@ -51,11 +51,12 @@ public class Module {
         mDriveMotor = new TalonFX(moduleConstants.driveMotorID, "CV");
         mDriveMotor.getConfigurator().apply(Robot.ctreConfigs.swerveDriveFXConfig);
 
-//        if(moduleNumber == 0 || moduleNumber == 2) {
-//            mDriveMotor.setInverted(false);
-//        }
-        if(moduleNumber == 1 || moduleNumber == 3) {
-            mAngleMotor.setInverted(false);
+        if(moduleNumber == 0 || moduleNumber == 2) {
+            mDriveMotor.setInverted(false);
+        }
+
+        if(moduleNumber == 0 || moduleNumber == 1 || moduleNumber == 2 || moduleNumber == 3) {
+            mAngleMotor.setInverted(true);
         }
         mDriveMotor.getConfigurator().setPosition(0.0);
     }
@@ -65,7 +66,7 @@ public class Module {
         mAngleMotor.setControl(anglePosition.withPosition(desiredState.angle.getRotations()));
         setSpeed(desiredState, isOpenLoop);
 
-        SmartDashboard.putNumber("Module " + moduleNumber + " Actual Angle", mAngleMotor.getPosition().getValue()); // Debugging
+//        SmartDashboard.putNumber("Module " + moduleNumber + " Actual Angle", mAngleMotor.getPosition().getValue()); // Debugging
     }
 
     private void setSpeed(SwerveModuleState desiredState, boolean isOpenLoop){
@@ -85,8 +86,8 @@ public class Module {
     }
 
     public void resetToAbsolute() {
-        SmartDashboard.putNumber("Module " + moduleNumber + " getRotations", getCANcoder().getRotations());
-        SmartDashboard.putNumber("Module " + moduleNumber + " AngleOffset getRotations", angleOffset.getRotations());
+//        SmartDashboard.putNumber("Module " + moduleNumber + " getRotations", getCANcoder().getRotations());
+//        SmartDashboard.putNumber("Module " + moduleNumber + " AngleOffset getRotations", angleOffset.getRotations());
         double absolutePosition = getCANcoder().getRotations() - angleOffset.getRotations();
         mAngleMotor.setPosition(absolutePosition);
     }
