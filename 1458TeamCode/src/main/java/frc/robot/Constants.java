@@ -60,8 +60,6 @@ public final class Constants {
                 public static final double angleOffset = 125.25;
 
                 public static final boolean isInverted = true;
-
-                public static final double wheelCircumference = chosenModule.wheelCircumference;
             }
 
             public static final class DriveMotorConfig {
@@ -93,8 +91,6 @@ public final class Constants {
                 public static final double driveKA = 0.27;
 
                 public static final boolean isInverted = false;
-
-                public static final double wheelCircumference = chosenModule.wheelCircumference;
             }
 
             public static final class CanCoderConfig {
@@ -132,8 +128,6 @@ public final class Constants {
                 public static final double angleOffset = -156.4275;
 
                 public static final boolean isInverted = true;
-
-                public static final double wheelCircumference = chosenModule.wheelCircumference;
             }
 
             public static final class DriveMotorConfig {
@@ -165,8 +159,6 @@ public final class Constants {
                 public static final double driveKA = 0.27;
 
                 public static final boolean isInverted = true;
-
-                public static final double wheelCircumference = chosenModule.wheelCircumference;
             }
 
             public static final class CanCoderConfig {
@@ -204,8 +196,6 @@ public final class Constants {
                 public static final double angleOffset = -242.409;
 
                 public static final boolean isInverted = true;
-
-                public static final double wheelCircumference = chosenModule.wheelCircumference;
             }
 
             public static final class DriveMotorConfig {
@@ -236,8 +226,6 @@ public final class Constants {
                 public static final double driveKA = 0.27;
 
                 public static final boolean isInverted = false;
-
-                public static final double wheelCircumference = chosenModule.wheelCircumference;
             }
 
             public static final class CanCoderConfig {
@@ -274,8 +262,6 @@ public final class Constants {
                 public static final double angleOffset = -327.18;
 
                 public static final boolean isInverted = true;
-
-                public static final double wheelCircumference = chosenModule.wheelCircumference;
             }
 
             public static final class DriveMotorConfig {
@@ -306,8 +292,6 @@ public final class Constants {
                 public static final double driveKA = 0.27;
 
                 public static final boolean isInverted = true;
-
-                public static final double wheelCircumference = chosenModule.wheelCircumference;
             }
 
             public static final class CanCoderConfig {
@@ -317,7 +301,6 @@ public final class Constants {
             }
 
             public static final double wheelCircumference = chosenModule.wheelCircumference;
-            //     new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
         }
     }
 

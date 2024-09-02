@@ -16,7 +16,7 @@ import frc.robot.Constants;
 public class SwerveModule {
     public int moduleNumber;
     private Rotation2d angleOffset;
-    private double driveMotorWheelCircumference;
+    private double wheelCircumference;
 
     private TalonFX mAngleMotor;
     private TalonFX mDriveMotor;
@@ -34,7 +34,7 @@ public class SwerveModule {
     public SwerveModule(SwerveModuleConfig swerveModuleConfig){
         moduleNumber = swerveModuleConfig.moduleNumber;
         angleOffset = swerveModuleConfig.angleMotor.angleOffset;
-        driveMotorWheelCircumference = swerveModuleConfig.driveMotor.wheelCircumference;
+        wheelCircumference = swerveModuleConfig.wheelCircumference;
 
         driveFeedForward = new SimpleMotorFeedforward(
             swerveModuleConfig.driveMotor.motorFXConfig.Slot0.kP,
@@ -75,7 +75,7 @@ public class SwerveModule {
             mDriveMotor.setControl(driveDutyCycle);
         }
         else {
-            driveVelocity.Velocity = Conversions.MPSToRPS(desiredState.speedMetersPerSecond, this.driveMotorWheelCircumference);
+            driveVelocity.Velocity = Conversions.MPSToRPS(desiredState.speedMetersPerSecond, this.wheelCircumference);
             driveVelocity.FeedForward = driveFeedForward.calculate(desiredState.speedMetersPerSecond);
             mDriveMotor.setControl(driveVelocity);
         }
@@ -94,14 +94,14 @@ public class SwerveModule {
 
     public SwerveModuleState getState(){
         return new SwerveModuleState(
-            Conversions.RPSToMPS(mDriveMotor.getVelocity().getValue(), this.driveMotorWheelCircumference),
+            Conversions.RPSToMPS(mDriveMotor.getVelocity().getValue(), this.wheelCircumference),
             Rotation2d.fromRotations(mAngleMotor.getPosition().getValue())
         );
     }
 
     public SwerveModulePosition getPosition(){
         return new SwerveModulePosition(
-            Conversions.rotationsToMeters(mDriveMotor.getPosition().getValue(), this.driveMotorWheelCircumference),
+            Conversions.rotationsToMeters(mDriveMotor.getPosition().getValue(), this.wheelCircumference),
             Rotation2d.fromRotations(mAngleMotor.getPosition().getValue())
         );
     }

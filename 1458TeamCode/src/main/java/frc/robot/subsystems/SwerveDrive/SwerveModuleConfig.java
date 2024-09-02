@@ -4,9 +4,13 @@ import frc.robot.Constants;
 
 public enum SwerveModuleConfig {
     FRONTLEFT (0),
-    FRONTRIGHT (1);
+    FRONTRIGHT (1),
+    BACKLEFT (2),
+    BACKRIGHT (3);
 
     public final int moduleNumber;
+
+    public final double wheelCircumference;
 
     public final SwerveAngleMotorConfig angleMotor;
     public final SwerveDriveMotorConfig driveMotor;
@@ -31,8 +35,7 @@ public enum SwerveModuleConfig {
                 Constants.Swerve.FrontLeftMod.AngleMotorConfig.angleKI,
                 Constants.Swerve.FrontLeftMod.AngleMotorConfig.angleKD,
                 Constants.Swerve.FrontLeftMod.AngleMotorConfig.isInverted,
-                Constants.Swerve.FrontLeftMod.AngleMotorConfig.angleOffset,
-                Constants.Swerve.FrontLeftMod.AngleMotorConfig.wheelCircumference
+                Constants.Swerve.FrontLeftMod.AngleMotorConfig.angleOffset
             );
 
             driveMotor = new SwerveDriveMotorConfig(
@@ -49,8 +52,7 @@ public enum SwerveModuleConfig {
                 Constants.Swerve.FrontLeftMod.DriveMotorConfig.driveKD,
                 Constants.Swerve.FrontLeftMod.DriveMotorConfig.openLoopRamp,
                 Constants.Swerve.FrontLeftMod.DriveMotorConfig.closedLoopRamp,
-                Constants.Swerve.FrontLeftMod.DriveMotorConfig.isInverted,
-                Constants.Swerve.FrontLeftMod.DriveMotorConfig.wheelCircumference
+                Constants.Swerve.FrontLeftMod.DriveMotorConfig.isInverted
 
             );
 
@@ -58,7 +60,10 @@ public enum SwerveModuleConfig {
                 Constants.Swerve.FrontLeftMod.CanCoderConfig.canCoderID,
                 Constants.Swerve.FrontLeftMod.CanCoderConfig.cancoderInvert
             );
-        } else {/* Front Right */
+
+            wheelCircumference = Constants.Swerve.FrontLeftMod.wheelCircumference;
+
+        } else if (moduleNumber == 1) {/* Front Right */
             angleMotor = new SwerveAngleMotorConfig(
                 Constants.Swerve.FrontRightMod.AngleMotorConfig.angleMotorID,
                 Constants.Swerve.FrontRightMod.AngleMotorConfig.angleMotorInvert,
@@ -72,8 +77,7 @@ public enum SwerveModuleConfig {
                 Constants.Swerve.FrontRightMod.AngleMotorConfig.angleKI,
                 Constants.Swerve.FrontRightMod.AngleMotorConfig.angleKD,
                 Constants.Swerve.FrontRightMod.AngleMotorConfig.isInverted,
-                Constants.Swerve.FrontRightMod.AngleMotorConfig.angleOffset,
-                Constants.Swerve.FrontRightMod.AngleMotorConfig.wheelCircumference
+                Constants.Swerve.FrontRightMod.AngleMotorConfig.angleOffset
             );
 
             driveMotor = new SwerveDriveMotorConfig(
@@ -90,14 +94,97 @@ public enum SwerveModuleConfig {
                 Constants.Swerve.FrontRightMod.DriveMotorConfig.driveKD,
                 Constants.Swerve.FrontRightMod.DriveMotorConfig.openLoopRamp,
                 Constants.Swerve.FrontRightMod.DriveMotorConfig.closedLoopRamp,
-                Constants.Swerve.FrontRightMod.DriveMotorConfig.isInverted,
-                Constants.Swerve.FrontRightMod.DriveMotorConfig.wheelCircumference
+                Constants.Swerve.FrontRightMod.DriveMotorConfig.isInverted
             );
 
             canCoder = new SwerveCANCoderConfig(
                 Constants.Swerve.FrontRightMod.CanCoderConfig.canCoderID,
                 Constants.Swerve.FrontRightMod.CanCoderConfig.cancoderInvert
             );
+
+            wheelCircumference = Constants.Swerve.FrontRightMod.wheelCircumference;
+
+        } else if (moduleNumber == 2) {/* Back Left */
+            angleMotor = new SwerveAngleMotorConfig(
+                Constants.Swerve.BackLeftMod.AngleMotorConfig.angleMotorID,
+                Constants.Swerve.BackLeftMod.AngleMotorConfig.angleMotorInvert,
+                Constants.Swerve.BackLeftMod.AngleMotorConfig.angleNeutralMode,
+                Constants.Swerve.BackLeftMod.AngleMotorConfig.angleGearRatio,
+                Constants.Swerve.BackLeftMod.AngleMotorConfig.angleCurrentLimit,
+                Constants.Swerve.BackLeftMod.AngleMotorConfig.angleCurrentThreshold,
+                Constants.Swerve.BackLeftMod.AngleMotorConfig.angleCurrentThresholdTime,
+                Constants.Swerve.BackLeftMod.AngleMotorConfig.angleEnableCurrentLimit,
+                Constants.Swerve.BackLeftMod.AngleMotorConfig.angleKP,
+                Constants.Swerve.BackLeftMod.AngleMotorConfig.angleKI,
+                Constants.Swerve.BackLeftMod.AngleMotorConfig.angleKD,
+                Constants.Swerve.BackLeftMod.AngleMotorConfig.isInverted,
+                Constants.Swerve.BackLeftMod.AngleMotorConfig.angleOffset
+            );
+
+            driveMotor = new SwerveDriveMotorConfig(
+                Constants.Swerve.BackLeftMod.DriveMotorConfig.driveMotorID,
+                Constants.Swerve.BackLeftMod.DriveMotorConfig.driveMotorInvert,
+                Constants.Swerve.BackLeftMod.DriveMotorConfig.driveNeutralMode,
+                Constants.Swerve.BackLeftMod.DriveMotorConfig.driveGearRatio,
+                Constants.Swerve.BackLeftMod.DriveMotorConfig.driveCurrentLimit,
+                Constants.Swerve.BackLeftMod.DriveMotorConfig.driveCurrentThreshold,
+                Constants.Swerve.BackLeftMod.DriveMotorConfig.driveCurrentThresholdTime,
+                Constants.Swerve.BackLeftMod.DriveMotorConfig.driveEnableCurrentLimit,
+                Constants.Swerve.BackLeftMod.DriveMotorConfig.driveKP,
+                Constants.Swerve.BackLeftMod.DriveMotorConfig.driveKI,
+                Constants.Swerve.BackLeftMod.DriveMotorConfig.driveKD,
+                Constants.Swerve.BackLeftMod.DriveMotorConfig.openLoopRamp,
+                Constants.Swerve.BackLeftMod.DriveMotorConfig.closedLoopRamp,
+                Constants.Swerve.BackLeftMod.DriveMotorConfig.isInverted
+            );
+
+            canCoder = new SwerveCANCoderConfig(
+                Constants.Swerve.BackLeftMod.CanCoderConfig.canCoderID,
+                Constants.Swerve.BackLeftMod.CanCoderConfig.cancoderInvert
+            );
+
+            wheelCircumference = Constants.Swerve.BackLeftMod.wheelCircumference;
+
+        } else {/* Back Right */
+            angleMotor = new SwerveAngleMotorConfig(
+                Constants.Swerve.BackRightMod.AngleMotorConfig.angleMotorID,
+                Constants.Swerve.BackRightMod.AngleMotorConfig.angleMotorInvert,
+                Constants.Swerve.BackRightMod.AngleMotorConfig.angleNeutralMode,
+                Constants.Swerve.BackRightMod.AngleMotorConfig.angleGearRatio,
+                Constants.Swerve.BackRightMod.AngleMotorConfig.angleCurrentLimit,
+                Constants.Swerve.BackRightMod.AngleMotorConfig.angleCurrentThreshold,
+                Constants.Swerve.BackRightMod.AngleMotorConfig.angleCurrentThresholdTime,
+                Constants.Swerve.BackRightMod.AngleMotorConfig.angleEnableCurrentLimit,
+                Constants.Swerve.BackRightMod.AngleMotorConfig.angleKP,
+                Constants.Swerve.BackRightMod.AngleMotorConfig.angleKI,
+                Constants.Swerve.BackRightMod.AngleMotorConfig.angleKD,
+                Constants.Swerve.BackRightMod.AngleMotorConfig.isInverted,
+                Constants.Swerve.BackRightMod.AngleMotorConfig.angleOffset
+            );
+
+            driveMotor = new SwerveDriveMotorConfig(
+                Constants.Swerve.BackRightMod.DriveMotorConfig.driveMotorID,
+                Constants.Swerve.BackRightMod.DriveMotorConfig.driveMotorInvert,
+                Constants.Swerve.BackRightMod.DriveMotorConfig.driveNeutralMode,
+                Constants.Swerve.BackRightMod.DriveMotorConfig.driveGearRatio,
+                Constants.Swerve.BackRightMod.DriveMotorConfig.driveCurrentLimit,
+                Constants.Swerve.BackRightMod.DriveMotorConfig.driveCurrentThreshold,
+                Constants.Swerve.BackRightMod.DriveMotorConfig.driveCurrentThresholdTime,
+                Constants.Swerve.BackRightMod.DriveMotorConfig.driveEnableCurrentLimit,
+                Constants.Swerve.BackRightMod.DriveMotorConfig.driveKP,
+                Constants.Swerve.BackRightMod.DriveMotorConfig.driveKI,
+                Constants.Swerve.BackRightMod.DriveMotorConfig.driveKD,
+                Constants.Swerve.BackRightMod.DriveMotorConfig.openLoopRamp,
+                Constants.Swerve.BackRightMod.DriveMotorConfig.closedLoopRamp,
+                Constants.Swerve.BackRightMod.DriveMotorConfig.isInverted
+            );
+
+            canCoder = new SwerveCANCoderConfig(
+                Constants.Swerve.BackRightMod.CanCoderConfig.canCoderID,
+                Constants.Swerve.BackRightMod.CanCoderConfig.cancoderInvert
+            );
+
+            wheelCircumference = Constants.Swerve.BackRightMod.wheelCircumference;
         }
     }
 }

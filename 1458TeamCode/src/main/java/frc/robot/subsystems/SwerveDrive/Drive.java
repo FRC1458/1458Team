@@ -30,7 +30,9 @@ public class Drive extends SubsystemBase {
 
         mSwerveMods = new SwerveModule[]{
                 new SwerveModule(SwerveModuleConfig.FRONTLEFT),
-                new SwerveModule(SwerveModuleConfig.FRONTRIGHT)
+                new SwerveModule(SwerveModuleConfig.FRONTRIGHT),
+                new SwerveModule(SwerveModuleConfig.BACKLEFT),
+                new SwerveModule(SwerveModuleConfig.BACKRIGHT)
         };
 
         swerveOdometry = new SwerveDriveOdometry(Constants.Swerve.swerveKinematics, getGyroYaw(), getModulePositions());
