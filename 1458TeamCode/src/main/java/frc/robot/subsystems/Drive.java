@@ -8,6 +8,8 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
+import java.util.List;
+
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 
@@ -15,6 +17,11 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -22,6 +29,9 @@ public class Drive extends SubsystemBase {
     public SwerveDriveOdometry swerveOdometry;
     public Module[] mSwerveMods;
     public Pigeon2 gyro;
+
+    private Trajectory trajectory;
+    private final Field2d field = new Field2d();
 
     public Drive() {
         gyro = new Pigeon2(Constants.Swerve.pigeonID, "CV");
@@ -35,8 +45,22 @@ public class Drive extends SubsystemBase {
                 new Module(3, Constants.Swerve.BackRightMod.constants)
         };
 
-
         swerveOdometry = new SwerveDriveOdometry(Constants.Swerve.swerveKinematics, getGyroYaw(), getModulePositions());
+
+        // Create and push Field2d to SmartDashboard.
+        SmartDashboard.putData("Field", field);
+
+        // Create the trajectory to follow in autonomous.
+        trajectory =
+            TrajectoryGenerator.generateTrajectory(
+                new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
+                List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
+                new Pose2d(3, 0, Rotation2d.fromDegrees(0)),
+                new TrajectoryConfig(Units.feetToMeters(3.0), Units.feetToMeters(3.0))
+            );
+
+        // Push the trajectory to Field2d.
+        field.getObject("traj").setTrajectory(trajectory);
     }
 
     public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
@@ -127,10 +151,11 @@ public class Drive extends SubsystemBase {
         for (Module mod : mSwerveMods) {
             SmartDashboard.putNumber("Mod " + mod.moduleNumber + " CANcoder", (mod.getCANcoder().getDegrees()+180)%360);
 
-
 //            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Angle", ((mod.mAngleMotor.getPosition().getValue()%22.0)*360/22-180));
             SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Angle", ((mod.mAngleMotor.getPosition().getValue() * 360) % 360 + 360) % 360); // This is super specific, don't break this pls
 //            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);
         }
+
+        field.setRobotPose(swerveOdometry.getPoseMeters());
     }
 }
