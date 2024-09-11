@@ -3,9 +3,14 @@ package frc.robot;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.subsystems.limelight.LimeLight;
 
 import frc.robot.autos.*;
 import frc.robot.commands.*;
@@ -32,7 +37,7 @@ public class RobotContainer {
 
     /* Subsystems */
     private final Drive s_Swerve = new Drive();
-
+    private final LimeLight mLimeLight = new LimeLight();
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
@@ -46,8 +51,13 @@ public class RobotContainer {
             )
         );
 
+        CommandScheduler.getInstance().registerSubsystem(mLimeLight);
+        
         // Configure the button bindings
         configureButtonBindings();
+        // Call the method to display Limelight data on SmartDashboard
+        displayLimeLightData();
+        configureShuffleboard();
     }
 
     /**
@@ -59,6 +69,7 @@ public class RobotContainer {
     private void configureButtonBindings() {
         /* Driver Buttons */
         zeroGyro.onTrue(new InstantCommand(() -> s_Swerve.zeroHeading()));
+        
     }
 
     /**
@@ -70,4 +81,32 @@ public class RobotContainer {
         // An ExampleCommand will run in autonomous
         return new Auto(s_Swerve);
     }
+
+    // Method to display Limelight data on SmartDashboard
+    public void displayLimeLightData() {
+        SmartDashboard.putBoolean("Limelight Has Target", mLimeLight.hasTarget());
+        SmartDashboard.putNumber("Limelight X", mLimeLight.getX());
+        SmartDashboard.putNumber("Limelight Y", mLimeLight.getY());
+        SmartDashboard.putNumber("Limelight Area", mLimeLight.getArea());
+    }
+
+    // Call this method periodically (e.g., in a periodic method in your main robot class)
+    public void updateLimeLightData() {
+        SmartDashboard.putBoolean("Limelight Has Target", mLimeLight.hasTarget());
+        SmartDashboard.putNumber("Limelight X", mLimeLight.getX());
+        SmartDashboard.putNumber("Limelight Y", mLimeLight.getY());
+        SmartDashboard.putNumber("Limelight Area", mLimeLight.getArea());
+        SmartDashboard.putNumber("Red TIe R", mLimeLight.getArea());
+        Shuffleboard.update();
+    }
+
+    private void configureShuffleboard() {
+        ShuffleboardTab tab = Shuffleboard.getTab("LimeLight Data");
+        tab.addBoolean("Limelight Has Target", mLimeLight::hasTarget);
+        tab.addNumber("Limelight X", mLimeLight::getX);
+        tab.addNumber("Limelight Y", mLimeLight::getY);
+        tab.addNumber("Limelight Area", mLimeLight::getArea);
+        tab.addNumber("Red TIe R", mLimeLight::getArea);
+    }
+    
 }
