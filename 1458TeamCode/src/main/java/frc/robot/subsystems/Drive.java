@@ -12,9 +12,17 @@ import java.util.List;
 
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
+import com.ctre.phoenix6.sim.Pigeon2SimState;
+
+import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.simulation.AnalogGyroSim;
+import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
+import edu.wpi.first.wpilibj.simulation.EncoderSim;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
@@ -32,6 +40,13 @@ public class Drive extends SubsystemBase {
 
     private Trajectory trajectory;
     private final Field2d field = new Field2d();
+    private Pose2d simPose = new Pose2d();
+
+    // // Simulation
+    // private final AnalogGyroSim m_gyroSim = new AnalogGyroSim(m_gyro);
+    // private final EncoderSim m_leftEncoderSim = new EncoderSim(m_leftEncoder);
+    // private final EncoderSim m_rightEncoderSim = new EncoderSim(m_rightEncoder);
+    private final Pigeon2SimState gyroSim;
 
     public Drive() {
         gyro = new Pigeon2(Constants.Swerve.pigeonID, "CV");
@@ -47,6 +62,7 @@ public class Drive extends SubsystemBase {
 
         swerveOdometry = new SwerveDriveOdometry(Constants.Swerve.swerveKinematics, getGyroYaw(), getModulePositions());
 
+        // Simulation
         // Create and push Field2d to SmartDashboard.
         SmartDashboard.putData("Field", field);
 
@@ -61,6 +77,8 @@ public class Drive extends SubsystemBase {
 
         // Push the trajectory to Field2d.
         field.getObject("traj").setTrajectory(trajectory);
+
+        gyroSim = gyro.getSimState();
     }
 
     public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
@@ -156,6 +174,34 @@ public class Drive extends SubsystemBase {
 //            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);
         }
 
+        field.setRobotPose(swerveOdometry.getPoseMeters());
+    }
+
+    @Override
+    public void simulationPeriodic() {
+        // TODO: Sim jointly as one system
+        for (Module mod : mSwerveMods) {
+            mod.updateSimPeriodic();
+            
+            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " CANcoder", (mod.getCANcoder().getDegrees()+180)%360);
+            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Angle", ((mod.mAngleMotor.getPosition().getValue() * 360) % 360 + 360) % 360); // This is super specific, don't break this pls
+        }
+
+        // final ChassisSpeeds chassisSpeeds = Constants.Swerve.swerveKinematics.toChassisSpeeds(getModuleStates());
+        // simPose = simPose.transformBy((
+        //     new Transform2d(
+        //         new Translation2d(
+        //             chassisSpeeds.vxMetersPerSecond * TimedRobot.kDefaultPeriod * 100000,
+        //             chassisSpeeds.vyMetersPerSecond * TimedRobot.kDefaultPeriod * 100000),
+        //         // new Translation2d(
+        //         //     20,
+        //         //     20),
+        //         new Rotation2d(chassisSpeeds.omegaRadiansPerSecond * TimedRobot.kDefaultPeriod)
+        //     )
+        // ));
+        // field.setRobotPose(simPose);
+
+        swerveOdometry.update(getGyroYaw(), getModulePositions());
         field.setRobotPose(swerveOdometry.getPoseMeters());
     }
 }

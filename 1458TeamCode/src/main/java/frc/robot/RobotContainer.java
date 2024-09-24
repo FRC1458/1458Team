@@ -34,7 +34,6 @@ public class RobotContainer {
     /* Subsystems */
     private final Drive s_Swerve = new Drive();
 
-
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
         TeleopSwerve teleopSwerveCommand = new TeleopSwerve(
