@@ -5,10 +5,7 @@ import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.mechanisms.swerve.SimSwerveDrivetrain;
 import com.ctre.phoenix6.sim.CANcoderSimState;
-import com.ctre.phoenix6.sim.ChassisReference;
-import com.ctre.phoenix6.sim.Pigeon2SimState;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 
 import edu.wpi.first.math.VecBuilder;
@@ -16,13 +13,10 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
-import edu.wpi.first.wpilibj.simulation.EncoderSim;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 
@@ -86,31 +80,11 @@ public class Module {
         mDriveMotor.getConfigurator().setPosition(0.0);
 
         // For simulation
-        // encoderSim = new EncoderSim(mAngleMotor);
         mDriveMotorSimState = mDriveMotor.getSimState();
         mAngleMotorSimState = mAngleMotor.getSimState();
         angleEncoderSimState = angleEncoder.getSimState();
 
         final double kEncoderRadiansPerPulse = 2.0 * Math.PI / 2048;
-
-        // mDriveSim = new DifferentialDrivetrainSim(
-        //     DCMotor.getFalcon500Foc(2), // 2 CIMS on each side of the drivetrain.
-        //     Constants.Swerve.driveGearRatio, // Standard AndyMark Gearing reduction.
-        //     2.1, // MOI of 2.1 kg m^2 (from CAD model).
-        //     26.5, // Mass of the robot is 26.5 kg.
-        //     Constants.Swerve.wheelCircumference, // Robot uses 3" radius (6" diameter) wheels.
-        //     0.546, // Distance between wheels is _ meters.
-
-        //     /*
-        //     * The standard deviations for measurement noise:
-        //     * x and y: 0.001 m
-        //     * heading: 0.001 rad
-        //     * l and r velocity: 0.1 m/s
-        //     * l and r position: 0.005 m
-        //     */
-        //     /* Uncomment the following line to add measurement noise. */
-        //     null // VecBuilder.fill(0.001, 0.001, 0.001, 0.1, 0.1, 0.005, 0.005)
-        // );
 
         mDriveSim = new FlywheelSim(
             DCMotor.getFalcon500(1),
@@ -176,58 +150,7 @@ public class Module {
             Rotation2d.fromRotations(mAngleMotor.getPosition().getValue())
         );
     }
-
-    // /** Simulate one module with naive physics model. */
-    // public void updateSimPeriodic() {
-    //     // Pass the robot battery voltage to the simulated devices
-    //     mDriveMotorSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
-    //     mAngleMotorSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
-    //     angleEncoderSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
-
-    //     // Simulate drive
-    //     mDriveSim.setInput(mDriveMotorSimState.getMotorVoltage() * RobotController.getBatteryVoltage());
-    //     // mDriveSim.setInputs(mDriveMotorSimState.getVelocity().getValue() * RobotController.getBatteryVoltage());
-    //     mDriveSim.update(TimedRobot.kDefaultPeriod);
-
-    //     double velocity = mDriveSim.getAngularVelocityRadPerSec() * Constants.Swerve.wheelCircumference / (2.0 * Math.PI);
-    //     mDriveMotorSimState.setRawRotorPosition(velocity * Constants.Swerve.driveGearRatio);
-    //     // angleEncoderSimState.setVelocity(velocity);
-
-    //     driveDutyCycle.Output = velocity / Constants.Swerve.maxSpeed;
-    //     mDriveMotor.setControl(driveDutyCycle);
-    //     // else {
-    //     //     driveVelocity.Velocity = Conversions.MPSToRPS(desiredState.speedMetersPerSecond, Constants.Swerve.wheelCircumference);
-    //     //     driveVelocity.FeedForward = driveFeedForward.calculate(desiredState.speedMetersPerSecond);
-    //     //     mDriveMotor.setControl(driveVelocity);
-    //     // }
-
-    //     // // Simulate steering
-    //     // mSteeringSim.setInput(
-    //     //     mAngleMotor.getPosition().getValue() * RobotController.getBatteryVoltage());
-    //     // mSteeringSim.update(TimedRobot.kDefaultPeriod);
-    //     // mAngleMotor.setSimSensorPositionAndVelocity(
-    //     //     mSteeringSim.getAngleRads(),
-    //     //     mSteeringSim.getVelocityRadPerSec(),
-    //     //     TimedRobot.kDefaultPeriod,
-    //     //     Constants.Swerve.angleGearRatio);
-
-    //     // // Update all of our sensors
-    //     // final double leftPos = metersToRotations(mDriveSim.;
-    //     // // This is OK, since the time base is the same
-    //     // final double leftVel = metersToRotations(mDriveMotorSimState.getLeftVelocityMetersPerSecond());
-    //     // final double rightPos = metersToRotations(mDriveMotorSimState.getRightPositionMeters());
-    //     // // This is OK, since the time base is the same
-    //     // final double rightVel = metersToRotations(mDriveMotorSimState.getRightVelocityMetersPerSecond());
-    //     // leftSensSim.setRawPosition(leftPos);
-    //     // leftSensSim.setVelocity(leftVel);
-    //     // rightSensSim.setRawPosition(rightPos);
-    //     // rightSensSim.setVelocity(rightVel);
-    //     // leftSim.setRawRotorPosition(leftPos * this.kGearRatio);
-    //     // leftSim.setRotorVelocity(leftVel * this.kGearRatio);
-    //     // rightSim.setRawRotorPosition(rightPos * this.kGearRatio);
-    //     // rightSim.setRotorVelocity(rightVel * this.kGearRatio);
-    // }
-
+    
     /** Simulate one module with naive physics model. */
     public void updateSimPeriodic() {
         // Pass the robot battery voltage to the simulated devices
@@ -242,16 +165,6 @@ public class Module {
 
         double driveVelocity = mDriveSim.getAngularVelocityRadPerSec() * Constants.Swerve.wheelCircumference / (2.0 * Math.PI);
         mDriveMotorSimState.setRawRotorPosition(driveVelocity * Constants.Swerve.driveGearRatio);
-        // mDriveMotorSimState.setRotorVelocity(driveVelocity * Constants.Swerve.driveGearRatio);
-        // angleEncoderSimState.setVelocity(velocity);
-
-        // driveDutyCycle.Output = driveVelocity / Constants.Swerve.maxSpeed;
-        // mDriveMotor.setControl(driveDutyCycle);
-        // else {
-        //     driveVelocity.Velocity = Conversions.MPSToRPS(desiredState.speedMetersPerSecond, Constants.Swerve.wheelCircumference);
-        //     driveVelocity.FeedForward = driveFeedForward.calculate(desiredState.speedMetersPerSecond);
-        //     mDriveMotor.setControl(driveVelocity);
-        // }
 
         // Simulate steering
         mSteeringSim.setInput(mAngleMotorSimState.getMotorVoltage() * RobotController.getBatteryVoltage());
@@ -262,26 +175,5 @@ public class Module {
 
         mAngleMotorSimState.setRawRotorPosition(angle);
         mAngleMotorSimState.setRotorVelocity(steeringVelocity * Constants.Swerve.driveGearRatio);
-        // mAngleMotor.setSimSensorPositionAndVelocity(
-        //     mSteeringSim.getAngleRads(),
-        //     mSteeringSim.getVelocityRadPerSec(),
-        //     TimedRobot.kDefaultPeriod,
-        //     Constants.Swerve.angleGearRatio);
-
-        // // Update all of our sensors
-        // final double leftPos = metersToRotations(mDriveSim.;
-        // // This is OK, since the time base is the same
-        // final double leftVel = metersToRotations(mDriveMotorSimState.getLeftVelocityMetersPerSecond());
-        // final double rightPos = metersToRotations(mDriveMotorSimState.getRightPositionMeters());
-        // // This is OK, since the time base is the same
-        // final double rightVel = metersToRotations(mDriveMotorSimState.getRightVelocityMetersPerSecond());
-        // leftSensSim.setRawPosition(leftPos);
-        // leftSensSim.setVelocity(leftVel);
-        // rightSensSim.setRawPosition(rightPos);
-        // rightSensSim.setVelocity(rightVel);
-        // leftSim.setRawRotorPosition(leftPos * this.kGearRatio);
-        // leftSim.setRotorVelocity(leftVel * this.kGearRatio);
-        // rightSim.setRawRotorPosition(rightPos * this.kGearRatio);
-        // rightSim.setRotorVelocity(rightVel * this.kGearRatio);
     }
 }
