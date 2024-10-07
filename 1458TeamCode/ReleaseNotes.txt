@@ -1,0 +1,20 @@
+this release notes records changes of the project chronically. 
+
+Oct 7th 2024
+- create Framework25 branch on team1458 github repo
+- create vscode prj based on this new branch
+- migrate Loops folder into Framework25 from older branch
+- migrate subsystem.java and DummySubsystem into Framework25 from older branch
+
+Oct 4th 2024
+- Create "Loops" subfolder under "java/frc/robot"
+- Insert Loops/Loop.java file
+- Insert Loops/Looper.java file
+- Insert Loops/ILooper.java file
+- Insert Loops/CrashTrackingRunnable.java file, "logThrowableCrash" call is commented out (@-@)
+
+Oct 5th 2024
+- Insert subsystems/Subsystem.java
+- Insert subsystems/DummySubsystem.java
+- Insert SubsystemManager.java under "java/frc/robot"
+- Modify Robot.java to use SubsystemManager 
