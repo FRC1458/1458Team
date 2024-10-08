@@ -17,6 +17,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 
@@ -45,13 +46,8 @@ public class Module {
 
     /* simulation */
     // private final DifferentialDrivetrainSim mDriveSim;
-    private final FlywheelSim mDriveSim;
-    private final SingleJointedArmSim mSteeringSim;
-
-    // private final EncoderSim encoderSim;
-    private final TalonFXSimState mDriveMotorSimState;
-    private final TalonFXSimState mAngleMotorSimState;
-    private CANcoderSimState angleEncoderSimState;
+    private final DCMotorSim mDriveMotorSim;
+    private final DCMotorSim mAngleMotorSim;
 
     public Module(int moduleNumber, SwerveModuleConstants moduleConstants){
         this.moduleNumber = moduleNumber;
@@ -80,30 +76,8 @@ public class Module {
         mDriveMotor.getConfigurator().setPosition(0.0);
 
         // For simulation
-        mDriveMotorSimState = mDriveMotor.getSimState();
-        mAngleMotorSimState = mAngleMotor.getSimState();
-        angleEncoderSimState = angleEncoder.getSimState();
-
-        final double kEncoderRadiansPerPulse = 2.0 * Math.PI / 2048;
-
-        mDriveSim = new FlywheelSim(
-            DCMotor.getFalcon500(1),
-            Constants.Swerve.driveGearRatio,
-            0.01,
-            VecBuilder.fill(kEncoderRadiansPerPulse) // Add noise with a std-dev of 1 tick
-        );
-
-        mSteeringSim = new SingleJointedArmSim(
-            LinearSystemId.createSingleJointedArmSystem(DCMotor.getFalcon500(1), 0.001, Constants.Swerve.angleGearRatio),
-            DCMotor.getFalcon500(1),
-            Constants.Swerve.angleGearRatio,
-            0.0, // Length (m)
-            Double.NEGATIVE_INFINITY, // Min angle
-            Double.POSITIVE_INFINITY, // Max angle
-            false, // Simulate gravity
-            0.0,
-            VecBuilder.fill(kEncoderRadiansPerPulse) // Add noise with a std-dev of 1 tick
-        );
+        mDriveMotorSim = new DCMotorSim(DCMotor.getFalcon500(1), Constants.Swerve.driveGearRatio, 0.001);
+        mAngleMotorSim = new DCMotorSim(DCMotor.getFalcon500(1), Constants.Swerve.angleGearRatio, 0.001);
     }
 
     public void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop) {
@@ -150,30 +124,37 @@ public class Module {
             Rotation2d.fromRotations(mAngleMotor.getPosition().getValue())
         );
     }
-    
+
     /** Simulate one module with naive physics model. */
     public void updateSimPeriodic() {
+        TalonFXSimState mDriveMotorSimState = mDriveMotor.getSimState();
+        TalonFXSimState mAngleMotorSimState = mAngleMotor.getSimState();
+        CANcoderSimState angleEncoderSimState = angleEncoder.getSimState();
+
         // Pass the robot battery voltage to the simulated devices
         mDriveMotorSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
         mAngleMotorSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
         angleEncoderSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
 
         // Simulate drive
-        mDriveSim.setInput(mDriveMotorSimState.getMotorVoltage() * RobotController.getBatteryVoltage());
-        // mDriveSim.setInputs(mDriveMotorSimState.getVelocity().getValue() * RobotController.getBatteryVoltage());
-        mDriveSim.update(TimedRobot.kDefaultPeriod);
+        mDriveMotorSim.setInputVoltage(mDriveMotorSimState.getMotorVoltage());
+        mDriveMotorSim.update(TimedRobot.kDefaultPeriod);
 
-        double driveVelocity = mDriveSim.getAngularVelocityRadPerSec() * Constants.Swerve.wheelCircumference / (2.0 * Math.PI);
-        mDriveMotorSimState.setRawRotorPosition(driveVelocity * Constants.Swerve.driveGearRatio);
+        double drivePosition = mDriveMotorSim.getAngularPositionRotations();
+        double driveVelocity = mDriveMotorSim.getAngularVelocityRadPerSec() * Constants.Swerve.wheelCircumference / (2.0 * Math.PI);
+        mDriveMotorSimState.setRawRotorPosition(drivePosition * Constants.Swerve.driveGearRatio);
+        mDriveMotorSimState.setRotorVelocity(driveVelocity * Constants.Swerve.driveGearRatio);
 
         // Simulate steering
-        mSteeringSim.setInput(mAngleMotorSimState.getMotorVoltage() * RobotController.getBatteryVoltage());
-        mSteeringSim.update(TimedRobot.kDefaultPeriod);
+        mAngleMotorSim.setInputVoltage(mAngleMotorSimState.getMotorVoltage());
+        mAngleMotorSim.update(TimedRobot.kDefaultPeriod);
 
-        double angle = mSteeringSim.getAngleRads() * Constants.Swerve.wheelCircumference / (2.0 * Math.PI);
-        double steeringVelocity = mSteeringSim.getVelocityRadPerSec() * Constants.Swerve.wheelCircumference / (2.0 * Math.PI);
+        double steeringPosition = mAngleMotorSim.getAngularPositionRotations();
+        double steeringVelocity = mAngleMotorSim.getAngularVelocityRadPerSec();
+        mAngleMotorSimState.setRawRotorPosition(steeringPosition * Constants.Swerve.angleGearRatio);
+        mAngleMotorSimState.setRotorVelocity(steeringVelocity * Constants.Swerve.angleGearRatio);
 
-        mAngleMotorSimState.setRawRotorPosition(angle);
-        mAngleMotorSimState.setRotorVelocity(steeringVelocity * Constants.Swerve.driveGearRatio);
+        angleEncoderSimState.setRawPosition(steeringPosition * Constants.Swerve.angleGearRatio);
+        angleEncoderSimState.setVelocity(steeringVelocity * Constants.Swerve.angleGearRatio);
     }
 }

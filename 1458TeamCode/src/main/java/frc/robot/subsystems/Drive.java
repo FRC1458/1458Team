@@ -12,6 +12,7 @@ import java.util.List;
 
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.ctre.phoenix6.sim.Pigeon2SimState;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -21,6 +22,8 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -30,8 +33,11 @@ public class Drive extends SubsystemBase {
     public Module[] mSwerveMods;
     public Pigeon2 gyro;
 
+    // Simulation
     private Trajectory trajectory;
     private final Field2d field = new Field2d();
+    public final Pigeon2SimState gyroSimState;
+    public Rotation2d lastAngle = new Rotation2d();
 
     public Drive() {
         gyro = new Pigeon2(Constants.Swerve.pigeonID, "CV");
@@ -62,6 +68,8 @@ public class Drive extends SubsystemBase {
 
         // Push the trajectory to Field2d.
         field.getObject("traj").setTrajectory(trajectory);
+
+        gyroSimState = gyro.getSimState();
     }
 
     public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
@@ -170,7 +178,9 @@ public class Drive extends SubsystemBase {
             SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Angle", ((mod.mAngleMotor.getPosition().getValue() * 360) % 360 + 360) % 360); // This is super specific, don't break this pls
         }
 
-        swerveOdometry.update(getGyroYaw(), getModulePositions());
-        field.setRobotPose(swerveOdometry.getPoseMeters());
+        // gyroSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
+        // double angleChange = Constants.Swerve.swerveKinematics.toChassisSpeeds(getModuleStates()).omegaRadiansPerSecond * TimedRobot.kDefaultPeriod;
+        // lastAngle = lastAngle.plus(Rotation2d.fromRadians(angleChange));
+        // gyroSimState.setRawYaw(lastAngle.getDegrees());
     }
 }
