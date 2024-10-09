@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 // @-@ new package from Framework25
 import frc.robot.Loops.Looper;
-import frc.robot.subsystems.Dummy;
+import frc.robot.subsystems.DummySubsystem;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -52,7 +52,7 @@ public class Robot extends TimedRobot {
 		);    
     m_SubsystemManager.registerEnabledLoops(m_EnabledLooper);
     m_SubsystemManager.registerDisabledLoops(m_DisabledLooper);
-    m_robotContainer = new RobotContainer();
+   // m_robotContainer = new RobotContainer();
 
     //test code to start the enabledlooper here
     m_EnabledLooper.start();
