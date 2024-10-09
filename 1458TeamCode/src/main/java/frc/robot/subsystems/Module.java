@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
@@ -10,6 +12,7 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.lib.math.Conversions;
 import frc.robot.lib.util.SwerveModuleConstants;
@@ -17,13 +20,43 @@ import frc.robot.Constants;
 import frc.robot.CTREConfigs;
 import frc.robot.Robot;
 
-public class Module {
+public class Module extends Subsystem {  // Supports looper 
     public int moduleNumber;
     private Rotation2d angleOffset;
 
-    TalonFX mAngleMotor;
-    private TalonFX mDriveMotor;
-    private CANcoder angleEncoder;
+     TalonFX mAngleMotor;
+     TalonFX mDriveMotor;
+     CANcoder angleEncoder;
+
+     /*
+
+     private static Module m_Instance;
+
+    public static Module getInstance() {
+		if (m_Instance == null) {
+			m_Instance = new Module();
+		}
+		return m_Instance;
+	}
+    */
+
+    //Table that gets updated every 2 ms 
+    
+    private mPeriodicIO mPeriodicIO = new mPeriodicIO();
+
+    public static class mPeriodicIO {
+		// Inputs
+		public double timestamp = 0.0;
+		public double rotationPosition = 0.0;
+		public double rotationVelocity = 0.0;
+		public double drivePosition = 0.0;
+		public double driveVelocity = 0.0;
+
+		// Outputs
+		public double targetVelocity = 0.0;
+		public ControlRequest rotationDemand;
+		public ControlRequest driveDemand;
+	}
 
     private final SimpleMotorFeedforward driveFeedForward = new SimpleMotorFeedforward(Constants.Swerve.driveKS, Constants.Swerve.driveKV, Constants.Swerve.driveKA);
 
@@ -61,6 +94,35 @@ public class Module {
         mDriveMotor.getConfigurator().setPosition(0.0);
     }
 
+
+
+	@Override
+	public synchronized void readPeriodicInputs() {
+		mPeriodicIO.timestamp = Timer.getFPGATimestamp();
+		refreshSignals();
+	}
+   
+
+    public synchronized void refreshSignals() {
+		mPeriodicIO.rotationVelocity = mAngleMotor.getRotorVelocity().getValue();
+		mPeriodicIO.driveVelocity = mDriveMotor.getRotorVelocity().getValue();
+
+		mPeriodicIO.rotationPosition = BaseStatusSignal.getLatencyCompensatedValue(
+				mAngleMotor.getRotorPosition(), mAngleMotor.getRotorVelocity());
+		mPeriodicIO.drivePosition = mDriveMotor.getRotorPosition().getValueAsDouble();
+
+        DisplayToDahboard()
+
+	}
+
+    @Override
+	public synchronized void writePeriodicOutputs() {
+         
+        //mAngleMotor.getRotorVelocity().getValue();
+        //mAngleMotor.setControl(nu
+	}
+
+
     public void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop) {
         desiredState = SwerveModuleState.optimize(desiredState, getState().angle);
         mAngleMotor.setControl(anglePosition.withPosition(desiredState.angle.getRotations()));
@@ -86,8 +148,8 @@ public class Module {
     }
 
     public void resetToAbsolute() {
-//        SmartDashboard.putNumber("Module " + moduleNumber + " getRotations", getCANcoder().getRotations());
-//        SmartDashboard.putNumber("Module " + moduleNumber + " AngleOffset getRotations", angleOffset.getRotations());
+        SmartDashboard.putNumber("Module " + moduleNumber + " getRotations", getCANcoder().getRotations());
+        SmartDashboard.putNumber("Module " + moduleNumber + " AngleOffset getRotations", angleOffset.getRotations());
         double absolutePosition = getCANcoder().getRotations() - angleOffset.getRotations();
         mAngleMotor.setPosition(absolutePosition);
     }
@@ -105,4 +167,12 @@ public class Module {
             Rotation2d.fromRotations(mAngleMotor.getPosition().getValue())
         );
     }
+
+    public void DisplayToDahboard() {
+        SmartDashboard.putNumber("Module " + moduleNumber + " getRotations", getCANcoder().getRotations());
+        SmartDashboard.putNumber("Module " + moduleNumber + " AngleOffset getRotations", angleOffset.getRotations());
+        double absolutePosition = getCANcoder().getRotations() - angleOffset.getRotations();
+       // mAngleMotor.setPosition(absolutePosition);
+    }
+      
 }

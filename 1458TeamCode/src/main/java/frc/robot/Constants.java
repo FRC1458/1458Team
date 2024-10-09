@@ -17,6 +17,11 @@ public final class Constants {
     public static final double stickDeadband = 0.1;
     public static boolean isEpsilon;
 
+    // robot loop time
+	public static final double kLooperDt = 0.02;
+    // Disables extra smart dashboard outputs that slow down the robot
+	public static final boolean disableExtraTelemetry = false;
+
     public static final class Swerve {
         public static final int pigeonID = 20;
 

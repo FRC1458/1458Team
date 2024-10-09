@@ -1,5 +1,7 @@
 package frc.robot;
 
+import org.opencv.core.TickMeter;
+
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
@@ -36,7 +38,7 @@ public class RobotContainer {
     private final JoystickButton robotCentric = new JoystickButton(driver, XboxController.Button.kLeftBumper.value);
 
     /* Subsystems */
-    private final Drive s_Swerve = new Drive();
+    public final Drive s_Swerve = new Drive();
     private final LimeLight mLimeLight = new LimeLight();
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -107,6 +109,9 @@ public class RobotContainer {
         tab.addNumber("Limelight Y", mLimeLight::getY);
         tab.addNumber("Limelight Area", mLimeLight::getArea);
         tab.addNumber("Red TIe R", mLimeLight::getArea);
+
+        ShuffleboardTab tab1 = Shuffleboard.getTab("Module");
+        tab1.addNumber("Module", mLimeLight::getX);
     }
     
 }
