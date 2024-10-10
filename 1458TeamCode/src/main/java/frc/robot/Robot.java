@@ -8,6 +8,10 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
+import frc.robot.Loops.Looper;
+import frc.robot.subsystems.DummySubsystem;
+import frc.robot.subsystems.SubsystemManager;
+
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
  * each mode, as described in the TimedRobot documentation. If you change the name of this class or
@@ -15,6 +19,16 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
  * project.
  */
 public class Robot extends TimedRobot {
+
+    // @-@ new objects from Framework25
+  
+   public final SubsystemManager m_SubsystemManager = SubsystemManager.getInstance();
+
+    private final Looper m_EnabledLooper = new Looper();
+    private final Looper m_DisabledLooper = new Looper();
+    private DummySubsystem m_ExampleSubsystem;
+
+    
   public static final CTREConfigs ctreConfigs = new CTREConfigs();
 
   
@@ -31,6 +45,34 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
+    
+
+    for (int port = 5800; port <= 5809; port++) {
+      edu.wpi.first.net.PortForwarder.add(port, "limelight.local", port);
+    }
+    
+
+    //@-@ subystems init code from Framework25
+    m_ExampleSubsystem = DummySubsystem.getInstance();
+    m_SubsystemManager.setSubsystems(
+      m_ExampleSubsystem, 
+      m_robotContainer.s_Swerve.mSwerveMods[0],
+      m_robotContainer.s_Swerve.mSwerveMods[1],
+      m_robotContainer.s_Swerve.mSwerveMods[2],
+      m_robotContainer.s_Swerve.mSwerveMods[3]
+      //Insert instances of additional subsystems here
+		);    
+    m_SubsystemManager.registerEnabledLoops(m_EnabledLooper);
+    m_SubsystemManager.registerDisabledLoops(m_DisabledLooper);
+   // m_robotContainer = new RobotContainer();
+
+  
+
+    //test code to start the enabledlooper here
+    m_EnabledLooper.start();
+    m_DisabledLooper.stop();
+
+
   }
 
   /**
@@ -84,7 +126,9 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    m_robotContainer.updateLimeLightData();
+  }
 
   @Override
   public void testInit() {
@@ -94,5 +138,7 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during test mode. */
   @Override
-  public void testPeriodic() {}
+  public void testPeriodic() {
+    m_robotContainer.updateLimeLightData();
+  }
 }
