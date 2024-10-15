@@ -11,6 +11,7 @@ public final class SwerveAngleMotorConfig {
     public final int angleMotorID;
     public final boolean isInverted;
     public final Rotation2d angleOffset;
+    public final double angleGearRatio;
     public final TalonFXConfiguration angleFXConfig = new TalonFXConfiguration();
 
     public SwerveAngleMotorConfig(
@@ -33,6 +34,7 @@ public final class SwerveAngleMotorConfig {
         this.isInverted = isInverted;
 
         this.angleOffset = Rotation2d.fromRotations((angleOffset/-360));
+        this.angleGearRatio = angleGearRatio;
 
         /* Motor Inverts and Neutral Mode */
         angleFXConfig.MotorOutput.Inverted = angleMotorInvert;

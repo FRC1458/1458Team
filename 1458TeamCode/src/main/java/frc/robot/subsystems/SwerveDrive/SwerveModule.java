@@ -5,18 +5,24 @@ import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.sim.CANcoderSimState;
+import com.ctre.phoenix6.sim.TalonFXSimState;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+
 import frc.robot.lib.math.Conversions;
 import frc.robot.Constants;
 
 public class SwerveModule {
     public int moduleNumber;
-    private Rotation2d angleOffset;
-    private double wheelCircumference;
+    private final SwerveModuleConfig swerveModuleConfig;
 
     private TalonFX mAngleMotor;
     private TalonFX mDriveMotor;
@@ -31,10 +37,14 @@ public class SwerveModule {
     /* angle motor control requests */
     private final PositionVoltage anglePosition = new PositionVoltage(0);
 
+    /* simulation */
+    // private final DifferentialDrivetrainSim mDriveSim;
+    private final DCMotorSim mDriveMotorSim;
+    private final DCMotorSim mAngleMotorSim;
+
     public SwerveModule(SwerveModuleConfig swerveModuleConfig){
         moduleNumber = swerveModuleConfig.moduleNumber;
-        angleOffset = swerveModuleConfig.angleMotor.angleOffset;
-        wheelCircumference = swerveModuleConfig.wheelCircumference;
+        this.swerveModuleConfig = swerveModuleConfig;
 
         driveFeedForward = new SimpleMotorFeedforward(
             swerveModuleConfig.driveMotor.driveKS,
@@ -59,6 +69,10 @@ public class SwerveModule {
         mAngleMotor.setInverted(swerveModuleConfig.angleMotor.isInverted);
 
         mDriveMotor.getConfigurator().setPosition(0.0);
+
+        // For simulation
+        mDriveMotorSim = new DCMotorSim(DCMotor.getFalcon500(1), swerveModuleConfig.driveMotor.driveGearRatio, 0.001);
+        mAngleMotorSim = new DCMotorSim(DCMotor.getFalcon500(1), swerveModuleConfig.angleMotor.angleGearRatio, 0.001);
     }
 
     public void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop) {
@@ -75,7 +89,7 @@ public class SwerveModule {
             mDriveMotor.setControl(driveDutyCycle);
         }
         else {
-            driveVelocity.Velocity = Conversions.MPSToRPS(desiredState.speedMetersPerSecond, this.wheelCircumference);
+            driveVelocity.Velocity = Conversions.MPSToRPS(desiredState.speedMetersPerSecond, this.swerveModuleConfig.wheelCircumference);
             driveVelocity.FeedForward = driveFeedForward.calculate(desiredState.speedMetersPerSecond);
             mDriveMotor.setControl(driveVelocity);
         }
@@ -88,20 +102,20 @@ public class SwerveModule {
     public void resetToAbsolute() {
 //        SmartDashboard.putNumber("Module " + moduleNumber + " getRotations", getCANcoder().getRotations());
 //        SmartDashboard.putNumber("Module " + moduleNumber + " AngleOffset getRotations", angleOffset.getRotations());
-        double absolutePosition = getCANcoder().getRotations() - angleOffset.getRotations();
+        double absolutePosition = getCANcoder().getRotations() - this.swerveModuleConfig.angleMotor.angleOffset.getRotations();
         mAngleMotor.setPosition(absolutePosition);
     }
 
     public SwerveModuleState getState(){
         return new SwerveModuleState(
-            Conversions.RPSToMPS(mDriveMotor.getVelocity().getValue(), this.wheelCircumference),
+            Conversions.RPSToMPS(mDriveMotor.getVelocity().getValue(), this.swerveModuleConfig.wheelCircumference),
             Rotation2d.fromRotations(mAngleMotor.getPosition().getValue())
         );
     }
 
     public SwerveModulePosition getPosition(){
         return new SwerveModulePosition(
-            Conversions.rotationsToMeters(mDriveMotor.getPosition().getValue(), this.wheelCircumference),
+            Conversions.rotationsToMeters(mDriveMotor.getPosition().getValue(), this.swerveModuleConfig.wheelCircumference),
             Rotation2d.fromRotations(mAngleMotor.getPosition().getValue())
         );
     }
@@ -109,5 +123,40 @@ public class SwerveModule {
     public double getAngleMotorPosition(){
         // return Rotation2d.fromRotations(mAngleMotor.getPosition().getValue()).getDegrees();
         return mAngleMotor.getPosition().getValue();
+    }
+
+    /** Simulate one module with naive physics model. */
+    public void updateSimPeriodic() {
+        TalonFXSimState mDriveMotorSimState = mDriveMotor.getSimState();
+        TalonFXSimState mAngleMotorSimState = mAngleMotor.getSimState();
+        CANcoderSimState angleEncoderSimState = angleEncoder.getSimState();
+
+        // Pass the robot battery voltage to the simulated devices
+        mDriveMotorSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
+        mAngleMotorSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
+        angleEncoderSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
+
+        // Simulate drive
+        mDriveMotorSim.setInputVoltage(mDriveMotorSimState.getMotorVoltage());
+        mDriveMotorSim.update(TimedRobot.kDefaultPeriod);
+
+        double drivePosition = mDriveMotorSim.getAngularPositionRotations();
+        double driveVelocity = mDriveMotorSim.getAngularVelocityRadPerSec() * this.swerveModuleConfig.wheelCircumference / (2.0 * Math.PI);
+        double driveGearRatio = this.swerveModuleConfig.driveMotor.driveGearRatio;
+        mDriveMotorSimState.setRawRotorPosition(drivePosition * driveGearRatio);
+        mDriveMotorSimState.setRotorVelocity(driveVelocity * driveGearRatio);
+
+        // Simulate steering
+        mAngleMotorSim.setInputVoltage(mAngleMotorSimState.getMotorVoltage());
+        mAngleMotorSim.update(TimedRobot.kDefaultPeriod);
+
+        double steeringPosition = mAngleMotorSim.getAngularPositionRotations();
+        double steeringVelocity = mAngleMotorSim.getAngularVelocityRadPerSec();
+        double angleGearRatio = this.swerveModuleConfig.angleMotor.angleGearRatio;
+        mAngleMotorSimState.setRawRotorPosition(steeringPosition * angleGearRatio);
+        mAngleMotorSimState.setRotorVelocity(steeringVelocity * angleGearRatio);
+
+        angleEncoderSimState.setRawPosition(steeringPosition * angleGearRatio);
+        angleEncoderSimState.setVelocity(steeringVelocity * angleGearRatio);
     }
 }

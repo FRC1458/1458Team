@@ -7,6 +7,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 public final class SwerveDriveMotorConfig {
     public final int driveMotorID;
     public final boolean isInverted;
+    public final double driveGearRatio;
 
     public final double driveKS;
     public final double driveKV;
@@ -35,6 +36,7 @@ public final class SwerveDriveMotorConfig {
         /** Swerve Drive Motor Configuration */
         this.driveMotorID = driveMotorID;
         this.isInverted = isInverted;
+        this.driveGearRatio = driveGearRatio;
 
         this.driveKS = driveKS;
         this.driveKV = driveKV;
