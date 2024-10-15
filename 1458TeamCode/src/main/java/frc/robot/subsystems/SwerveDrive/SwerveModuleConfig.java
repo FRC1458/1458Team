@@ -50,6 +50,9 @@ public enum SwerveModuleConfig {
                 Constants.Swerve.FrontLeftMod.DriveMotorConfig.driveKP,
                 Constants.Swerve.FrontLeftMod.DriveMotorConfig.driveKI,
                 Constants.Swerve.FrontLeftMod.DriveMotorConfig.driveKD,
+                Constants.Swerve.FrontLeftMod.DriveMotorConfig.driveKS,
+                Constants.Swerve.FrontLeftMod.DriveMotorConfig.driveKV,
+                Constants.Swerve.FrontLeftMod.DriveMotorConfig.driveKA,
                 Constants.Swerve.FrontLeftMod.DriveMotorConfig.openLoopRamp,
                 Constants.Swerve.FrontLeftMod.DriveMotorConfig.closedLoopRamp,
                 Constants.Swerve.FrontLeftMod.DriveMotorConfig.isInverted
@@ -92,6 +95,9 @@ public enum SwerveModuleConfig {
                 Constants.Swerve.FrontRightMod.DriveMotorConfig.driveKP,
                 Constants.Swerve.FrontRightMod.DriveMotorConfig.driveKI,
                 Constants.Swerve.FrontRightMod.DriveMotorConfig.driveKD,
+                Constants.Swerve.FrontRightMod.DriveMotorConfig.driveKS,
+                Constants.Swerve.FrontRightMod.DriveMotorConfig.driveKV,
+                Constants.Swerve.FrontRightMod.DriveMotorConfig.driveKA,
                 Constants.Swerve.FrontRightMod.DriveMotorConfig.openLoopRamp,
                 Constants.Swerve.FrontRightMod.DriveMotorConfig.closedLoopRamp,
                 Constants.Swerve.FrontRightMod.DriveMotorConfig.isInverted
@@ -133,6 +139,9 @@ public enum SwerveModuleConfig {
                 Constants.Swerve.BackLeftMod.DriveMotorConfig.driveKP,
                 Constants.Swerve.BackLeftMod.DriveMotorConfig.driveKI,
                 Constants.Swerve.BackLeftMod.DriveMotorConfig.driveKD,
+                Constants.Swerve.BackLeftMod.DriveMotorConfig.driveKS,
+                Constants.Swerve.BackLeftMod.DriveMotorConfig.driveKV,
+                Constants.Swerve.BackLeftMod.DriveMotorConfig.driveKA,
                 Constants.Swerve.BackLeftMod.DriveMotorConfig.openLoopRamp,
                 Constants.Swerve.BackLeftMod.DriveMotorConfig.closedLoopRamp,
                 Constants.Swerve.BackLeftMod.DriveMotorConfig.isInverted
@@ -174,6 +183,9 @@ public enum SwerveModuleConfig {
                 Constants.Swerve.BackRightMod.DriveMotorConfig.driveKP,
                 Constants.Swerve.BackRightMod.DriveMotorConfig.driveKI,
                 Constants.Swerve.BackRightMod.DriveMotorConfig.driveKD,
+                Constants.Swerve.BackRightMod.DriveMotorConfig.driveKS,
+                Constants.Swerve.BackRightMod.DriveMotorConfig.driveKV,
+                Constants.Swerve.BackRightMod.DriveMotorConfig.driveKA,
                 Constants.Swerve.BackRightMod.DriveMotorConfig.openLoopRamp,
                 Constants.Swerve.BackRightMod.DriveMotorConfig.closedLoopRamp,
                 Constants.Swerve.BackRightMod.DriveMotorConfig.isInverted

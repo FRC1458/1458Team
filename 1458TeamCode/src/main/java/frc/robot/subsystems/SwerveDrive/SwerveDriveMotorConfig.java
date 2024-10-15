@@ -7,6 +7,10 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 public final class SwerveDriveMotorConfig {
     public final int driveMotorID;
     public final boolean isInverted;
+
+    public final double driveKS;
+    public final double driveKV;
+    public final double driveKA;
     public final TalonFXConfiguration motorFXConfig = new TalonFXConfiguration();
 
     public SwerveDriveMotorConfig(
@@ -21,6 +25,9 @@ public final class SwerveDriveMotorConfig {
         double driveKP,
         double driveKI,
         double driveKD,
+        double driveKS,
+        double driveKV,
+        double driveKA,
         double openLoopRamp,
         double closedLoopRamp,
         boolean isInverted
@@ -28,6 +35,10 @@ public final class SwerveDriveMotorConfig {
         /** Swerve Drive Motor Configuration */
         this.driveMotorID = driveMotorID;
         this.isInverted = isInverted;
+
+        this.driveKS = driveKS;
+        this.driveKV = driveKV;
+        this.driveKA = driveKA;
 
         /* Motor Inverts and Neutral Mode */
         motorFXConfig.MotorOutput.Inverted = driveMotorInvert;

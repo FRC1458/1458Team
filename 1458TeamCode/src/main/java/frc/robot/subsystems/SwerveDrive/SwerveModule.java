@@ -37,9 +37,9 @@ public class SwerveModule {
         wheelCircumference = swerveModuleConfig.wheelCircumference;
 
         driveFeedForward = new SimpleMotorFeedforward(
-            swerveModuleConfig.driveMotor.motorFXConfig.Slot0.kP,
-            swerveModuleConfig.driveMotor.motorFXConfig.Slot0.kI,
-            swerveModuleConfig.driveMotor.motorFXConfig.Slot0.kD
+            swerveModuleConfig.driveMotor.driveKS,
+            swerveModuleConfig.driveMotor.driveKV,
+            swerveModuleConfig.driveMotor.driveKA
         );
 
         /* Angle Encoder Config */
