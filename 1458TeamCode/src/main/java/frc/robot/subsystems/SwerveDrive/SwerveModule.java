@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.SwerveDrive;
 
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
@@ -10,22 +10,19 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.lib.math.Conversions;
-import frc.robot.lib.util.SwerveModuleConstants;
 import frc.robot.Constants;
-import frc.robot.CTREConfigs;
-import frc.robot.Robot;
 
-public class Module {
+public class SwerveModule {
     public int moduleNumber;
     private Rotation2d angleOffset;
+    private double wheelCircumference;
 
-    TalonFX mAngleMotor;
+    private TalonFX mAngleMotor;
     private TalonFX mDriveMotor;
     private CANcoder angleEncoder;
 
-    private final SimpleMotorFeedforward driveFeedForward = new SimpleMotorFeedforward(Constants.Swerve.driveKS, Constants.Swerve.driveKV, Constants.Swerve.driveKA);
+    private final SimpleMotorFeedforward driveFeedForward;
 
     /* drive motor control requests */
     private final DutyCycleOut driveDutyCycle = new DutyCycleOut(0);
@@ -34,30 +31,33 @@ public class Module {
     /* angle motor control requests */
     private final PositionVoltage anglePosition = new PositionVoltage(0);
 
-    public Module(int moduleNumber, SwerveModuleConstants moduleConstants){
-        this.moduleNumber = moduleNumber;
-        this.angleOffset = moduleConstants.angleOffset;
-        
+    public SwerveModule(SwerveModuleConfig swerveModuleConfig){
+        moduleNumber = swerveModuleConfig.moduleNumber;
+        angleOffset = swerveModuleConfig.angleMotor.angleOffset;
+        wheelCircumference = swerveModuleConfig.wheelCircumference;
+
+        driveFeedForward = new SimpleMotorFeedforward(
+            swerveModuleConfig.driveMotor.driveKS,
+            swerveModuleConfig.driveMotor.driveKV,
+            swerveModuleConfig.driveMotor.driveKA
+        );
+
         /* Angle Encoder Config */
-        angleEncoder = new CANcoder(moduleConstants.cancoderID, "CV");
-        angleEncoder.getConfigurator().apply(Robot.ctreConfigs.swerveCANcoderConfig);
+        angleEncoder = new CANcoder(swerveModuleConfig.canCoder.canCoderID, "CV");
+        angleEncoder.getConfigurator().apply(swerveModuleConfig.canCoder.canCoderConfig);
 
         /* Angle Motor Config */
-        mAngleMotor = new TalonFX(moduleConstants.angleMotorID, "CV");
-        mAngleMotor.getConfigurator().apply(Robot.ctreConfigs.swerveAngleFXConfig);
+        mAngleMotor = new TalonFX(swerveModuleConfig.angleMotor.angleMotorID, "CV");
+        mAngleMotor.getConfigurator().apply(swerveModuleConfig.angleMotor.angleFXConfig);
         resetToAbsolute();
 
         /* Drive Motor Config */
-        mDriveMotor = new TalonFX(moduleConstants.driveMotorID, "CV");
-        mDriveMotor.getConfigurator().apply(Robot.ctreConfigs.swerveDriveFXConfig);
+        mDriveMotor = new TalonFX(swerveModuleConfig.driveMotor.driveMotorID, "CV");
+        mDriveMotor.getConfigurator().apply(swerveModuleConfig.driveMotor.motorFXConfig);
 
-        if(moduleNumber == 0 || moduleNumber == 2) {
-            mDriveMotor.setInverted(false);
-        }
+        mDriveMotor.setInverted(swerveModuleConfig.driveMotor.isInverted);
+        mAngleMotor.setInverted(swerveModuleConfig.angleMotor.isInverted);
 
-        if(moduleNumber == 0 || moduleNumber == 1 || moduleNumber == 2 || moduleNumber == 3) {
-            mAngleMotor.setInverted(true);
-        }
         mDriveMotor.getConfigurator().setPosition(0.0);
     }
 
@@ -75,7 +75,7 @@ public class Module {
             mDriveMotor.setControl(driveDutyCycle);
         }
         else {
-            driveVelocity.Velocity = Conversions.MPSToRPS(desiredState.speedMetersPerSecond, Constants.Swerve.wheelCircumference);
+            driveVelocity.Velocity = Conversions.MPSToRPS(desiredState.speedMetersPerSecond, this.wheelCircumference);
             driveVelocity.FeedForward = driveFeedForward.calculate(desiredState.speedMetersPerSecond);
             mDriveMotor.setControl(driveVelocity);
         }
@@ -94,15 +94,20 @@ public class Module {
 
     public SwerveModuleState getState(){
         return new SwerveModuleState(
-            Conversions.RPSToMPS(mDriveMotor.getVelocity().getValue(), Constants.Swerve.wheelCircumference), 
+            Conversions.RPSToMPS(mDriveMotor.getVelocity().getValue(), this.wheelCircumference),
             Rotation2d.fromRotations(mAngleMotor.getPosition().getValue())
         );
     }
 
     public SwerveModulePosition getPosition(){
         return new SwerveModulePosition(
-            Conversions.rotationsToMeters(mDriveMotor.getPosition().getValue(), Constants.Swerve.wheelCircumference), 
+            Conversions.rotationsToMeters(mDriveMotor.getPosition().getValue(), this.wheelCircumference),
             Rotation2d.fromRotations(mAngleMotor.getPosition().getValue())
         );
+    }
+
+    public double getAngleMotorPosition(){
+        // return Rotation2d.fromRotations(mAngleMotor.getPosition().getValue()).getDegrees();
+        return mAngleMotor.getPosition().getValue();
     }
 }
