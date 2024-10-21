@@ -31,8 +31,8 @@ public class RobotContainer {
     private final JoystickButton zeroGyro = new JoystickButton(driver, XboxController.Button.kY.value);
     private final JoystickButton robotCentric = new JoystickButton(driver, XboxController.Button.kLeftBumper.value);
 
-    /* Elevator buttons */
-    private final JoystickButton deployElevator = new JoystickButton(driver, XboxController.Button.kRightBumper.value);
+    /* Subsystem buttons */
+    private final JoystickButton deploySubsystems = new JoystickButton(driver, XboxController.Button.kRightBumper.value);
 
     /* Subsystems */
     private final Drive s_Swerve = new Drive();
@@ -66,13 +66,14 @@ public class RobotContainer {
         /* Driver Buttons */
         zeroGyro.onTrue(new InstantCommand(() -> s_Swerve.zeroHeading()));
 
-        // /* Elevator Buttons */
-        deployElevator.onTrue(new InstantCommand(() -> m_elevator.reachGoal(Constants.Elevator.kSetpointMeters)));
-        deployElevator.onFalse(new InstantCommand(() -> m_elevator.reachGoal(0.0)));
+        /* Subsystem Buttons */
+        /* Elevator */
+        deploySubsystems.onTrue(new InstantCommand(() -> m_elevator.reachGoal(Constants.Elevator.kSetpointMeters)));
+        deploySubsystems.onFalse(new InstantCommand(() -> m_elevator.reachGoal(0.0)));
 
-        /* Intake Buttons */
-        deployElevator.onTrue(new InstantCommand(() -> m_intake.deploy()));
-        deployElevator.onFalse(new InstantCommand(() -> m_intake.retract()));
+        /* Intake */
+        deploySubsystems.onTrue(new InstantCommand(() -> m_intake.deploy()));
+        deploySubsystems.onFalse(new InstantCommand(() -> m_intake.retract()));
     }
 
     /**

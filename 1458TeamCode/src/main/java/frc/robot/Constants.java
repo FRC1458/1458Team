@@ -130,6 +130,8 @@ public final class Constants {
     }
 
     public static final class Elevator {
+        public static int deviceID = 20;
+
         public static final int kMotorPort = 0;
         public static final int kEncoderAChannel = 0;
         public static final int kEncoderBChannel = 1;

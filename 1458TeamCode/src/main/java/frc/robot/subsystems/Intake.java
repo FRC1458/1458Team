@@ -91,8 +91,8 @@ public class Intake extends SubsystemBase {
   // Mechanism2d Visualization
   // See https://docs.wpilib.org/en/stable/docs/software/dashboards/glass/mech2d-widget.html
   private static final Mechanism2d mech = new Mechanism2d(1, 1);
-  private static final double kArmPivotX = 0.7;
-  private static final double kArmPivotY = 0.3;
+  private static final double kArmPivotX = 0.8;
+  private static final double kArmPivotY = 0.75;
   private static final MechanismRoot2d armPivot =
       mech.getRoot("Intake Arm Pivot", kArmPivotX, kArmPivotY);
   private static final double kIntakeLength = 0.5;
@@ -138,6 +138,7 @@ public class Intake extends SubsystemBase {
     rollerAxle.setPosition(
         kArmPivotX + kIntakeLength * Math.cos(armSim.getAngleRads()),
         kArmPivotY + kIntakeLength * Math.sin(armSim.getAngleRads()));
+
     // Scale down the angular velocity so we can actually see what is happening
     rollerViz.setAngle(
         rollerViz.getAngle()
