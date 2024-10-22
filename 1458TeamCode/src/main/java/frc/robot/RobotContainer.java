@@ -49,6 +49,9 @@ public class RobotContainer {
 
         // Configure the button bindings
         configureButtonBindings();
+
+        // Write subsystem information to smartdashboard
+        SmartDashboard.putData("Drive", s_Swerve);
     }
 
     /**

@@ -22,6 +22,9 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -36,6 +39,13 @@ public class Drive extends SubsystemBase {
     private final Field2d field = new Field2d();
     public final Pigeon2SimState gyroSimState;
     public Rotation2d lastAngle = new Rotation2d();
+
+    private final StructArrayPublisher<SwerveModuleState> statePublisher = NetworkTableInstance.getDefault()
+        .getStructArrayTopic("SmartDashboard/Drive/States", SwerveModuleState.struct).publish();
+    private final StructPublisher<Rotation2d> rotationPublisher = NetworkTableInstance.getDefault()
+        .getStructTopic("SmartDashboard/Drive/Rotation", Rotation2d.struct).publish();
+    private final StructPublisher<ChassisSpeeds> chassisSpeedsPublisher = NetworkTableInstance.getDefault()
+        .getStructTopic("SmartDashboard/Drive/ChassisSpeeds", ChassisSpeeds.struct).publish();
 
     public Drive() {
         gyro = new Pigeon2(Constants.Swerve.pigeonID, "CV");
@@ -71,24 +81,25 @@ public class Drive extends SubsystemBase {
     }
 
     public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
+        ChassisSpeeds chassisSpeeds = fieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(
+            translation.getX(),
+            translation.getY(),
+            rotation,
+            getHeading()
+        ) : new ChassisSpeeds(
+            translation.getX(),
+            translation.getY(),
+            rotation);
+
         SwerveModuleState[] swerveModuleStates =
-                Constants.Swerve.swerveKinematics.toSwerveModuleStates(
-                        fieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                                translation.getX(),
-                                translation.getY(),
-                                rotation,
-                                getHeading()
-                        )
-                                : new ChassisSpeeds(
-                                translation.getX(),
-                                translation.getY(),
-                                rotation)
-                );
+                Constants.Swerve.swerveKinematics.toSwerveModuleStates(chassisSpeeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.Swerve.maxSpeed);
 
         for (SwerveModule mod : mSwerveMods) {
             mod.setDesiredState(swerveModuleStates[mod.moduleNumber], isOpenLoop);
         }
+
+        chassisSpeedsPublisher.set(chassisSpeeds);
     }
 
     /* Used by SwerveControllerCommand in Auto */
@@ -151,15 +162,21 @@ public class Drive extends SubsystemBase {
         SwerveModuleState[] states = getModuleStates();
         for (int i = 0; i < mSwerveMods.length; i++) {
             double goalDegrees = states[i].angle.getDegrees();
-            SmartDashboard.putNumber("Module " + mSwerveMods[i].moduleNumber + " Goal Angle", goalDegrees);
+            SmartDashboard.putNumber("Drive/Module " + mSwerveMods[i].moduleNumber + " Goal Angle", goalDegrees);
         }
         swerveOdometry.update(getGyroYaw(), getModulePositions());
 
+        // Publish swerve module states and rotaton to smartdashboard
+        statePublisher.set(states);
+
+        Rotation2d rotation = swerveOdometry.getPoseMeters().getRotation();
+        rotationPublisher.set(rotation);
+
         for (SwerveModule mod : mSwerveMods) {
-            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " CANcoder", (mod.getCANcoder().getDegrees()+180)%360);
+            SmartDashboard.putNumber("Drive/Module " + mod.moduleNumber + " CANcoder", (mod.getCANcoder().getDegrees()+180)%360);
 
 //            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Angle", ((mod.mAngleMotor.getPosition().getValue()%22.0)*360/22-180));
-            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Angle", ((mod.getAngleMotorPosition() * 360) % 360 + 360) % 360); // This is super specific, don't break this pls
+            SmartDashboard.putNumber("Drive/Module " + mod.moduleNumber + " Angle", ((mod.getAngleMotorPosition() * 360) % 360 + 360) % 360); // This is super specific, don't break this pls
 //            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);
         }
 
@@ -172,8 +189,8 @@ public class Drive extends SubsystemBase {
         for (SwerveModule mod : mSwerveMods) {
             mod.updateSimPeriodic();
 
-            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " CANcoder", (mod.getCANcoder().getDegrees()+180)%360);
-            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Angle", ((mod.getAngleMotorPosition() * 360) % 360 + 360) % 360); // This is super specific, don't break this pls
+            SmartDashboard.putNumber("Drive/Module " + mod.moduleNumber + " CANcoder", (mod.getCANcoder().getDegrees()+180)%360);
+            SmartDashboard.putNumber("Drive/Module " + mod.moduleNumber + " Angle", ((mod.getAngleMotorPosition() * 360) % 360 + 360) % 360); // This is super specific, don't break this pls
         }
     }
 }
