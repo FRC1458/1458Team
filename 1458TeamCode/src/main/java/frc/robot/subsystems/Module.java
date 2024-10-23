@@ -111,7 +111,7 @@ public class Module extends Subsystem {  // Supports looper
 				mAngleMotor.getRotorPosition(), mAngleMotor.getRotorVelocity());
 		mPeriodicIO.drivePosition = mDriveMotor.getRotorPosition().getValueAsDouble();
 
-        DisplayToDahboard()
+        DisplayToDahboard();
 
 	}
 
