@@ -1,0 +1,55 @@
+package frc.robot.lib.trajectory;
+
+import edu.wpi.first.math.trajectory.*;
+import java.nio.file.Paths;
+import java.io.IOException;
+
+//dc.10.21.2024, this class is going to load all paths pre-defined via PathWeaver tool
+
+public class TrajectoryGenerator {
+    
+    //the trajectories used in auto mode
+    private TrajectorySet mTrajectorySet = null;
+
+    public class TrajectorySet {
+		public final Trajectory testTrajectory = loadTrajectory("./PathWeaver/output/Path1.json");
+		public final Trajectory testTrajectory2 = loadTrajectory("./PathWeaver/output/Path1.json");
+        /* dc.10.21.2024, additional trajectory can be added similar to the TestTrajectory */
+
+        private Trajectory loadTrajectory (String sJsonFile){
+            try{
+                return TrajectoryUtil.fromPathweaverJson( Paths.get(sJsonFile));
+            } catch(IOException err){
+                return null;
+            }
+        }
+    }
+
+    // instanciation code 
+    private static TrajectoryGenerator mInstance;
+	public static TrajectoryGenerator getInstance() {
+		if (mInstance == null) {
+			mInstance = new TrajectoryGenerator();
+		}
+		return mInstance;
+	}
+
+    //constructor code
+    public TrajectoryGenerator (){
+        //dc.to be implemented
+    }
+
+    //actually create the trajectory object
+    public void generateTrajectories (){
+        if (mTrajectorySet == null) {
+			System.out.println("Generating trajectories...");
+			mTrajectorySet = new TrajectorySet();
+			System.out.println("Finished trajectory generation");
+		}
+    }    
+
+    //access to the trajectory set 
+	public TrajectorySet getTrajectorySet() {
+		return mTrajectorySet;
+	}
+}
