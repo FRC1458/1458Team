@@ -1,5 +1,7 @@
 package frc.robot.lib.trajectory;
 
+import java.util.List;
+
 import edu.wpi.first.math.trajectory.*;
 
 //dc.10.21.2024, rewrite the TrajectoryIterator class based on wpilib Trajectory package, main functions as following
@@ -39,7 +41,12 @@ public class TrajectoryIterator {
 
     public double getRemainingProgress() {
         return Math.max(0.0, mCurrentTrajectory.getTotalTimeSeconds() - progress_);
-    }    
+    }
+
+    public Trajectory.State getLastPoint(){
+        List<Trajectory.State> stateList = mCurrentTrajectory.getStates();
+        return stateList.get(stateList.size()-1);
+    }
 
     //access to the current trajectory properties
     public Trajectory trajectory(){ return mCurrentTrajectory;}
