@@ -20,6 +20,7 @@ import frc.robot.subsystems.Subsystem;
 import frc.robot.lib.util.Conversions;
 import frc.robot.lib.util.Util;
 import frc.robot.lib.drivers.Phoenix6Util;
+import frc.robot.lib.util.SwerveModuleConstants;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -56,9 +57,10 @@ public class SwerveModule extends Subsystem {
 		public ControlRequest driveDemand;
 	}
 
+	//dc.10.25.2024 replace citrus SwerveModuleConstants with our own. Just need to angleOffset.getRadians, and disregard CancoderID
 	public SwerveModule(int moduleNumber, SwerveModuleConstants moduleConstants, CANcoder cancoder) {
 		this.kModuleNumber = moduleNumber;
-		kAngleOffset = moduleConstants.angleOffset;
+		kAngleOffset = moduleConstants.angleOffset.getRadians();	//kAngleOffset is in radians
 
 		angleEncoder = cancoder;
 
@@ -259,7 +261,7 @@ public class SwerveModule extends Subsystem {
 		return mSignals;
 	}
 
-    //TODO: need to reconcile the following class with lib.util.SwerveModuleConstants class 
+/*     //TODO: need to reconcile the following class with lib.util.SwerveModuleConstants class 
 	public static class SwerveModuleConstants { 
 		public final int driveMotorID;
 		public final int angleMotorID;
@@ -271,4 +273,5 @@ public class SwerveModule extends Subsystem {
 			this.angleOffset = angleOffset;
 		}
 	}
+*/
 }
