@@ -42,8 +42,18 @@ public class DriveMotionPlanner {
     //set trajectory to traverse
     public void setTrajectory(final TrajectoryIterator trajectory) {
         mCurrentTrajectory = trajectory;
-        //tbd
+        //TODO: actual setTrajectory() to be implemented 
     }
+
+	public void reset() {
+//		mErrorTracker.reset();
+		mTranslationalError = new Translation2d();
+		mPrevHeadingError = new Rotation2d();
+//		mLastSetpoint = null;
+		mOutput = new ChassisSpeeds();
+		mLastTime = Double.POSITIVE_INFINITY;
+	}
+
 
     //follower type
 	public enum FollowerType {
@@ -151,11 +161,11 @@ public class DriveMotionPlanner {
 				SmartDashboard.putNumber("PurePursuit/PreviewQtd", previewQuantity);
 				sample_point = mCurrentTrajectory.advance(previewQuantity);
 				// RobotState.getInstance().setDisplaySetpointPose(Pose2d.fromTranslation(RobotState.getInstance().getFieldToOdom(timestamp)).transformBy(sample_point.state().state().getPose()));
-				mSetpoint = sample_point.state();
+				mSetpoint = sample_point;
 				mOutput = updatePurePursuit(current_state, 0.0);
 			}
 		} else {
-			if (mCurrentTrajectory.trajectory().getLastPoint().state().velocity() == 0.0) {
+			if (mCurrentTrajectory.getLastPoint().velocityMetersPerSecond == 0.0) {
 				mOutput = new ChassisSpeeds();
 			}
 		}
@@ -168,9 +178,9 @@ public class DriveMotionPlanner {
 		return mCurrentTrajectory != null && mCurrentTrajectory.isDone();
 	}
 
-
+	//dc. add Twist2d pid_error as input parameter to remove dependency on class property in original citrus code
 	protected ChassisSpeeds updatePIDChassis(ChassisSpeeds chassisSpeeds, Twist2d pid_error) {
-		// dc.10.22.2024, TODO: tune the "K" constants during test and debug
+		// dc.10.22.2024, TODO: tune the "K" constants of PID algo
 		// Feedback on longitudinal error (distance).
 		final double kPathk = 2.4; // 2.4;/* * Math.hypot(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond)*/;//0.15;
 		final double kPathKTheta = 3.0;
@@ -180,15 +190,14 @@ public class DriveMotionPlanner {
 		return chassisSpeeds;
 	}
 
-	protected ChassisSpeeds updatePurePursuit(Pose2d current_state, double feedforwardOmegaRadiansPerSecond) {
-		//dc.10.22.2024 TODO: to be ported from Citrus code
+	//dc.10.22.2024 TODO: updatePurePursuit() to be ported from Citrus code
+	protected ChassisSpeeds updatePurePursuit(Pose2d current_state, double feedforwardOmegaRadiansPerSecond) {		
 		return null;
 	}
 
 
 	// dc.10.21.2024 calculate the error between robot's actual state and desired state
-	// TODO: revisit to finetune the algorithm late 
-	// citrus original implementation is : Util.inversePose2d(current_state).transformBy(mSetpoint.poseMeters.);
+	// TODO: revisit to check the math. citrus original code is : current_state.inverse().transformBy(mSetpoint.state().getPose());
 	public Pose2d calculateError (Pose2d actualState, Pose2d desiredState){
 		// Calculate the error in translation (position)
 		Translation2d positionError = desiredState.getTranslation().minus(actualState.getTranslation());
@@ -199,5 +208,15 @@ public class DriveMotionPlanner {
 		// Create a new Pose2d object to represent the error
 		return new Pose2d(positionError, rotationError);
 	}
-    
+
+	//dc.10.24.202 
+	private double distance(Pose2d current_state, double additional_progress) {
+		Trajectory.State previewState = mCurrentTrajectory.preview(additional_progress);
+		//TODO: revisit to check the math. citrus original code is : return Pose2d.log(previewState.inverse().transformBy(current_state)).norm());
+		Twist2d logErr = previewState.poseMeters.log(calculateError(previewState.poseMeters, current_state));
+		// get the norm of twist2d object
+		if (logErr.dy == 0.0)
+			return Math.abs(logErr.dx);
+		return Math.hypot(logErr.dx, logErr.dy);
+	}
 }
