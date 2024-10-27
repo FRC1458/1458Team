@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 //dc.10.25.2024, ported from com.team1678.frc2024.subsystems.Drive;
 
 import frc.robot.Constants;
+import frc.robot.Constants.Swerve;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.lib.util.SwerveModuleConstants;
 /*
@@ -67,7 +68,7 @@ public class SwerveDrive extends Subsystem {
 	private boolean mOverrideTrajectory = false;
 	private boolean mOverrideHeading = false;
 
-	private Rotation2d mTrackingAngle = Rotation2d.identity();
+	private Rotation2d mTrackingAngle = new Rotation2d();
 
 	private KinematicLimits mKinematicLimits = SwerveConstants.kUncappedLimits;
 
@@ -211,7 +212,7 @@ public class SwerveDrive extends Subsystem {
 
 			@Override
 			public void onLoop(double timestamp) {
-				synchronized (Drive.this) {
+				synchronized (SwerveDrive.this) {
 					switch (mControlState) {
 						case PATH_FOLLOWING:
 							updatePathFollower();
@@ -257,9 +258,8 @@ public class SwerveDrive extends Subsystem {
 		mPeriodicIO.heading = mPigeon.getYaw();
 		mPeriodicIO.pitch = mPigeon.getPitch();
 
-		Twist2d twist_vel = Constants.SwerveConstants.kKinematics
-				.toChassisSpeeds(getModuleStates())
-				.toTwist2d();
+		Twist2d twist_vel = toTwist2d(Constants.SwerveConstants.kKinematics
+				.toChassisSpeeds(getModuleStates()));
 		Translation2d translation_vel = new Translation2d(twist_vel.dx, twist_vel.dy);
 		translation_vel = translation_vel.rotateBy(getHeading());
 		mPeriodicIO.measured_velocity = new Twist2d(
@@ -268,7 +268,7 @@ public class SwerveDrive extends Subsystem {
 				twist_vel.dtheta);
 	}
 
-	public synchronized void setTrajectory(TrajectoryIterator<TimedState<Pose2dWithMotion>> trajectory) {
+	public synchronized void setTrajectory(TrajectoryIterator trajectory) {
 		if (mMotionPlanner != null) {
 			mOverrideTrajectory = false;
 			mMotionPlanner.reset();
@@ -400,7 +400,7 @@ public class SwerveDrive extends Subsystem {
 				mPeriodicIO.des_chassis_speeds.vyMetersPerSecond * Constants.kLooperDt * 4.0,
 				Rotation2d.fromRadians(
 						mPeriodicIO.des_chassis_speeds.omegaRadiansPerSecond * Constants.kLooperDt * 4.0));
-		Twist2d twist_vel = Pose2d.log(robot_pose_vel).scaled(1.0 / (4.0 * Constants.kLooperDt));
+		Twist2d twist_vel = Util.scaledTwist2d(Util.logMap(robot_pose_vel), 1.0 / (4.0 * Constants.kLooperDt));//dc: 10/25.2024, Util.logMap() = Pose2d.log(), Util.ScaledTwist2d()=Twist2d.scaled()
 
 		ChassisSpeeds wanted_speeds;
 		if (mOverrideHeading) {
@@ -430,9 +430,10 @@ public class SwerveDrive extends Subsystem {
 			SwerveModuleState[] prev_module_states =
 					mPeriodicIO.des_module_states.clone(); // Get last setpoint to get differentials
 			ChassisSpeeds prev_chassis_speeds = SwerveConstants.kKinematics.toChassisSpeeds(prev_module_states);
-			SwerveModuleState[] target_module_states = SwerveConstants.kKinematics.toModuleStates(wanted_speeds);
-
-			if (wanted_speeds.epsilonEquals(new ChassisSpeeds(), Util.kEpsilon)) {
+			SwerveModuleState[] target_module_states = SwerveConstants.kKinematics.toSwerveModuleStates(wanted_speeds);
+			
+			// Zero the modules' speeds if want_speeds is less epsilon value
+			if (Util.chassisSpeedsEpsilonEquals(wanted_speeds, new ChassisSpeeds(), Util.kEpsilon)) {
 				for (int i = 0; i < target_module_states.length; i++) {
 					target_module_states[i].speedMetersPerSecond = 0.0;
 					target_module_states[i].angle = prev_module_states[i].angle;
@@ -469,18 +470,19 @@ public class SwerveDrive extends Subsystem {
 			}
 
 			SmartDashboard.putNumber("Accel", min_translational_scalar);
-
+			// cap accelerations of both translation and rotation velocities
 			wanted_speeds = new ChassisSpeeds(
 					prev_chassis_speeds.vxMetersPerSecond + dx * min_translational_scalar,
 					prev_chassis_speeds.vyMetersPerSecond + dy * min_translational_scalar,
 					prev_chassis_speeds.omegaRadiansPerSecond + domega * min_omega_scalar);
 		}
 
-		SwerveModuleState[] real_module_setpoints = SwerveConstants.kKinematics.toModuleStates(wanted_speeds);
+		SwerveModuleState[] real_module_setpoints = SwerveConstants.kKinematics.toSwerveModuleStates(wanted_speeds);
 		SwerveDriveKinematics.desaturateWheelSpeeds(real_module_setpoints, Constants.SwerveConstants.maxSpeed);
 
+		Twist2d pred_twist_vel= new Twist2d(wanted_speeds.vxMetersPerSecond,wanted_speeds.vyMetersPerSecond,wanted_speeds.omegaRadiansPerSecond);
 		mPeriodicIO.predicted_velocity =
-				Pose2d.log(Pose2d.exp(wanted_speeds.toTwist2d()).rotateBy(getHeading()));
+				Util.logMap(Util.expMap(pred_twist_vel).rotateBy(getHeading()));//dc modified original citrus code: Pose2d.log(Pose2d.exp(wanted_speeds.toTwist2d()).rotateBy(getHeading()));
 		mPeriodicIO.des_module_states = real_module_setpoints;
 	}
 
@@ -594,7 +596,7 @@ public class SwerveDrive extends Subsystem {
 		// Inputs/Desired States
 		double timestamp;
 		ChassisSpeeds des_chassis_speeds = new ChassisSpeeds(0.0, 0.0, 0.0);
-		Twist2d measured_velocity = Twist2d.identity();
+		Twist2d measured_velocity = new Twist2d();
 		Rotation2d heading = new Rotation2d();
 		Rotation2d pitch = new Rotation2d();
 
@@ -602,15 +604,16 @@ public class SwerveDrive extends Subsystem {
 		SwerveModuleState[] des_module_states = new SwerveModuleState[] {
 			new SwerveModuleState(), new SwerveModuleState(), new SwerveModuleState(), new SwerveModuleState()
 		};
-		Twist2d predicted_velocity = Twist2d.identity();
-		Translation2d translational_error = Translation2d.identity();
-		Rotation2d heading_error = Rotation2d.identity();
+		Twist2d predicted_velocity = new Twist2d();
+		Translation2d translational_error = new Translation2d();
+		Rotation2d heading_error = new Rotation2d();
 //dc.LeftSideOnly		TimedState<Pose2dWithMotion> path_setpoint = new TimedState<Pose2dWithMotion>(Pose2dWithMotion.identity());
 		Rotation2d heading_setpoint = new Rotation2d();
 	}
 
 	@Override
 	public void outputTelemetry() {
+	/* dc.10.26.2024, TODO: fix code in RobotState and remove the comment-out
 		if (Constants.disableExtraTelemetry) {
 			return;
 		}
@@ -646,6 +649,7 @@ public class SwerveDrive extends Subsystem {
 				Math.hypot(
 						Constants.SwerveConstants.kKinematics.toChassisSpeeds(getModuleStates()).vxMetersPerSecond,
 						Constants.SwerveConstants.kKinematics.toChassisSpeeds(getModuleStates()).vyMetersPerSecond));
+	*/
 	}
 
 /* 
@@ -668,7 +672,13 @@ public class SwerveDrive extends Subsystem {
 	public static class KinematicLimits {
 		public double kMaxDriveVelocity = Constants.SwerveConstants.maxSpeed; // m/s
 		public double kMaxAccel = Double.MAX_VALUE; // m/s^2
-		public double kMaxAngularVelocity = Constants.SwerveConstants.maxAngularVelocity; // rad/s
+		public double kMaxAngularVelocity = Constants.Swerve.maxAngularVelocity; // rad/s
 		public double kMaxAngularAccel = Double.MAX_VALUE; // rad/s^2
 	}
+
+	//dc.10.26.2024 util to convert ChassisSpeed into twist2d object 
+	public Twist2d toTwist2d(ChassisSpeeds chassisSpeeds) {
+		return new Twist2d(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond, chassisSpeeds.omegaRadiansPerSecond);
+	}
+
 }

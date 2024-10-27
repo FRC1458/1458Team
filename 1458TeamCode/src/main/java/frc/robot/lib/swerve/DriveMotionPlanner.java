@@ -195,6 +195,16 @@ public class DriveMotionPlanner {
 		return null;
 	}
 
+	//getty functions to access key properties 
+	public synchronized Translation2d getTranslationalError() {
+		return new Translation2d(
+				mError.getTranslation().getX(), mError.getTranslation().getY());
+	}
+	public synchronized Rotation2d getHeadingError() {
+		return mError.getRotation();
+	}
+
+
 
 	// dc.10.21.2024 calculate the error between robot's actual state and desired state
 	// TODO: revisit to check the math. citrus original code is : current_state.inverse().transformBy(mSetpoint.state().getPose());
@@ -218,5 +228,5 @@ public class DriveMotionPlanner {
 		if (logErr.dy == 0.0)
 			return Math.abs(logErr.dx);
 		return Math.hypot(logErr.dx, logErr.dy);
-	}
+	}	
 }

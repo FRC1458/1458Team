@@ -76,11 +76,12 @@ public class RobotState {
 
 	/**
 	 * @return Latest odometry pose.
-	 */
+	 * TODO: find replacement of InterpolatingDouble, or port team254 code
 	public synchronized Map.Entry<InterpolatingDouble, Pose2d> getLatestOdomToVehicle() {
         //TODO: actual getLatestOdomToVehicle() to be implemented 
         return null;
 	}
+	 */
 
 	/**
 	 * Gets odometry pose from history. Linearly interpolates between gaps.

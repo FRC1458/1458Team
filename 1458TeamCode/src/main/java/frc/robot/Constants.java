@@ -14,6 +14,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import frc.robot.lib.util.COTSTalonFXSwerveConstants;
 import frc.robot.lib.util.SwerveModuleConstants;
+import frc.robot.subsystems.SwerveDrive.KinematicLimits;
 import frc.robot.subsystems.limelight.GoalTracker;
 
 public final class Constants {
@@ -197,19 +198,29 @@ public final class Constants {
 		public static final double kSnapSwerveHeadingKi = 0.0;
 		public static final double kSnapSwerveHeadingKd = 0.6;
 		public static final double kSnapSwerveHeadingKf = 1.0;
-        
-        /* TalonFx module constants*/
 
         /*dc.10.21.2024 mapping existing constants so that ported citrus code only needs minimal changes */
+        public static final SwerveDriveKinematics kKinematics = Swerve.swerveKinematics;
         public static final boolean driveMotorInvert = false;   //TODO: need to verify with the actual Robot setting
         public static final boolean angleMotorInvert = true;    //TODO: need to verify with the actual Robot setting
-        public static final double wheelDiameter = Swerve.chosenModule.wheelDiameter; //4.0inch
+        public static final double wheelDiameter = Swerve.chosenModule.wheelDiameter; //??4.0inch
         public static final double wheelCircumference = Swerve.chosenModule.wheelCircumference;
         public static final double driveGearRatio = Swerve.chosenModule.driveGearRatio;//?? Constants.isEpsilon ? 5.82 : 5.82; 
         public static final double angleGearRatio = Swerve.chosenModule.angleGearRatio;
         public static final double maxSpeed = Swerve.maxSpeed; 
         public static final double kV = 12 * Math.PI * wheelDiameter / (driveGearRatio * maxSpeed); //TODO: need to finetune with the actual robot
 
+        public static final KinematicLimits kUncappedLimits = new KinematicLimits();
+
+		static {
+			kUncappedLimits.kMaxDriveVelocity = maxSpeed;
+			kUncappedLimits.kMaxAccel = Double.MAX_VALUE;
+			kUncappedLimits.kMaxAngularVelocity = Swerve.maxAngularVelocity;
+			kUncappedLimits.kMaxAngularAccel = Double.MAX_VALUE;
+		}
+
+        /* TalonFx module constants*/
+        
         public static TalonFXConfiguration AzimuthFXConfig() {
             TalonFXConfiguration config = new TalonFXConfiguration();
 
