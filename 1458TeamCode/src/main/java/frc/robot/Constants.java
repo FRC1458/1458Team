@@ -11,9 +11,16 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import frc.robot.lib.util.COTSTalonFXSwerveConstants;
 import frc.robot.lib.util.SwerveModuleConstants;
+import frc.robot.subsystems.limelight.GoalTracker;
 
 public final class Constants {
     public static final double stickDeadband = 0.1;
+    public static boolean isEpsilon;
+
+    // robot loop time
+	public static final double kLooperDt = 0.02;
+    // Disables extra smart dashboard outputs that slow down the robot
+	public static final boolean disableExtraTelemetry = false;
 
     public static final class Swerve {
         public static final int pigeonID = 20;
@@ -144,4 +151,30 @@ public final class Constants {
             new TrapezoidProfile.Constraints(
                 kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
     }
+
+    public static final class LimelightConstants {
+
+		public static final double kNoteHeight = 0.0508;
+		public static final double kNoteTargetOffset = 0.2;
+		public static final double kMaxNoteTrackingDistance = 6.75;
+		public static final double kNoteTrackEpsilon = 1.0;
+
+		public static final String kName = "limelight";
+		public static final Translation2d kRobotToCameraTranslation = new Translation2d(0.0, 0.0);
+		public static final double kCameraHeightMeters = isEpsilon ? 0.59 : 0.65;
+		public static final Rotation2d kCameraPitch = Rotation2d.fromDegrees(-18.0);
+		public static final Rotation2d kCameraYaw = Rotation2d.fromDegrees(0.0);
+
+		public static final GoalTracker.Configuration kNoteTrackerConstants = new GoalTracker.Configuration();
+
+		static {
+			kNoteTrackerConstants.kMaxTrackerDistance = 0.46;
+			kNoteTrackerConstants.kMaxGoalTrackAge = 0.5;
+			kNoteTrackerConstants.kCameraFrameRate = 30.0;
+			kNoteTrackerConstants.kStabilityWeight = 1.0;
+			kNoteTrackerConstants.kAgeWeight = 0.2;
+			kNoteTrackerConstants.kSwitchingWeight = 0.2;
+		}
+	}
+    
 }
