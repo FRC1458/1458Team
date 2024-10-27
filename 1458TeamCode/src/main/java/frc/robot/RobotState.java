@@ -1,10 +1,20 @@
 package frc.robot;
 
 import java.util.Map;
+import java.util.Optional;
 
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.estimator.ExtendedKalmanFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N2;
+import edu.wpi.first.math.Matrix;
+import frc.robot.lib.util.InterpolatingTreeMap;
+import frc.robot.lib.util.Interpolable;
+import frc.robot.lib.util.InterpolatingDouble;
+import frc.robot.lib.util.MovingAverageTwist2d;
 
 //dc.10.25.2024 TODO: a dummy RobotState class to pass compilation, placeholder for actual implementation
 //priority level 2, for presentation purpose
@@ -18,6 +28,30 @@ public class RobotState {
 		return mInstance;
 	}
 
+	private static final int kObservationBufferSize = 50;
+	private static final Matrix<N2, N1> kStateStdDevs = VecBuilder.fill(Math.pow(0.05, 1), Math.pow(0.05, 1)); // drive
+	private static final Matrix<N2, N1> kLocalMeasurementStdDevs = VecBuilder.fill(
+			Math.pow(0.02, 1), // vision
+			Math.pow(0.02, 1));
+	//private Optional<VisionUpdate> mLatestVisionUpdate;
+
+	private Optional<Translation2d> initial_field_to_odom = Optional.empty();
+	private InterpolatingTreeMap<InterpolatingDouble, Pose2d> odometry_to_vehicle;
+	private InterpolatingTreeMap<InterpolatingDouble, Translation2d> field_to_odometry;
+	private ExtendedKalmanFilter<N2, N2, N2> mKalmanFilter;
+	//private VisionPoseAcceptor mPoseAcceptor;
+
+	private Twist2d vehicle_velocity_measured;
+	private Twist2d vehicle_velocity_predicted;
+	private MovingAverageTwist2d vehicle_velocity_measured_filtered;
+
+	private boolean mHasRecievedVisionUpdate = false;
+	private boolean mIsInAuto = false;
+
+	public RobotState() {
+		reset(0.0, new Pose2d());
+	}
+
 	/**
 	 * Adds new odometry pose update.
 	 *
@@ -27,8 +61,28 @@ public class RobotState {
 	 * @param predicted_velocity Predicted field-relative velocity (usually swerve
 	 *                           setpoint).
 	 */
-	public synchronized void addOdometryUpdate(double now, Pose2d odometry_pose, Twist2d measured_velocity, Twist2d predicted_velocity) {
-        //TODO: actual addOdometryUpdate() to be implemented 
+	
+	 public synchronized void reset(double now, Pose2d initial_odom_to_vehicle) {
+		odometry_to_vehicle = new InterpolatingTreeMap<InterpolatingDouble, Pose2d>(kObservationBufferSize);
+		odometry_to_vehicle.put(new InterpolatingDouble(now), initial_odom_to_vehicle);
+		field_to_odometry = new InterpolatingTreeMap<InterpolatingDouble, Translation2d>(kObservationBufferSize);
+		field_to_odometry.put(new InterpolatingDouble(now), getInitialFieldToOdom());
+		vehicle_velocity_measured = new Twist2d();
+		vehicle_velocity_predicted = new Twist2d();
+		vehicle_velocity_measured_filtered = new MovingAverageTwist2d(25);
+		//mLatestVisionUpdate = new Optional();
+		//mPoseAcceptor = new VisionPoseAcceptor();
+	}
+	
+
+	public synchronized void addOdometryUpdate(
+        double now, Pose2d odometry_pose, Twist2d measured_velocity, Twist2d predicted_velocity) {
+		odometry_to_vehicle.put(new InterpolatingDouble(now), odometry_pose);
+		mKalmanFilter.predict(
+				VecBuilder.fill(0.0, 0.0), Constants.kLooperDt); // Propagate error of current vision prediction
+		vehicle_velocity_measured = measured_velocity;
+		vehicle_velocity_measured_filtered.add(measured_velocity);
+		vehicle_velocity_predicted = predicted_velocity;
     }
 
 	/**
@@ -38,16 +92,18 @@ public class RobotState {
 	 * @return Initial odometry error translation.
 	 */
 	public synchronized Translation2d getInitialFieldToOdom() {
-        //TODO: actual getInitialFieldToOdom() to be implemented 
-        return null;
+        if (initial_field_to_odom.isEmpty()) return new Translation2d();
+		return initial_field_to_odom.get();
 	}
 
 	/**
 	 * @return Latest field relative robot pose.
 	 */
 	public synchronized Pose2d getLatestFieldToVehicle() {
-        //TODO: actual getLatestFieldToVehicle() to be implemented 
-        return null;
+        Pose2d odomToVehicle = getLatestOdomToVehicle().getValue();
+
+		Translation2d fieldToOdom = getLatestFieldToOdom();
+		return new Pose2d(fieldToOdom.translateBy(odomToVehicle.getTranslation()), odomToVehicle.getRotation());
 	}
 
 	/**
@@ -58,8 +114,11 @@ public class RobotState {
 	 * @return Field relative robot pose at timestamp.
 	 */
 	public synchronized Pose2d getFieldToVehicle(double timestamp) {
-        //TODO: actual getFieldToVehicle() to be implemented 
-        return null;
+        Pose2d odomToVehicle = getOdomToVehicle(timestamp);
+
+		Translation2d fieldToOdom = getFieldToOdom(timestamp);
+		return new Pose2d(fieldToOdom.translateBy(odomToVehicle.getTranslation()), odomToVehicle.getRotation());
+	
 	}
 
 	/**
@@ -70,8 +129,10 @@ public class RobotState {
 	 * @return Predcited robot pose at lookahead time.
 	 */
 	public synchronized Pose2d getPredictedFieldToVehicle(double lookahead_time) {
-        //TODO: actual getPredictedFieldToVehicle() to be implemented 
-        return null;
+        Pose2d odomToVehicle = getPredictedOdomToVehicle(lookahead_time);
+
+		Translation2d fieldToOdom = getLatestFieldToOdom();
+		return new Pose2d(fieldToOdom.translateBy(odomToVehicle.getTranslation()), odomToVehicle.getRotation());
 	}
 
 	/**
@@ -90,8 +151,7 @@ public class RobotState {
 	 * @return Odometry relative robot pose at timestamp.
 	 */
 	public synchronized Pose2d getOdomToVehicle(double timestamp) {
-        //TODO: actual getOdomToVehicle() to be implemented 
-        return null;
+        return odometry_to_vehicle.getInterpolated(new InterpolatingDouble(timestamp));
 	}
 
 	/**
@@ -102,16 +162,16 @@ public class RobotState {
 	 * @return Predcited odometry pose at lookahead time.
 	 */
 	public synchronized Pose2d getPredictedOdomToVehicle(double lookahead_time) {
-        //TODO: actual getPredictedOdomToVehicle() to be implemented 
-        return null;
+        return getLatestOdomToVehicle()
+				.getValue()
+				.transformBy(Pose2d.exp(vehicle_velocity_predicted.scaled(lookahead_time)));
 	}
 
 	/**
 	 * @return Latest odometry error translation.
 	 */
 	public synchronized Translation2d getLatestFieldToOdom() {
-        //TODO: actual getLatestFieldToOdom() to be implemented 
-        return null;
+        return getFieldToOdom(field_to_odometry.lastKey().value);
 	}
 
 	/**
@@ -120,8 +180,8 @@ public class RobotState {
 	 * @return Odometry error at timestamp.
 	 */
 	public synchronized Translation2d getFieldToOdom(double timestamp) {
-        //TODO: actual getFieldToOdom() to be implemented 
-        return null;
+        if (field_to_odometry.isEmpty()) return new Translation2d();
+		return field_to_odometry.getInterpolated(new InterpolatingDouble(timestamp));
 	}
 
 	/**
