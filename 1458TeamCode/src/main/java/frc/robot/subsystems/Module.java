@@ -7,6 +7,8 @@ import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.sim.CANcoderSimState;
+import com.ctre.phoenix6.sim.TalonFXSimState;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -14,10 +16,14 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+
 import frc.robot.lib.math.Conversions;
 import frc.robot.lib.util.SwerveModuleConstants;
 import frc.robot.Constants;
-import frc.robot.CTREConfigs;
 import frc.robot.Robot;
 
 public class Module extends Subsystem {  // Supports looper 
@@ -67,10 +73,15 @@ public class Module extends Subsystem {  // Supports looper
     /* angle motor control requests */
     private final PositionVoltage anglePosition = new PositionVoltage(0);
 
+    /* simulation */
+    // private final DifferentialDrivetrainSim mDriveSim;
+    private final DCMotorSim mDriveMotorSim;
+    private final DCMotorSim mAngleMotorSim;
+
     public Module(int moduleNumber, SwerveModuleConstants moduleConstants){
         this.moduleNumber = moduleNumber;
         this.angleOffset = moduleConstants.angleOffset;
-        
+
         /* Angle Encoder Config */
         angleEncoder = new CANcoder(moduleConstants.cancoderID, "CV");
         angleEncoder.getConfigurator().apply(Robot.ctreConfigs.swerveCANcoderConfig);
@@ -92,6 +103,10 @@ public class Module extends Subsystem {  // Supports looper
             mAngleMotor.setInverted(true);
         }
         mDriveMotor.getConfigurator().setPosition(0.0);
+
+        // For simulation
+        mDriveMotorSim = new DCMotorSim(DCMotor.getFalcon500(1), Constants.Swerve.driveGearRatio, 0.001);
+        mAngleMotorSim = new DCMotorSim(DCMotor.getFalcon500(1), Constants.Swerve.angleGearRatio, 0.001);
     }
 
 
@@ -111,7 +126,7 @@ public class Module extends Subsystem {  // Supports looper
 				mAngleMotor.getRotorPosition(), mAngleMotor.getRotorVelocity());
 		mPeriodicIO.drivePosition = mDriveMotor.getRotorPosition().getValueAsDouble();
 
-        DisplayToDahboard()
+        DisplayToDahboard();
 
 	}
 
@@ -157,14 +172,14 @@ public class Module extends Subsystem {  // Supports looper
 
     public SwerveModuleState getState(){
         return new SwerveModuleState(
-            Conversions.RPSToMPS(mDriveMotor.getVelocity().getValue(), Constants.Swerve.wheelCircumference), 
+            Conversions.RPSToMPS(mDriveMotor.getVelocity().getValue(), Constants.Swerve.wheelCircumference),
             Rotation2d.fromRotations(mAngleMotor.getPosition().getValue())
         );
     }
 
     public SwerveModulePosition getPosition(){
         return new SwerveModulePosition(
-            Conversions.rotationsToMeters(mDriveMotor.getPosition().getValue(), Constants.Swerve.wheelCircumference), 
+            Conversions.rotationsToMeters(mDriveMotor.getPosition().getValue(), Constants.Swerve.wheelCircumference),
             Rotation2d.fromRotations(mAngleMotor.getPosition().getValue())
         );
     }
@@ -176,4 +191,36 @@ public class Module extends Subsystem {  // Supports looper
        // mAngleMotor.setPosition(absolutePosition);
     }
       
+    /** Simulate one module with naive physics model. */
+    public void updateSimPeriodic() {
+        TalonFXSimState mDriveMotorSimState = mDriveMotor.getSimState();
+        TalonFXSimState mAngleMotorSimState = mAngleMotor.getSimState();
+        CANcoderSimState angleEncoderSimState = angleEncoder.getSimState();
+
+        // Pass the robot battery voltage to the simulated devices
+        mDriveMotorSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
+        mAngleMotorSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
+        angleEncoderSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
+
+        // Simulate drive
+        mDriveMotorSim.setInputVoltage(mDriveMotorSimState.getMotorVoltage());
+        mDriveMotorSim.update(TimedRobot.kDefaultPeriod);
+
+        double drivePosition = mDriveMotorSim.getAngularPositionRotations();
+        double driveVelocity = mDriveMotorSim.getAngularVelocityRadPerSec() * Constants.Swerve.wheelCircumference / (2.0 * Math.PI);
+        mDriveMotorSimState.setRawRotorPosition(drivePosition * Constants.Swerve.driveGearRatio);
+        mDriveMotorSimState.setRotorVelocity(driveVelocity * Constants.Swerve.driveGearRatio);
+
+        // Simulate steering
+        mAngleMotorSim.setInputVoltage(mAngleMotorSimState.getMotorVoltage());
+        mAngleMotorSim.update(TimedRobot.kDefaultPeriod);
+
+        double steeringPosition = mAngleMotorSim.getAngularPositionRotations();
+        double steeringVelocity = mAngleMotorSim.getAngularVelocityRadPerSec();
+        mAngleMotorSimState.setRawRotorPosition(steeringPosition * Constants.Swerve.angleGearRatio);
+        mAngleMotorSimState.setRotorVelocity(steeringVelocity * Constants.Swerve.angleGearRatio);
+
+        angleEncoderSimState.setRawPosition(steeringPosition * Constants.Swerve.angleGearRatio);
+        angleEncoderSimState.setVelocity(steeringVelocity * Constants.Swerve.angleGearRatio);
+    }
 }
