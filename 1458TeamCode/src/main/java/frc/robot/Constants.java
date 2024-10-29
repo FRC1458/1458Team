@@ -39,11 +39,17 @@ public final class Constants {
 
         /* Swerve Kinematics 
          * No need to ever change this unless you are not doing a traditional rectangular/square 4 module swerve */
-         public static final SwerveDriveKinematics swerveKinematics = new SwerveDriveKinematics(
+         public static final Translation2d[] swerveModuleLocations = {  //dc.10.28.2024, need for WheelTracker.java
             new Translation2d(wheelBase / 2.0, trackWidth / 2.0),
             new Translation2d(wheelBase / 2.0, -trackWidth / 2.0),
             new Translation2d(-wheelBase / 2.0, trackWidth / 2.0),
-            new Translation2d(-wheelBase / 2.0, -trackWidth / 2.0));
+            new Translation2d(-wheelBase / 2.0, -trackWidth / 2.0)
+         };
+         public static final SwerveDriveKinematics swerveKinematics = new SwerveDriveKinematics(
+            swerveModuleLocations[0],
+            swerveModuleLocations[1],
+            swerveModuleLocations[2],
+            swerveModuleLocations[0]);
 
         /* Module Gear Ratios */
         public static final double driveGearRatio = chosenModule.driveGearRatio;
