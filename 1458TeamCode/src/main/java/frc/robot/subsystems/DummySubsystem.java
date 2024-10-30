@@ -19,17 +19,17 @@ public class DummySubsystem extends Subsystem {
 
     @Override
 	public void readPeriodicInputs() {
-        System.out.println("Example Subsystem is reading periodic inputs");
+        //System.out.println("Example Subsystem is reading periodic inputs");
     }
 
     @Override
 	public void writePeriodicOutputs() {
-        System.out.println("Example Subsystem is writing periodic outputs");
+        //System.out.println("Example Subsystem is writing periodic outputs");
     }
 
     @Override
 	public void outputTelemetry() {
-        System.out.println("Example Subsystem is outputting telemetry");
+        //System.out.println("Example Subsystem is outputting telemetry");
     }
 
     @Override
