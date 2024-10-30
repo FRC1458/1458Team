@@ -72,11 +72,11 @@ public class SwerveDrive extends Subsystem {
 
 	private KinematicLimits mKinematicLimits = SwerveConstants.kUncappedLimits;
 
-	private static Drive mInstance;
+	private static SwerveDrive mInstance;
 
-	public static Drive getInstance() {
+	public static SwerveDrive getInstance() {
 		if (mInstance == null) {
-			mInstance = new Drive();
+			mInstance = new SwerveDrive();
 		}
 		return mInstance;
 	}
@@ -104,7 +104,7 @@ public class SwerveDrive extends Subsystem {
 	/**
 	 * Updates drivetrain with latest desired speeds from the joystick, and sets DriveControlState appropriately.
 	 *
-	 * @param speeds ChassisSpeeds object derived from joystick input.
+	 * @param speeds a robot-relative ChassisSpeeds object derived from joystick input
 	 */
 	public void feedTeleopSetpoint(ChassisSpeeds speeds) {
 		if (mControlState == DriveControlState.PATH_FOLLOWING) {
@@ -595,7 +595,7 @@ public class SwerveDrive extends Subsystem {
 	public static class PeriodicIO {
 		// Inputs/Desired States
 		double timestamp;
-		ChassisSpeeds des_chassis_speeds = new ChassisSpeeds(0.0, 0.0, 0.0);
+		ChassisSpeeds des_chassis_speeds = new ChassisSpeeds(0.0, 0.0, 0.0);//a robot-relative chassisSpeeds object
 		Twist2d measured_velocity = new Twist2d();
 		Rotation2d heading = new Rotation2d();
 		Rotation2d pitch = new Rotation2d();

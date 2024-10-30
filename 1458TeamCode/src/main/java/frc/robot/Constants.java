@@ -215,6 +215,7 @@ public final class Constants {
         public static final double angleGearRatio = Swerve.chosenModule.angleGearRatio;
         public static final double maxSpeed = Swerve.maxSpeed; 
         public static final double kV = 12 * Math.PI * wheelDiameter / (driveGearRatio * maxSpeed); //TODO: need to finetune with the actual robot
+        public static final double kCancoderBootAllowanceSeconds = 10.0;
 
         public static final KinematicLimits kUncappedLimits = new KinematicLimits();
 

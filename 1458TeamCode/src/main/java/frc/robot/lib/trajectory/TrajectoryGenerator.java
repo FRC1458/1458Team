@@ -12,8 +12,8 @@ public class TrajectoryGenerator {
     private TrajectorySet mTrajectorySet = null;
 
     public class TrajectorySet {
-		public final Trajectory testTrajectory = loadTrajectory("./PathWeaver/output/Path1.json");
-		public final Trajectory testTrajectory2 = loadTrajectory("./PathWeaver/output/Path1.json");
+		public final Trajectory testTrajectory = loadTrajectory("./PathWeaver/output/Path1.json");  //TODO: update with right path of the test json file here. 
+		public final Trajectory testTrajectory2 = loadTrajectory("./PathWeaver/output/Path1.json"); //TODO: update with right path of the test json file here. 
         /* dc.10.21.2024, additional trajectory can be added similar to the TestTrajectory */
 
         private Trajectory loadTrajectory (String sJsonFile){
