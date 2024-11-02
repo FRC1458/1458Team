@@ -238,10 +238,11 @@ public final class Constants {
             config.Slot0.kV = 0.0;
 
             config.CurrentLimits.StatorCurrentLimitEnable = true;
-            config.CurrentLimits.StatorCurrentLimit = 80;
+            config.CurrentLimits.StatorCurrentLimit = Swerve.driveCurrentLimit;//80;
 
             config.CurrentLimits.SupplyCurrentLimitEnable = true;
-            config.CurrentLimits.SupplyCurrentLimit = 60;
+            config.CurrentLimits.SupplyCurrentLimit = Swerve.driveCurrentLimit;//60;
+            config.CurrentLimits.SupplyCurrentThreshold = Swerve.driveCurrentThreshold;//add this to limit current spiking 
             config.CurrentLimits.SupplyTimeThreshold = 0.2;
 
             config.Voltage.PeakForwardVoltage = 12.0;
@@ -262,10 +263,11 @@ public final class Constants {
 			config.Slot0.kV = 12 * Math.PI * wheelDiameter / (driveGearRatio * maxSpeed);
 
 			config.CurrentLimits.StatorCurrentLimitEnable = true;
-			config.CurrentLimits.StatorCurrentLimit = 110;
+			config.CurrentLimits.StatorCurrentLimit = Swerve.driveCurrentLimit;//citrus code value = 110;
 
 			config.CurrentLimits.SupplyCurrentLimitEnable = true;
-			config.CurrentLimits.SupplyCurrentLimit = 90;
+			config.CurrentLimits.SupplyCurrentLimit = Swerve.driveCurrentLimit;//citrus value = 90;
+            config.CurrentLimits.SupplyCurrentThreshold = Swerve.driveCurrentThreshold;//add this to limit current spiking 
 			config.CurrentLimits.SupplyTimeThreshold = 0.5;
 
 			config.Voltage.PeakForwardVoltage = 12.0;
@@ -273,8 +275,8 @@ public final class Constants {
 
 			config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
-			config.OpenLoopRamps.DutyCycleOpenLoopRampPeriod = 0.25;
-			config.OpenLoopRamps.VoltageOpenLoopRampPeriod = 0.25;
+			config.OpenLoopRamps.DutyCycleOpenLoopRampPeriod = Swerve.openLoopRamp;
+			config.OpenLoopRamps.VoltageOpenLoopRampPeriod = Swerve.openLoopRamp;
 			return config;
 		}
 
