@@ -1,0 +1,143 @@
+{
+  "HALProvider": {
+    "Other Devices": {
+      "CANCoder (v6)[0]": {
+        "header": {
+          "open": true
+        }
+      },
+      "CANCoder (v6)[1]": {
+        "header": {
+          "open": true
+        }
+      },
+      "CANCoder (v6)[6]": {
+        "header": {
+          "open": true
+        }
+      },
+      "CANCoder (v6)[7]": {
+        "header": {
+          "open": true
+        }
+      },
+      "Pigeon 2 (v6)[20]": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon FX (v6)[10]": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon FX (v6)[10]/Rotor Sensor": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon FX (v6)[11]": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon FX (v6)[2]": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon FX (v6)[3]": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon FX (v6)[5]": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon FX (v6)[8]": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon FX (v6)[8]/Rotor Sensor": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon FX (v6)[9]": {
+        "header": {
+          "open": true
+        }
+      }
+    }
+  },
+  "NTProvider": {
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Arm": "Mechanism2d",
+      "/SmartDashboard/Elevator": "Mechanism2d",
+      "/SmartDashboard/Elevator Sim": "Mechanism2d",
+      "/SmartDashboard/Field": "Field2d",
+      "/SmartDashboard/TeleopSwerveCmd": "Command"
+    },
+    "windows": {
+      "/SmartDashboard/Arm": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Elevator": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Field": {
+        "bottom": 544,
+        "builtin": "2024 Crescendo",
+        "height": 8.013679504394531,
+        "left": 46,
+        "right": 1088,
+        "top": 36,
+        "width": 16.541748046875,
+        "window": {
+          "visible": true
+        }
+      }
+    }
+  },
+  "NetworkTables": {
+    "Retained Values": {
+      "open": false
+    },
+    "transitory": {
+      "SmartDashboard": {
+        "Field": {
+          "double[]##v_/SmartDashboard/Field/Robot": {
+            "open": true
+          },
+          "double[]##v_/SmartDashboard/Field/traj": {
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
+      }
+    }
+  },
+  "NetworkTables Info": {
+    "Clients": {
+      "open": true
+    },
+    "Connections": {
+      "open": true
+    },
+    "Server": {
+      "Publishers": {
+        "open": true
+      }
+    },
+    "visible": true
+  }
+}
