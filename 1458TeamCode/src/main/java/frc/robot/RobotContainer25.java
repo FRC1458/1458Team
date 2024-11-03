@@ -178,12 +178,10 @@ public class RobotContainer25 {
             double translationVal = MathUtil.applyDeadband(m_JoyStick.getRawAxis(translationAxis), Constants.stickDeadband);
             double strafeVal = MathUtil.applyDeadband(m_JoyStick.getRawAxis(strafeAxis), Constants.stickDeadband);
             double rotationVal = MathUtil.applyDeadband(m_JoyStick.getRawAxis(rotationAxis), Constants.stickDeadband);
-            if (Math.abs(translationVal)>Util.kEpsilon || Math.abs(strafeVal)> Util.kEpsilon || Math.abs(rotationVal)>Util.kEpsilon ){
 //                System.out.println("DC: manualModePeriodc() translationVal=" + translationVal + ", StrafeVal=" + strafeVal + ", rotationVal=" + rotationVal);
                 m_SwerveDrive.feedTeleopSetpoint(ChassisSpeeds.fromFieldRelativeSpeeds(
                     translationVal, strafeVal, rotationVal,
                     Util.robotToFieldRelative(m_SwerveDrive.getHeading(), is_red_alliance)));
-            }            
 
 //			mDriverControls.oneControllerMode();
 

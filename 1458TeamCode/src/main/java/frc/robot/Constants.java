@@ -231,9 +231,9 @@ public final class Constants {
         public static TalonFXConfiguration AzimuthFXConfig() {
             TalonFXConfiguration config = new TalonFXConfiguration();
 
-            config.Slot0.kP = 1.0005;
+            config.Slot0.kP = .3;
             config.Slot0.kI = 0.0;
-            config.Slot0.kD = 0.0004;
+            config.Slot0.kD = 0.0008;
             config.Slot0.kS = 0.0;
             config.Slot0.kV = 0.0;
 
@@ -258,7 +258,7 @@ public final class Constants {
 
 			config.Slot0.kP = 0.030 * 12.0;
 			config.Slot0.kI = 0.0;
-			config.Slot0.kD = 0.000001 * 12.0;
+			config.Slot0.kD = 0.000000 * 12.0;
 			config.Slot0.kS = 0.1;
 			config.Slot0.kV = 12 * Math.PI * wheelDiameter / (driveGearRatio * maxSpeed);
 
