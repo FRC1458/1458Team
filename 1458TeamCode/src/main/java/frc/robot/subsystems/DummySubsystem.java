@@ -37,17 +37,17 @@ public class DummySubsystem extends Subsystem {
         enabledLooper.register(new Loop() {
 			@Override
 			public void onStart(double timestamp) {
-				System.out.println("loop has started");
+				//System.out.println("DummySubsystem loop has started");
 			}
 
 			@Override
 			public void onLoop(double timestamp) {
-                System.out.println("on looped");
+                //System.out.println("on looped");
 			}
 
 			@Override
 			public void onStop(double timestamp) {
-				System.out.println("loop has stopped");
+				//System.out.println("DummySubsystem loop has stopped");
             }
 		});
     }
