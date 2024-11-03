@@ -35,6 +35,7 @@ import frc.robot.lib.trajectory.TrajectoryIterator;
 //TODO:import com.team254.lib.trajectory.TimedView;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.Trajectory.State;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -475,8 +476,18 @@ public class SwerveDrive extends Subsystem {
 					prev_chassis_speeds.vxMetersPerSecond + dx * min_translational_scalar,
 					prev_chassis_speeds.vyMetersPerSecond + dy * min_translational_scalar,
 					prev_chassis_speeds.omegaRadiansPerSecond + domega * min_omega_scalar);
-		}
 
+			{//publish wanted_speed to NetworkTable, plot them in SIM GUI to verify motion profile used by TalonFx motor
+				//TODO: clean up at production release
+				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisSpeed/vxMPS").setDouble(wanted_speeds.vxMetersPerSecond);
+				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisSpeed/vyMPS").setDouble(wanted_speeds.vyMetersPerSecond);
+				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisSpeed/omegaRPS").setDouble(wanted_speeds.omegaRadiansPerSecond);
+				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisAccel/vxMPSS").setDouble(dx * min_translational_scalar);
+				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisAccel/vyMPSS").setDouble(dy * min_translational_scalar);
+				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisAccel/omegaRPSS").setDouble(domega * min_omega_scalar);
+			}
+		}
+		
 		SwerveModuleState[] real_module_setpoints = SwerveConstants.kKinematics.toSwerveModuleStates(wanted_speeds);
 		SwerveDriveKinematics.desaturateWheelSpeeds(real_module_setpoints, Constants.SwerveConstants.maxSpeed);
 
