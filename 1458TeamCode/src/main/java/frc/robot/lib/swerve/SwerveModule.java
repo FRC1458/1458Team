@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 //dc.10.21.2024, replace citrus SwerveModuleState with WPILIB version, the same practice as other Victor & Shaji
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 
@@ -42,6 +43,8 @@ public class SwerveModule extends Subsystem {
 	private BaseStatusSignal[] mSignals = new BaseStatusSignal[4];
 
 	private mPeriodicIO mPeriodicIO = new mPeriodicIO();
+	
+	private int mCounter=0;//TODO: code for debug, to be removed 
 
 	public static class mPeriodicIO {
 		// Inputs
@@ -76,9 +79,9 @@ public class SwerveModule extends Subsystem {
 				mDriveMotor.getConfigurator().apply(SwerveConstants.DriveFXConfig(), Constants.kLongCANTimeoutMs));
 		mDriveMotor.setInverted(SwerveConstants.driveMotorInvert);
 		mDriveMotor.setPosition(0.0);
-
+		
 		resetToAbsolute();
-
+		
 		mSignals[0] = mDriveMotor.getRotorPosition();
 		mSignals[1] = mDriveMotor.getRotorVelocity();
 		mSignals[2] = mAngleMotor.getRotorPosition();
@@ -89,10 +92,29 @@ public class SwerveModule extends Subsystem {
 	public synchronized void readPeriodicInputs() {
 		mPeriodicIO.timestamp = Timer.getFPGATimestamp();
 		refreshSignals();
+
+		//check drive motor's current and voltage and publish to NetworkTable, plot them in SIM GUI to verify motion profile used by TalonFx motor
+		//TODO: clean up at production release
+		double statorCurrent = mDriveMotor.getStatorCurrent().getValueAsDouble();
+		double motorVoltage = mDriveMotor.getMotorVoltage().getValueAsDouble();
+		NetworkTableInstance.getDefault().getEntry("/Telemetry/Module#" + kModuleNumber +"/DriveMotor/Voltage").setDouble(motorVoltage);
+		NetworkTableInstance.getDefault().getEntry("/Telemetry/Module#" + kModuleNumber +"/DriveMotor/Current").setDouble(statorCurrent);
+		
+		//TODO: verify the velocity signal reading on the real robots via printout. GetRotorVelocity() in WPILIB simulation environment always return zero.
+		if (mCounter++ >50) {	// once per second
+			mCounter =0;
+			if (kModuleNumber==1){	//only print one motor
+				//check drive motor's velocity and position 
+//				System.out.println("DC:Module#" +kModuleNumber+", actual velocity is "+ mPeriodicIO.driveVelocity + "m/s" );
+//				System.out.println("DC:Module#" +kModuleNumber+", drivePosition is "+ mPeriodicIO.drivePosition + "m, rotationPosition is " + mPeriodicIO.rotationPosition );
+//				System.out.println("DC:Module#" +kModuleNumber+" statorCurr=" + statorCurrent +"A, motorBusVoltage=" + motorVoltage + "V" );
+			}
+		}
 	}
 
 	public synchronized void refreshSignals() {
-		mPeriodicIO.rotationVelocity = mAngleMotor.getRotorVelocity().getValue();
+		//TODO: might need to add call to StatusSignal.refresh() for each signal in reading before get value
+ 		mPeriodicIO.rotationVelocity = mAngleMotor.getRotorVelocity().getValue();
 		mPeriodicIO.driveVelocity = mDriveMotor.getRotorVelocity().getValue();
 
 		mPeriodicIO.rotationPosition = BaseStatusSignal.getLatencyCompensatedValue(
