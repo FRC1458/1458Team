@@ -38,6 +38,7 @@ import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +54,7 @@ public class SwerveDrive extends Subsystem {
 	}
 
 	private WheelTracker mWheelTracker;
+	private final Field2d m_field = new Field2d();
 	private Pigeon mPigeon = Pigeon.getInstance();
 	public SwerveModule[] mModules;
 
@@ -96,6 +98,8 @@ public class SwerveDrive extends Subsystem {
 
 		mPigeon.setYaw(0.0);
 		mWheelTracker = new WheelTracker(mModules);
+
+		SmartDashboard.putData("Field", m_field);
 	}
 
 	public void setKinematicLimits(KinematicLimits newLimits) {
@@ -236,6 +240,7 @@ public class SwerveDrive extends Subsystem {
 									mWheelTracker.getRobotPose(),
 									mPeriodicIO.measured_velocity,
 									mPeriodicIO.predicted_velocity);
+					m_field.setRobotPose(mWheelTracker.getRobotPose());
 				}
 			}
 

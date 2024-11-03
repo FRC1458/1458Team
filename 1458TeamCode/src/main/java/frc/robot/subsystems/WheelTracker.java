@@ -89,6 +89,7 @@ public class WheelTracker {
 					updateRobotPose(Timer.getFPGATimestamp());
 				} catch (Exception e) {
 					e.printStackTrace();
+					System.out.println("Failed, see above error");
 				}
 			}
 		}
