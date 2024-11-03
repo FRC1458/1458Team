@@ -40,6 +40,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.util.ArrayList;
 import java.util.List;
+import frc.robot.lib.util.InterpolatingPose2d;
 
 public class SwerveDrive extends Subsystem {
 
@@ -232,7 +233,7 @@ public class SwerveDrive extends Subsystem {
 					RobotState.getInstance()
 							.addOdometryUpdate(
 									timestamp,
-									mWheelTracker.getRobotPose(),
+									new InterpolatingPose2d(mWheelTracker.getRobotPose()),
 									mPeriodicIO.measured_velocity,
 									mPeriodicIO.predicted_velocity);
 				}
