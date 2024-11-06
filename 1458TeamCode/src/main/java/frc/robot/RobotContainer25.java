@@ -176,7 +176,7 @@ public class RobotContainer25 {
 //				mDrive.resetOdometry(new Pose2d());
 //			}
             double translationVal = MathUtil.applyDeadband(m_JoyStick.getRawAxis(translationAxis), Constants.stickDeadband);
-            double strafeVal = MathUtil.applyDeadband(m_JoyStick.getRawAxis(strafeAxis), Constants.stickDeadband);
+            double strafeVal = -MathUtil.applyDeadband(m_JoyStick.getRawAxis(strafeAxis), Constants.stickDeadband);
             double rotationVal = MathUtil.applyDeadband(m_JoyStick.getRawAxis(rotationAxis), Constants.stickDeadband);
 //                System.out.println("DC: manualModePeriodc() translationVal=" + translationVal + ", StrafeVal=" + strafeVal + ", rotationVal=" + rotationVal);
                 m_SwerveDrive.feedTeleopSetpoint(ChassisSpeeds.fromFieldRelativeSpeeds(
