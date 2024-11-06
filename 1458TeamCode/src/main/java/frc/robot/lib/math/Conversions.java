@@ -1,5 +1,7 @@
 package frc.robot.lib.math;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+
 public class Conversions {
     
     /**

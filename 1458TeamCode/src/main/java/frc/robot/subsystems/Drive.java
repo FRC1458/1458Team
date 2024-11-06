@@ -2,7 +2,8 @@ package frc.robot.subsystems;
 
 
 import frc.robot.Constants;
-
+import frc.robot.Constants.SwerveConstants;
+import frc.robot.subsystems.SwerveDrive.KinematicLimits;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
@@ -22,6 +23,9 @@ public class Drive extends SubsystemBase {
     public SwerveDriveOdometry swerveOdometry;
     public Module[] mSwerveMods;
     public Pigeon2 gyro;
+    private static Drive mInstance;
+    private KinematicLimits mKinematicLimits = SwerveConstants.kUncappedLimits;
+
 
     public Drive() {
         gyro = new Pigeon2(Constants.Swerve.pigeonID, "CV");
@@ -132,5 +136,20 @@ public class Drive extends SubsystemBase {
             SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Angle", ((mod.mAngleMotor.getPosition().getValue() * 360) % 360 + 360) % 360); // This is super specific, don't break this pls
 //            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);
         }
+    }
+
+	public static Drive getInstance() {
+		if (mInstance == null) {
+			mInstance = new Drive();
+		}
+		return mInstance;
+	}
+
+	public void setKinematicLimits(KinematicLimits newLimits) {
+		this.mKinematicLimits = newLimits;
+	}
+
+    public KinematicLimits getKinematicLimits() {
+        return mKinematicLimits;
     }
 }

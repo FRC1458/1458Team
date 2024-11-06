@@ -219,6 +219,10 @@ public final class Constants {
 			kUncappedLimits.kMaxAngularAccel = Double.MAX_VALUE;
 		}
 
+        public static final boolean invertYAxis = false;
+		public static final boolean invertRAxis = false;
+		public static final boolean invertXAxis = false;
+
         /* TalonFx module constants*/
         
         public static TalonFXConfiguration AzimuthFXConfig() {

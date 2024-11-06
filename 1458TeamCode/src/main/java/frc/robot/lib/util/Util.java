@@ -258,6 +258,4 @@ dc.10.21.2024 commented out because wpilib Rotation2d misses .distance () method
 				&& Util.epsilonEquals(speed1.vyMetersPerSecond, other.vyMetersPerSecond, epsilon)
 				&& Util.epsilonEquals(speed1.omegaRadiansPerSecond, other.omegaRadiansPerSecond, epsilon);
 	}
-
-
 }
