@@ -68,8 +68,8 @@ public final class Constants {
         public static final double angleCurrentThresholdTime = 0.1;
         public static final boolean angleEnableCurrentLimit = true;
 
-        public static final int driveCurrentLimit = 60;
-        public static final int driveCurrentThreshold = 90;
+        public static final int driveCurrentLimit = 30; //dc.11.9.24 reduce max current per motor, total current needs to time motor-count(8)
+        public static final int driveCurrentThreshold = 45; 
         public static final double driveCurrentThresholdTime = 0.1;
         public static final boolean driveEnableCurrentLimit = true;
 
@@ -96,7 +96,7 @@ public final class Constants {
 
         /* Swerve Profiling Values */
         /** Meters per Second */
-        public static final double maxSpeed = .5; //TODO: This must be tuned to specific robot
+        public static final double maxSpeed = 5.2; //TODO: dc 11.9.24, increase max speed so that we can observe amplified drivetrain bahavior 
         /** Radians per Second */
         public static final double maxAngularVelocity = 10.0; //TODO: This must be tuned to specific robot
 
@@ -222,6 +222,7 @@ public final class Constants {
         public static final double driveGearRatio = Swerve.chosenModule.driveGearRatio;//?? Constants.isEpsilon ? 5.82 : 5.82; 
         public static final double angleGearRatio = Swerve.chosenModule.angleGearRatio;
         public static final double maxSpeed = Swerve.maxSpeed; 
+        public static final double maxAngularVelocity = Swerve.maxAngularVelocity;
         public static final double kV = 12 * Math.PI * wheelDiameter / (driveGearRatio * maxSpeed); //TODO: need to finetune with the actual robot
         public static final double kCancoderBootAllowanceSeconds = 10.0;
 
