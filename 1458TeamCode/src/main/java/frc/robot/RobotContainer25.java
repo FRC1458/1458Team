@@ -175,9 +175,10 @@ public class RobotContainer25 {
 //				mDrive.resetModulesToAbsolute();
 //				mDrive.resetOdometry(new Pose2d());
 //			}
-            double translationVal = MathUtil.applyDeadband(m_JoyStick.getRawAxis(translationAxis), Constants.stickDeadband);
-            double strafeVal = -MathUtil.applyDeadband(m_JoyStick.getRawAxis(strafeAxis), Constants.stickDeadband);
-            double rotationVal = MathUtil.applyDeadband(m_JoyStick.getRawAxis(rotationAxis), Constants.stickDeadband);
+            //dc.11.9.24, to scale up joystick input to max-speed
+            double translationVal = MathUtil.applyDeadband(m_JoyStick.getRawAxis(translationAxis), Constants.stickDeadband)*Constants.SwerveConstants.maxSpeed; 
+            double strafeVal = -MathUtil.applyDeadband(m_JoyStick.getRawAxis(strafeAxis), Constants.stickDeadband)*Constants.SwerveConstants.maxSpeed;
+            double rotationVal = MathUtil.applyDeadband(m_JoyStick.getRawAxis(rotationAxis), Constants.stickDeadband)* Constants.Swerve.maxAngularVelocity;  
 //                System.out.println("DC: manualModePeriodc() translationVal=" + translationVal + ", StrafeVal=" + strafeVal + ", rotationVal=" + rotationVal);
                 m_SwerveDrive.feedTeleopSetpoint(ChassisSpeeds.fromFieldRelativeSpeeds(
                     translationVal, strafeVal, rotationVal,
