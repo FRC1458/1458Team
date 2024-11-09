@@ -477,10 +477,11 @@ public class SwerveDrive extends Subsystem {
 					prev_chassis_speeds.vyMetersPerSecond + dy * min_translational_scalar,
 					prev_chassis_speeds.omegaRadiansPerSecond + domega * min_omega_scalar);
 
-			{//publish wanted_speed to NetworkTable, plot them in SIM GUI to verify motion profile used by TalonFx motor
+			{//publish wanted_speed (chassis speed) to NetworkTable, plot them in SIM GUI to verify motion profile used by TalonFx motor
 				//TODO: clean up at production release
 				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisSpeed/vxMPS").setDouble(wanted_speeds.vxMetersPerSecond);
 				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisSpeed/vyMPS").setDouble(wanted_speeds.vyMetersPerSecond);
+				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisSpeed/desOmegaRPS").setDouble(mPeriodicIO.des_chassis_speeds.omegaRadiansPerSecond);
 				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisSpeed/omegaRPS").setDouble(wanted_speeds.omegaRadiansPerSecond);
 				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisAccel/vxMPSS").setDouble(dx * min_translational_scalar);
 				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisAccel/vyMPSS").setDouble(dy * min_translational_scalar);
