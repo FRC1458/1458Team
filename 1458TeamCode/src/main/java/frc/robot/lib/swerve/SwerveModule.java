@@ -63,7 +63,7 @@ public class SwerveModule extends Subsystem {
 	//dc.10.25.2024 replace citrus SwerveModuleConstants with our own. Just need to angleOffset.getRadians, and disregard CancoderID
 	public SwerveModule(int moduleNumber, SwerveModuleConstants moduleConstants, CANcoder cancoder) {
 		this.kModuleNumber = moduleNumber;
-		kAngleOffset = moduleConstants.angleOffset.getRadians();	//kAngleOffset is in radians
+		kAngleOffset = moduleConstants.angleOffset.getDegrees();	//kAngleOffset is in radians
 
 		angleEncoder = cancoder;
 
@@ -71,13 +71,13 @@ public class SwerveModule extends Subsystem {
 		mAngleMotor = new TalonFX(moduleConstants.angleMotorID, "CV");
 		Phoenix6Util.checkErrorAndRetry(() ->
 				mAngleMotor.getConfigurator().apply(SwerveConstants.AzimuthFXConfig(), Constants.kLongCANTimeoutMs));
-		mAngleMotor.setInverted(SwerveConstants.angleMotorInvert);
+		mAngleMotor.setInverted(moduleConstants.angleInvert);
 
 		// Drive motor config
 		mDriveMotor = new TalonFX(moduleConstants.driveMotorID, "CV");
 		Phoenix6Util.checkErrorAndRetry(() ->
 				mDriveMotor.getConfigurator().apply(SwerveConstants.DriveFXConfig(), Constants.kLongCANTimeoutMs));
-		mDriveMotor.setInverted(SwerveConstants.driveMotorInvert);
+		mDriveMotor.setInverted(moduleConstants.driveInvert);
 		mDriveMotor.setPosition(0.0);
 		
 		resetToAbsolute();
