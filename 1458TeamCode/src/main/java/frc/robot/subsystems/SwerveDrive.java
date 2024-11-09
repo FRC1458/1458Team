@@ -484,6 +484,8 @@ public class SwerveDrive extends Subsystem {
 
 			{//publish wanted_speed (chassis speed) to NetworkTable, plot them in SIM GUI to verify motion profile used by TalonFx motor
 				//TODO: clean up at production release
+				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisSpeed/desVx").setDouble(mPeriodicIO.des_chassis_speeds.vxMetersPerSecond);
+				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisSpeed/desVy").setDouble(mPeriodicIO.des_chassis_speeds.vyMetersPerSecond);
 				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisSpeed/vxMPS").setDouble(wanted_speeds.vxMetersPerSecond);
 				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisSpeed/vyMPS").setDouble(wanted_speeds.vyMetersPerSecond);
 				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisSpeed/desOmegaRPS").setDouble(mPeriodicIO.des_chassis_speeds.omegaRadiansPerSecond);
@@ -686,7 +688,7 @@ public class SwerveDrive extends Subsystem {
 		return false;
 	}
 
-	public static class KinematicLimits {
+	public static class KinematicLimits {//TODO: dc.11/9/24, to be merged into global constants. 
 		public double kMaxDriveVelocity = Constants.SwerveConstants.maxSpeed; // m/s
 		public double kMaxAccel = Double.MAX_VALUE; // m/s^2
 		public double kMaxAngularVelocity = Constants.Swerve.maxAngularVelocity; // rad/s
