@@ -38,7 +38,7 @@ public class RobotContainer25 {
     private final int strafeAxis = XboxController.Axis.kLeftX.value;
     private final int rotationAxis = XboxController.Axis.kRightX.value;
     /* JoyStick Buttons */
-    private final JoystickButton zeroGyro = new JoystickButton(m_JoyStick, XboxController.Button.kY.value);
+    private final JoystickButton m_btnZeroGyro = new JoystickButton(m_JoyStick, XboxController.Button.kY.value);
     private final JoystickButton robotCentric = new JoystickButton(m_JoyStick, XboxController.Button.kLeftBumper.value);//TODO: how to drive if not robot-centric?
 
     /* loop framework objects*/
@@ -55,8 +55,8 @@ public class RobotContainer25 {
         try{
             //get instance of subsystems
             m_ExampleSubsystem = DummySubsystem.getInstance();
+            m_Cancoders = Cancoders.getInstance();//Cancoders shall be initialized before SwerveDrive as Cancoders are used by Module constructor and initialization code
             m_SwerveDrive = SwerveDrive.getInstance();
-            m_Cancoders = Cancoders.getInstance();
 
             // init cancoders 
             if (Robot.isReal()) {
@@ -106,7 +106,8 @@ public class RobotContainer25 {
      * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void bindSingleButtonCmds() {
-        // zeroGyro.onTrue(new InstantCommand(() -> m_SwerveDrive.zeroHeading())); //TODO: zeroGyro() vs zeroHeading()? check with victor
+        System.out.println("-->binding single button commands");
+        m_btnZeroGyro.onTrue(new InstantCommand(() -> m_SwerveDrive.straightenAllWheels())); //TODO: zeroGyro() vs zeroHeading()? check with victor
         // additional command bindings for single-event buttons        
     }
     
@@ -121,7 +122,8 @@ public class RobotContainer25 {
     public void initManualMode (){
    		try {
 //          RobotState.getInstance().setIsInAuto(false);
-			m_SwerveDrive.feedTeleopSetpoint(new ChassisSpeeds(0.0, 0.0, 0.0));
+            System.out.println("InitManualMode called");
+ 			m_SwerveDrive.feedTeleopSetpoint(new ChassisSpeeds(0.0, 0.0, 0.0));
             switchOnLooper(m_EnabledLooper, m_DisabledLooper);
 		} catch (Throwable t) {
 //			CrashTracker.logThrowableCrash(t);
@@ -154,6 +156,8 @@ public class RobotContainer25 {
     // init manual (teleop) mode
     public void initTestMode (){
         try {
+            System.out.println("InitTestMode called");
+            m_SwerveDrive.straightenAllWheels();
             m_DisabledLooper.stop();
             m_EnabledLooper.stop();
 		} catch (Throwable t) {
