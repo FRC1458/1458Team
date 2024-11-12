@@ -63,8 +63,8 @@ public final class Constants {
         public static final SensorDirectionValue cancoderInvert = chosenModule.cancoderInvert;
 
         /* Swerve Current Limiting */
-        public static final int angleCurrentLimit = 25;
-        public static final int angleCurrentThreshold = 40;
+        public static final int angleCurrentLimit = 20;
+        public static final int angleCurrentThreshold = 30;
         public static final double angleCurrentThresholdTime = 0.1;
         public static final boolean angleEnableCurrentLimit = true;
 
@@ -110,7 +110,7 @@ public final class Constants {
             public static final int driveMotorID = 8;
             public static final int angleMotorID = 10;
             public static final int canCoderID = 7;
-            public static final Rotation2d angleOffset = Rotation2d.fromRotations(0.644);
+            public static final Rotation2d angleOffset = Rotation2d.fromRotations(0.1521);
             public static final boolean isDriveInverted = true;
             public static final boolean isAngleInverted = false;
             public static final SwerveModuleConstants constants = 
@@ -122,9 +122,9 @@ public final class Constants {
             public static final int driveMotorID = 9;
             public static final int angleMotorID = 11;
             public static final int canCoderID = 6;
-            public static final boolean isDriveInverted = false;
+            public static final boolean isDriveInverted = true;
             public static final boolean isAngleInverted = false;
-            public static final Rotation2d angleOffset = Rotation2d.fromRotations(0.426);
+            public static final Rotation2d angleOffset = Rotation2d.fromRotations(0.4243);
             public static final SwerveModuleConstants constants = 
                 new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset, isDriveInverted, isAngleInverted);
         }
@@ -136,7 +136,7 @@ public final class Constants {
             public static final int canCoderID = 0;
             public static final boolean isDriveInverted = true;
             public static final boolean isAngleInverted = false;
-            public static final Rotation2d angleOffset = Rotation2d.fromRotations(0.666);
+            public static final Rotation2d angleOffset = Rotation2d.fromRotations(0.1643);
             public static final SwerveModuleConstants constants = 
                 new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset, isDriveInverted, isAngleInverted);
         }
@@ -148,7 +148,7 @@ public final class Constants {
             public static final int canCoderID = 1;
             public static final boolean isDriveInverted = false;
             public static final boolean isAngleInverted = false;
-            public static final Rotation2d angleOffset = Rotation2d.fromRotations(0.913);
+            public static final Rotation2d angleOffset = Rotation2d.fromRotations(0.4148);
             public static final SwerveModuleConstants constants =
                 new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset, isDriveInverted, isAngleInverted);
         }
@@ -247,12 +247,12 @@ public final class Constants {
             config.Slot0.kV = 0.0;
 
             config.CurrentLimits.StatorCurrentLimitEnable = true;
-            config.CurrentLimits.StatorCurrentLimit = Swerve.driveCurrentLimit;//80;
+            config.CurrentLimits.StatorCurrentLimit = Swerve.angleCurrentLimit;//80;
 
             config.CurrentLimits.SupplyCurrentLimitEnable = true;
-            config.CurrentLimits.SupplyCurrentLimit = Swerve.driveCurrentLimit;//60;
-            config.CurrentLimits.SupplyCurrentThreshold = Swerve.driveCurrentThreshold;//add this to limit current spiking 
-            config.CurrentLimits.SupplyTimeThreshold = 0.2;
+            config.CurrentLimits.SupplyCurrentLimit = Swerve.angleCurrentLimit;//60;
+            config.CurrentLimits.SupplyCurrentThreshold = Swerve.angleCurrentThreshold;//add this to limit current spiking 
+            config.CurrentLimits.SupplyTimeThreshold = Swerve.angleCurrentThresholdTime;
 
             config.Voltage.PeakForwardVoltage = 12.0;
             config.Voltage.PeakReverseVoltage = -12.0;
