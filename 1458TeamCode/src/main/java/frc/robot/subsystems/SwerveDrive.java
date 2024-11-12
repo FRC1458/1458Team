@@ -511,6 +511,12 @@ public class SwerveDrive extends Subsystem {
 		}
 	}
 
+	public void straightenAllWheels() {
+		for (SwerveModule module : mModules) {
+			module.straightenWheel();
+		}
+	}
+
 	/* 
 //dc.zeroReference
 	public void zeroGyro() {
