@@ -38,6 +38,7 @@ public class RobotContainer {
     private final Drive s_Swerve = new Drive();
     private final Elevator m_elevator = new Elevator();
     private final Intake m_intake = new Intake();
+    private final VisionSystem visionSystem = new VisionSystem(() -> s_Swerve.getPose());
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {

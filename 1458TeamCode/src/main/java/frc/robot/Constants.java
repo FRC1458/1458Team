@@ -5,7 +5,10 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
@@ -188,7 +191,15 @@ public final class Constants {
           public static final double simMOI = 0.01; // kgMetersSquared
           public static final double angularVelocityScalar = 0.03;
         }
-      }
+    }
+
+    public class Transforms {
+        public static Transform3d robotToCamera =
+            new Transform3d(
+                new Translation3d(0, 0, 0.5), // Centered on the robot, 0.5m up
+                new Rotation3d(0, Math.toRadians(-15), 0)); // Pitched 15 deg up
+    }
+
 
     public static final class AutoConstants { //TODO: The below constants are used in the example auto, and must be tuned to specific robot
         public static final double kMaxSpeedMetersPerSecond = 1;
