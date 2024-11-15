@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -92,7 +93,7 @@ public class RobotContainer25 {
             m_SwerveDrive.setNeutralBrake(true);
 
             //binds single-button events 
-            bindSingleButtonCmds ();
+//            bindSingleButtonCmds ();
 		} catch (Throwable t) {
 			//CrashTracker.logThrowableCrash(t);    //TODO: CrashTracker needs to be ported. to log crash/exception
 			throw t;
@@ -107,7 +108,7 @@ public class RobotContainer25 {
      */
     private void bindSingleButtonCmds() {
         System.out.println("-->binding single button commands");
-        m_btnZeroGyro.onTrue(new InstantCommand(() -> m_SwerveDrive.straightenAllWheels())); //TODO: zeroGyro() vs zeroHeading()? check with victor
+//        m_btnZeroGyro.onTrue(new InstantCommand(() -> m_SwerveDrive.resetModulesToAbsolute())); //TODO: zeroGyro() vs zeroHeading()? check with victor
         // additional command bindings for single-event buttons        
     }
     
@@ -157,7 +158,9 @@ public class RobotContainer25 {
     public void initTestMode (){
         try {
             System.out.println("InitTestMode called");
-            m_SwerveDrive.straightenAllWheels();
+//            m_SwerveDrive.straightenAllWheels();
+//            try{Thread.sleep(3000);}catch(Exception e){}
+//            m_SwerveDrive.testSwerve();
             m_DisabledLooper.stop();
             m_EnabledLooper.stop();
 		} catch (Throwable t) {
@@ -172,21 +175,23 @@ public class RobotContainer25 {
 //			mControlBoard.update();
 
 			/* Drive */
-//			if (mControlBoard.zeroGyro()) {
-//				System.out.println("Zeroing gyro!");
+//			if (m_JoyStick.getRawButton(XboxController.Button.kY.value)) {
+//				System.out.println("keyY is pressed, zero the wheels!");
 //				mDrive.zeroGyro(FieldLayout.handleAllianceFlip(new Rotation2d(), is_red_alliance)
 //						.getDegrees());
-//				mDrive.resetModulesToAbsolute();
+//				m_SwerveDrive.resetModulesToAbsolute();
 //				mDrive.resetOdometry(new Pose2d());
-//			}
-            //dc.11.9.24, to scale up joystick input to max-speed
-            double translationVal = MathUtil.applyDeadband(m_JoyStick.getRawAxis(translationAxis), Constants.stickDeadband)*Constants.SwerveConstants.maxSpeed; 
-            double strafeVal = -MathUtil.applyDeadband(m_JoyStick.getRawAxis(strafeAxis), Constants.stickDeadband)*Constants.SwerveConstants.maxSpeed;
-            double rotationVal = MathUtil.applyDeadband(m_JoyStick.getRawAxis(rotationAxis), Constants.stickDeadband)* Constants.Swerve.maxAngularVelocity;  
-//                System.out.println("DC: manualModePeriodc() translationVal=" + translationVal + ", StrafeVal=" + strafeVal + ", rotationVal=" + rotationVal);
-                m_SwerveDrive.feedTeleopSetpoint(ChassisSpeeds.fromFieldRelativeSpeeds(
-                    translationVal, strafeVal, rotationVal,
-                    Util.robotToFieldRelative(m_SwerveDrive.getHeading(), is_red_alliance)));
+//			}else
+            {
+                //dc.11.9.24, to scale up joystick input to max-speed
+                double translationVal = -MathUtil.applyDeadband(m_JoyStick.getRawAxis(translationAxis), Constants.stickDeadband)*Constants.SwerveConstants.maxSpeed; 
+                double strafeVal = - MathUtil.applyDeadband(m_JoyStick.getRawAxis(strafeAxis), Constants.stickDeadband)*Constants.SwerveConstants.maxSpeed;
+                double rotationVal = MathUtil.applyDeadband(m_JoyStick.getRawAxis(rotationAxis), Constants.stickDeadband)* Constants.Swerve.maxAngularVelocity;  
+    //                System.out.println("DC: manualModePeriodc() translationVal=" + translationVal + ", StrafeVal=" + strafeVal + ", rotationVal=" + rotationVal);
+                    m_SwerveDrive.feedTeleopSetpoint(ChassisSpeeds.fromFieldRelativeSpeeds(
+                        translationVal, strafeVal, rotationVal,
+                        Util.robotToFieldRelative(m_SwerveDrive.getHeading(), is_red_alliance)));
+            }
 
 //			mDriverControls.oneControllerMode();
 

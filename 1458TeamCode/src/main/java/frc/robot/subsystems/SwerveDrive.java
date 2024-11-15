@@ -77,6 +77,8 @@ public class SwerveDrive extends Subsystem {
 
 	private static SwerveDrive mInstance;
 
+	private int mCounter=0;//TODO: code for debug, to be removed 
+
 	public static SwerveDrive getInstance() {
 		if (mInstance == null) {
 			mInstance = new SwerveDrive();
@@ -482,8 +484,8 @@ public class SwerveDrive extends Subsystem {
 					prev_chassis_speeds.vyMetersPerSecond + dy * min_translational_scalar,
 					prev_chassis_speeds.omegaRadiansPerSecond + domega * min_omega_scalar);
 
-			{//publish wanted_speed (chassis speed) to NetworkTable, plot them in SIM GUI to verify motion profile used by TalonFx motor
-				//TODO: clean up at production release
+/*			{//publish wanted_speed (chassis speed) to NetworkTable, plot them in SIM GUI to verify motion profile used by TalonFx motor
+ 				//TODO: clean up at production release
 				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisSpeed/desVx").setDouble(mPeriodicIO.des_chassis_speeds.vxMetersPerSecond);
 				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisSpeed/desVy").setDouble(mPeriodicIO.des_chassis_speeds.vyMetersPerSecond);
 				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisSpeed/vxMPS").setDouble(wanted_speeds.vxMetersPerSecond);
@@ -493,10 +495,22 @@ public class SwerveDrive extends Subsystem {
 				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisAccel/vxMPSS").setDouble(dx * min_translational_scalar);
 				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisAccel/vyMPSS").setDouble(dy * min_translational_scalar);
 				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisAccel/omegaRPSS").setDouble(domega * min_omega_scalar);
-			}
+			}*/
 		}
 		
 		SwerveModuleState[] real_module_setpoints = SwerveConstants.kKinematics.toSwerveModuleStates(wanted_speeds);
+/*   	{//TODO: debug code, TBR
+			if (mCounter++ >50){
+				mCounter =0;
+				SmartDashboard.putString("updateSetPoint().wanted_speed (Omega, vx, vy)", 
+						String.format("%.2f,%.2f,%.2f", wanted_speeds.omegaRadiansPerSecond, wanted_speeds.vxMetersPerSecond, wanted_speeds.vyMetersPerSecond));
+
+				for (int i = 0; i < mModules.length; i++) {
+					SmartDashboard.putString("updateSetPoint().real_module_setpoints["+ i +"].angle", 
+						String.format("%.2f",real_module_setpoints[i].angle.getDegrees()));
+				}
+			}
+		}*/
 		SwerveDriveKinematics.desaturateWheelSpeeds(real_module_setpoints, Constants.SwerveConstants.maxSpeed);
 
 		Twist2d pred_twist_vel= new Twist2d(wanted_speeds.vxMetersPerSecond,wanted_speeds.vyMetersPerSecond,wanted_speeds.omegaRadiansPerSecond);
@@ -505,15 +519,44 @@ public class SwerveDrive extends Subsystem {
 		mPeriodicIO.des_module_states = real_module_setpoints;
 	}
 
+/* 	//TODO: debug swerve only, TBR
+	public void testSwerve(){
+		double wheelBase=23.5;
+		double trackWidth=23.5;
+		Translation2d[] moduleLocations = {
+            new Translation2d(wheelBase / 2.0, trackWidth / 2.0),
+            new Translation2d(wheelBase / 2.0, -trackWidth / 2.0),
+            new Translation2d(-wheelBase / 2.0, trackWidth / 2.0),
+            new Translation2d(-wheelBase / 2.0, -trackWidth / 2.0)
+         };
+         SwerveDriveKinematics wpiKinematics = new SwerveDriveKinematics(
+            moduleLocations[0],
+            moduleLocations[1],
+            moduleLocations[2],
+            moduleLocations[3]);		
+		
+		ChassisSpeeds wanted_speeds= new ChassisSpeeds(0.0,0.0,0.1);
+		SwerveModuleState[] real_module_setpoints = wpiKinematics.toSwerveModuleStates(wanted_speeds);
+//		SmartDashboard.putString("testSwerve().wanted_speed (Omega, vx, vy)", 
+//			String.format("%.2f,%.2f,%.2f", wanted_speeds.omegaRadiansPerSecond, wanted_speeds.vxMetersPerSecond, wanted_speeds.vyMetersPerSecond));
+		for (int i = 0; i < mModules.length; i++) {
+//			SmartDashboard.putString("testSwerve().real_module_setpoints["+ i +"].angle", 
+//				String.format("%.2f",real_module_setpoints[i].angle.getDegrees()));
+//			mModules[i].swerveModule(real_module_setpoints[i].angle.unaryMinus());
+		}
+	}
+*/
+
+/* 	public void straightenAllWheels() {
+		for (SwerveModule module : mModules) {
+			module.straightenWheel();
+		}
+	}
+*/
+
 	public void resetModulesToAbsolute() {
 		for (SwerveModule module : mModules) {
 			module.resetToAbsolute();
-		}
-	}
-
-	public void straightenAllWheels() {
-		for (SwerveModule module : mModules) {
-			module.straightenWheel();
 		}
 	}
 

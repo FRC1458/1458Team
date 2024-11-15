@@ -49,7 +49,7 @@ public final class Constants {
             swerveModuleLocations[0],
             swerveModuleLocations[1],
             swerveModuleLocations[2],
-            swerveModuleLocations[0]);
+            swerveModuleLocations[3]);//DC.11.14.24 shall be the 4th wheel 
 
         /* Module Gear Ratios */
         public static final double driveGearRatio = chosenModule.driveGearRatio;
@@ -96,9 +96,9 @@ public final class Constants {
 
         /* Swerve Profiling Values */
         /** Meters per Second */
-        public static final double maxSpeed = 5.2; //TODO: dc 11.9.24, increase max speed so that we can observe amplified drivetrain bahavior 
+        public static final double maxSpeed = 0.1; //TODO: dc 11.9.24, increase max speed so that we can observe amplified drivetrain bahavior 
         /** Radians per Second */
-        public static final double maxAngularVelocity = 10.0; //TODO: This must be tuned to specific robot
+        public static final double maxAngularVelocity = 0.5; //TODO: This must be tuned to specific robot
 
         /* Neutral Modes */
         public static final NeutralModeValue angleNeutralMode = NeutralModeValue.Coast;
