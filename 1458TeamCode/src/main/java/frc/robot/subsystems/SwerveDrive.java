@@ -5,6 +5,7 @@ package frc.robot.subsystems;
 import frc.robot.Constants;
 import frc.robot.Constants.Swerve;
 import frc.robot.Constants.SwerveConstants;
+import frc.robot.lib.util.InterpolatingPose2d;
 import frc.robot.lib.util.SwerveModuleConstants;
 /*
 import frc.robot.Constants.SwerveConstants.Mod0;
@@ -239,7 +240,7 @@ public class SwerveDrive extends Subsystem {
 					RobotState.getInstance()
 							.addOdometryUpdate(
 									timestamp,
-									mWheelTracker.getRobotPose(),
+									new InterpolatingPose2d(mWheelTracker.getRobotPose()),
 									mPeriodicIO.measured_velocity,
 									mPeriodicIO.predicted_velocity);
 					m_field.setRobotPose(mWheelTracker.getRobotPose());
