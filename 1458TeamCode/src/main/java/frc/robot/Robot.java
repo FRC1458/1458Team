@@ -8,6 +8,12 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
+import frc.robot.Loops.Looper;
+import frc.robot.controlboard.ControlBoard;
+import frc.robot.controlboard.DriverControls;
+import frc.robot.subsystems.DummySubsystem;
+import frc.robot.subsystems.SubsystemManager;
+
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
  * each mode, as described in the TimedRobot documentation. If you change the name of this class or
@@ -15,6 +21,17 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
  * project.
  */
 public class Robot extends TimedRobot {
+
+    // @-@ new objects from Framework25
+  
+   public final SubsystemManager m_SubsystemManager = SubsystemManager.getInstance();
+   private final ControlBoard mControlBoard = ControlBoard.getInstance();
+	 private final DriverControls mDriverControls = new DriverControls();
+
+   private final Looper m_EnabledLooper = new Looper();
+   private final Looper m_DisabledLooper = new Looper();
+   private DummySubsystem m_ExampleSubsystem;
+
 
   public static final CTREConfigs ctreConfigs = new CTREConfigs();
 
@@ -93,8 +110,11 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+
+    mControlBoard.update();
     //initialize container for teleop mode 
     m_robotContainer.initManualMode();
+
   }
 
   /** This function is called periodically during operator control. */
