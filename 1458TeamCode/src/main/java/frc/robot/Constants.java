@@ -18,7 +18,7 @@ import frc.robot.subsystems.SwerveDrive.KinematicLimits;
 import frc.robot.subsystems.limelight.GoalTracker;
 
 public final class Constants {
-    public static final double stickDeadband = 0.1;
+    public static final double stickDeadband = 0.07;
     public static boolean isEpsilon;
 
     // robot loop time
@@ -98,7 +98,7 @@ public final class Constants {
         /** Meters per Second */
         public static final double maxSpeed = 0.1; //TODO: dc 11.9.24, increase max speed so that we can observe amplified drivetrain bahavior 
         /** Radians per Second */
-        public static final double maxAngularVelocity = 0.5; //TODO: This must be tuned to specific robot
+        public static final double maxAngularVelocity = 0.25; //TODO: This must be tuned to specific robot
 
         /* Neutral Modes */
         public static final NeutralModeValue angleNeutralMode = NeutralModeValue.Coast;

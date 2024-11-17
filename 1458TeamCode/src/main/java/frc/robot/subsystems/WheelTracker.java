@@ -18,7 +18,7 @@ public class WheelTracker {
 	private final SwerveModule[] mModules;
 
 	private WheelProperties[] WheelProperties = new WheelProperties[4];
-	private Pose2d mRobotPose = new Pose2d();
+	private Pose2d mRobotPose = new Pose2d(10,10,new Rotation2d(0));
 	private Translation2d mRobotVelocity = new Translation2d(0, 0);
 	private BaseStatusSignal[] mAllSignals;
 

@@ -175,14 +175,11 @@ public class RobotContainer25 {
 //			mControlBoard.update();
 
 			/* Drive */
-//			if (m_JoyStick.getRawButton(XboxController.Button.kY.value)) {
-//				System.out.println("keyY is pressed, zero the wheels!");
-//				mDrive.zeroGyro(FieldLayout.handleAllianceFlip(new Rotation2d(), is_red_alliance)
-//						.getDegrees());
-//				m_SwerveDrive.resetModulesToAbsolute();
-//				mDrive.resetOdometry(new Pose2d());
-//			}else
-            {
+			if (m_JoyStick.getRawButton(XboxController.Button.kStart.value)) {
+				System.out.println("keyY is pressed, zero the wheels!");
+                m_SwerveDrive.zeroGyro(0);
+			}
+            
                 //dc.11.9.24, to scale up joystick input to max-speed
                 double translationVal = -MathUtil.applyDeadband(m_JoyStick.getRawAxis(translationAxis), Constants.stickDeadband)*Constants.SwerveConstants.maxSpeed; 
                 double strafeVal = - MathUtil.applyDeadband(m_JoyStick.getRawAxis(strafeAxis), Constants.stickDeadband)*Constants.SwerveConstants.maxSpeed;
@@ -191,7 +188,7 @@ public class RobotContainer25 {
                     m_SwerveDrive.feedTeleopSetpoint(ChassisSpeeds.fromFieldRelativeSpeeds(
                         translationVal, strafeVal, rotationVal,
                         Util.robotToFieldRelative(m_SwerveDrive.getHeading(), is_red_alliance)));
-            }
+            
 
 //			mDriverControls.oneControllerMode();
 
