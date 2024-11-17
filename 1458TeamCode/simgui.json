@@ -1,0 +1,217 @@
+{
+  "HALProvider": {
+    "Other Devices": {
+      "Talon FX (v6)[10]": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon FX (v6)[11]": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon FX (v6)[2]": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon FX (v6)[4]": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon FX (v6)[5]": {
+        "header": {
+          "open": true
+        }
+      }
+    }
+  },
+  "NTProvider": {
+    "types": {
+      "/FMSInfo": "FMSInfo"
+    }
+  },
+  "NetworkTables": {
+    "transitory": {
+      "SmartDashboard": {
+        "open": true
+      },
+      "Telemetry": {
+        "ChassisSpeed": {
+          "open": true
+        },
+        "Module#0": {
+          "DriveMotor": {
+            "open": true
+          }
+        },
+        "Module#1": {
+          "DriveMotor": {
+            "open": true
+          }
+        },
+        "Module#2": {
+          "DriveMotor": {
+            "open": true
+          }
+        },
+        "Module#3": {
+          "DriveMotor": {
+            "open": true
+          },
+          "open": true
+        },
+        "ModuleVelocity": {
+          "open": true
+        },
+        "open": true
+      }
+    }
+  },
+  "NetworkTables Info": {
+    "Clients": {
+      "open": true
+    },
+    "Connections": {
+      "open": true
+    },
+    "Server": {
+      "Publishers": {
+        "open": true
+      },
+      "Subscribers": {
+        "open": true
+      }
+    },
+    "visible": true
+  },
+  "Plot": {
+    "Plot <0>": {
+      "plots": [
+        {
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 205,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/Telemetry/Module#0/DriveMotor/Voltage"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/Telemetry/Module#1/DriveMotor/Voltage"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/Telemetry/Module#2/DriveMotor/Voltage"
+            },
+            {
+              "color": [
+                0.7686275243759155,
+                0.30588236451148987,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/Telemetry/Module#3/DriveMotor/Voltage"
+            }
+          ]
+        },
+        {
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 205,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/Telemetry/ChassisSpeed/desOmegaRPS"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/Telemetry/ChassisSpeed/omegaRPS"
+            }
+          ]
+        },
+        {
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 205,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/Telemetry/ChassisSpeed/vxMPS"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/Telemetry/ChassisSpeed/vyMPS"
+            }
+          ]
+        }
+      ]
+    },
+    "Plot <1>": {
+      "plots": [
+        {
+          "backgroundColor": [
+            0.0,
+            0.0,
+            0.0,
+            0.8500000238418579
+          ],
+          "height": 338
+        }
+      ],
+      "window": {
+        "visible": false
+      }
+    }
+  }
+}

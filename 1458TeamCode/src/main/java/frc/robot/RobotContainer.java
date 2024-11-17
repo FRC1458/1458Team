@@ -43,15 +43,16 @@ public class RobotContainer {
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
-        s_Swerve.setDefaultCommand(
-            new TeleopSwerve(
-                s_Swerve, 
-                () -> -driver.getRawAxis(translationAxis), 
-                () -> -driver.getRawAxis(strafeAxis), 
-                () -> -driver.getRawAxis(rotationAxis), 
-                () -> robotCentric.getAsBoolean()
-            )
+        TeleopSwerve teleopSwerveCommand = new TeleopSwerve(
+            s_Swerve,
+            () -> -driver.getRawAxis(translationAxis),
+            () -> -driver.getRawAxis(strafeAxis),
+            () -> -driver.getRawAxis(rotationAxis),
+            () -> robotCentric.getAsBoolean()
         );
+        s_Swerve.setDefaultCommand(teleopSwerveCommand);
+
+        SmartDashboard.putData("TeleopSwerveCmd", teleopSwerveCommand);
 
         CommandScheduler.getInstance().registerSubsystem(mLimeLight);
         

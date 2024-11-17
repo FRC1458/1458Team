@@ -39,11 +39,17 @@ public final class Constants {
 
         /* Swerve Kinematics 
          * No need to ever change this unless you are not doing a traditional rectangular/square 4 module swerve */
-         public static final SwerveDriveKinematics swerveKinematics = new SwerveDriveKinematics(
+         public static final Translation2d[] swerveModuleLocations = {  //dc.10.28.2024, need for WheelTracker.java
             new Translation2d(wheelBase / 2.0, trackWidth / 2.0),
             new Translation2d(wheelBase / 2.0, -trackWidth / 2.0),
             new Translation2d(-wheelBase / 2.0, trackWidth / 2.0),
-            new Translation2d(-wheelBase / 2.0, -trackWidth / 2.0));
+            new Translation2d(-wheelBase / 2.0, -trackWidth / 2.0)
+         };
+         public static final SwerveDriveKinematics swerveKinematics = new SwerveDriveKinematics(
+            swerveModuleLocations[0],
+            swerveModuleLocations[1],
+            swerveModuleLocations[2],
+            swerveModuleLocations[3]);//DC.11.14.24 shall be the 4th wheel 
 
         /* Module Gear Ratios */
         public static final double driveGearRatio = chosenModule.driveGearRatio;
@@ -57,13 +63,13 @@ public final class Constants {
         public static final SensorDirectionValue cancoderInvert = chosenModule.cancoderInvert;
 
         /* Swerve Current Limiting */
-        public static final int angleCurrentLimit = 25;
-        public static final int angleCurrentThreshold = 40;
+        public static final int angleCurrentLimit = 20;
+        public static final int angleCurrentThreshold = 30;
         public static final double angleCurrentThresholdTime = 0.1;
         public static final boolean angleEnableCurrentLimit = true;
 
-        public static final int driveCurrentLimit = 35;
-        public static final int driveCurrentThreshold = 60;
+        public static final int driveCurrentLimit = 30; //dc.11.9.24 reduce max current per motor, total current needs to time motor-count(8)
+        public static final int driveCurrentThreshold = 45; 
         public static final double driveCurrentThresholdTime = 0.1;
         public static final boolean driveEnableCurrentLimit = true;
 
@@ -80,7 +86,7 @@ public final class Constants {
         /* Drive Motor PID Values */
         public static final double driveKP = 0.12; //TODO: This must be tuned to specific robot
         public static final double driveKI = 0.0;
-        public static final double driveKD = 0.0;
+        public static final double driveKD = 0.0004;
         public static final double driveKF = 0.0;
 
         /* Drive Motor Characterization Values From SYSID */
@@ -90,9 +96,9 @@ public final class Constants {
 
         /* Swerve Profiling Values */
         /** Meters per Second */
-        public static final double maxSpeed = 4.5; //TODO: This must be tuned to specific robot
+        public static final double maxSpeed = 0.1; //TODO: dc 11.9.24, increase max speed so that we can observe amplified drivetrain bahavior 
         /** Radians per Second */
-        public static final double maxAngularVelocity = 10.0; //TODO: This must be tuned to specific robot
+        public static final double maxAngularVelocity = 0.5; //TODO: This must be tuned to specific robot
 
         /* Neutral Modes */
         public static final NeutralModeValue angleNeutralMode = NeutralModeValue.Coast;
@@ -104,9 +110,11 @@ public final class Constants {
             public static final int driveMotorID = 8;
             public static final int angleMotorID = 10;
             public static final int canCoderID = 7;
-            public static final Rotation2d angleOffset = Rotation2d.fromRotations(125.25/-360);
+            public static final Rotation2d angleOffset = Rotation2d.fromRotations(0.1521);
+            public static final boolean isDriveInverted = true;
+            public static final boolean isAngleInverted = false;
             public static final SwerveModuleConstants constants = 
-                new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
+                new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset, isDriveInverted, isAngleInverted);
         }
 
         /* Front Right Module - Module 1 */
@@ -114,9 +122,11 @@ public final class Constants {
             public static final int driveMotorID = 9;
             public static final int angleMotorID = 11;
             public static final int canCoderID = 6;
-            public static final Rotation2d angleOffset = Rotation2d.fromRotations(-156.4275/-360);
+            public static final boolean isDriveInverted = true;
+            public static final boolean isAngleInverted = false;
+            public static final Rotation2d angleOffset = Rotation2d.fromRotations(0.4243);
             public static final SwerveModuleConstants constants = 
-                new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
+                new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset, isDriveInverted, isAngleInverted);
         }
         
         /* Back Left Module - Module 2 */
@@ -124,9 +134,11 @@ public final class Constants {
             public static final int driveMotorID = 3;
             public static final int angleMotorID = 5;
             public static final int canCoderID = 0;
-            public static final Rotation2d angleOffset = Rotation2d.fromRotations(-242.409/-360);
+            public static final boolean isDriveInverted = true;
+            public static final boolean isAngleInverted = false;
+            public static final Rotation2d angleOffset = Rotation2d.fromRotations(0.1643);
             public static final SwerveModuleConstants constants = 
-                new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
+                new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset, isDriveInverted, isAngleInverted);
         }
 
         /* Back Right Module - Module 3 */
@@ -134,9 +146,11 @@ public final class Constants {
             public static final int driveMotorID = 4;
             public static final int angleMotorID = 2;
             public static final int canCoderID = 1;
-            public static final Rotation2d angleOffset = Rotation2d.fromRotations(-327.18/-360);
+            public static final boolean isDriveInverted = false;
+            public static final boolean isAngleInverted = false;
+            public static final Rotation2d angleOffset = Rotation2d.fromRotations(0.4148);
             public static final SwerveModuleConstants constants =
-                new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
+                new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset, isDriveInverted, isAngleInverted);
         }
     }
 
@@ -201,14 +215,16 @@ public final class Constants {
 
         /*dc.10.21.2024 mapping existing constants so that ported citrus code only needs minimal changes */
         public static final SwerveDriveKinematics kKinematics = Swerve.swerveKinematics;
-        public static final boolean driveMotorInvert = false;   //TODO: need to verify with the actual Robot setting
-        public static final boolean angleMotorInvert = true;    //TODO: need to verify with the actual Robot setting
+        //public static final boolean driveMotorInvert = false;   //TODO: need to verify with the actual Robot setting
+        //public static final boolean angleMotorInvert = true;    //TODO: need to verify with the actual Robot setting
         public static final double wheelDiameter = Swerve.chosenModule.wheelDiameter; //??4.0inch
         public static final double wheelCircumference = Swerve.chosenModule.wheelCircumference;
         public static final double driveGearRatio = Swerve.chosenModule.driveGearRatio;//?? Constants.isEpsilon ? 5.82 : 5.82; 
         public static final double angleGearRatio = Swerve.chosenModule.angleGearRatio;
         public static final double maxSpeed = Swerve.maxSpeed; 
+        public static final double maxAngularVelocity = Swerve.maxAngularVelocity;
         public static final double kV = 12 * Math.PI * wheelDiameter / (driveGearRatio * maxSpeed); //TODO: need to finetune with the actual robot
+        public static final double kCancoderBootAllowanceSeconds = 10.0;
 
         public static final KinematicLimits kUncappedLimits = new KinematicLimits();
 
@@ -228,18 +244,19 @@ public final class Constants {
         public static TalonFXConfiguration AzimuthFXConfig() {
             TalonFXConfiguration config = new TalonFXConfiguration();
 
-            config.Slot0.kP = 1.0005;
+            config.Slot0.kP = .3;
             config.Slot0.kI = 0.0;
-            config.Slot0.kD = 0.0004;
+            config.Slot0.kD = 0.0008;
             config.Slot0.kS = 0.0;
             config.Slot0.kV = 0.0;
 
             config.CurrentLimits.StatorCurrentLimitEnable = true;
-            config.CurrentLimits.StatorCurrentLimit = 80;
+            config.CurrentLimits.StatorCurrentLimit = Swerve.angleCurrentLimit;//80;
 
             config.CurrentLimits.SupplyCurrentLimitEnable = true;
-            config.CurrentLimits.SupplyCurrentLimit = 60;
-            config.CurrentLimits.SupplyTimeThreshold = 0.2;
+            config.CurrentLimits.SupplyCurrentLimit = Swerve.angleCurrentLimit;//60;
+            config.CurrentLimits.SupplyCurrentThreshold = Swerve.angleCurrentThreshold;//add this to limit current spiking 
+            config.CurrentLimits.SupplyTimeThreshold = Swerve.angleCurrentThresholdTime;
 
             config.Voltage.PeakForwardVoltage = 12.0;
             config.Voltage.PeakReverseVoltage = -12.0;
@@ -254,15 +271,16 @@ public final class Constants {
 
 			config.Slot0.kP = 0.030 * 12.0;
 			config.Slot0.kI = 0.0;
-			config.Slot0.kD = 0.000001 * 12.0;
+			config.Slot0.kD = 0.000000 * 12.0;
 			config.Slot0.kS = 0.1;
 			config.Slot0.kV = 12 * Math.PI * wheelDiameter / (driveGearRatio * maxSpeed);
 
 			config.CurrentLimits.StatorCurrentLimitEnable = true;
-			config.CurrentLimits.StatorCurrentLimit = 110;
+			config.CurrentLimits.StatorCurrentLimit = Swerve.driveCurrentLimit;//citrus code value = 110;
 
 			config.CurrentLimits.SupplyCurrentLimitEnable = true;
-			config.CurrentLimits.SupplyCurrentLimit = 90;
+			config.CurrentLimits.SupplyCurrentLimit = Swerve.driveCurrentLimit;//citrus value = 90;
+            config.CurrentLimits.SupplyCurrentThreshold = Swerve.driveCurrentThreshold;//add this to limit current spiking 
 			config.CurrentLimits.SupplyTimeThreshold = 0.5;
 
 			config.Voltage.PeakForwardVoltage = 12.0;
@@ -270,8 +288,8 @@ public final class Constants {
 
 			config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
-			config.OpenLoopRamps.DutyCycleOpenLoopRampPeriod = 0.25;
-			config.OpenLoopRamps.VoltageOpenLoopRampPeriod = 0.25;
+			config.OpenLoopRamps.DutyCycleOpenLoopRampPeriod = Swerve.openLoopRamp;
+			config.OpenLoopRamps.VoltageOpenLoopRampPeriod = Swerve.openLoopRamp;
 			return config;
 		}
 

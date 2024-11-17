@@ -35,7 +35,7 @@ public class Pigeon {
 	private Rotation2d pitchAdjustmentAngle = new Rotation2d();
 
 	private Pigeon(int port) {
-		mGyro = new Pigeon2(port, "canivore1");
+		mGyro = new Pigeon2(port, "CV"); //TODO: ADD TO CONSTANTS
 		mGyro.getConfigurator().apply(new Pigeon2Configuration());
 	}
 

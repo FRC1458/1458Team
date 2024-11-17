@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 //dc.10.21.2024, replace citrus SwerveModuleState with WPILIB version, the same practice as other Victor & Shaji
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 
@@ -42,6 +43,8 @@ public class SwerveModule extends Subsystem {
 	private BaseStatusSignal[] mSignals = new BaseStatusSignal[4];
 
 	private mPeriodicIO mPeriodicIO = new mPeriodicIO();
+	
+	private int mCounter=0;//TODO: code for debug, to be removed 
 
 	public static class mPeriodicIO {
 		// Inputs
@@ -60,25 +63,25 @@ public class SwerveModule extends Subsystem {
 	//dc.10.25.2024 replace citrus SwerveModuleConstants with our own. Just need to angleOffset.getRadians, and disregard CancoderID
 	public SwerveModule(int moduleNumber, SwerveModuleConstants moduleConstants, CANcoder cancoder) {
 		this.kModuleNumber = moduleNumber;
-		kAngleOffset = moduleConstants.angleOffset.getRadians();	//kAngleOffset is in radians
+		kAngleOffset = moduleConstants.angleOffset.getDegrees();	//kAngleOffset is in radians
 
 		angleEncoder = cancoder;
 
 		// Angle motor config
-		mAngleMotor = new TalonFX(moduleConstants.angleMotorID, "canivore1");
+		mAngleMotor = new TalonFX(moduleConstants.angleMotorID, "CV");
 		Phoenix6Util.checkErrorAndRetry(() ->
 				mAngleMotor.getConfigurator().apply(SwerveConstants.AzimuthFXConfig(), Constants.kLongCANTimeoutMs));
-		mAngleMotor.setInverted(SwerveConstants.angleMotorInvert);
+		mAngleMotor.setInverted(moduleConstants.angleInvert);
 
 		// Drive motor config
-		mDriveMotor = new TalonFX(moduleConstants.driveMotorID, "canivore1");
+		mDriveMotor = new TalonFX(moduleConstants.driveMotorID, "CV");
 		Phoenix6Util.checkErrorAndRetry(() ->
 				mDriveMotor.getConfigurator().apply(SwerveConstants.DriveFXConfig(), Constants.kLongCANTimeoutMs));
-		mDriveMotor.setInverted(SwerveConstants.driveMotorInvert);
+		mDriveMotor.setInverted(moduleConstants.driveInvert);
 		mDriveMotor.setPosition(0.0);
-
+		
 		resetToAbsolute();
-
+		
 		mSignals[0] = mDriveMotor.getRotorPosition();
 		mSignals[1] = mDriveMotor.getRotorVelocity();
 		mSignals[2] = mAngleMotor.getRotorPosition();
@@ -89,10 +92,18 @@ public class SwerveModule extends Subsystem {
 	public synchronized void readPeriodicInputs() {
 		mPeriodicIO.timestamp = Timer.getFPGATimestamp();
 		refreshSignals();
+
+		//check drive motor's current and voltage and publish to NetworkTable, plot them in SIM GUI to verify motion profile used by TalonFx motor
+		//TODO: clean up at production release
+		double statorCurrent = mDriveMotor.getStatorCurrent().getValueAsDouble();
+		double motorVoltage = mDriveMotor.getMotorVoltage().getValueAsDouble();
+		NetworkTableInstance.getDefault().getEntry("/Telemetry/Module#" + kModuleNumber +"/DriveMotor/Voltage").setDouble(motorVoltage);
+		NetworkTableInstance.getDefault().getEntry("/Telemetry/Module#" + kModuleNumber +"/DriveMotor/Current").setDouble(statorCurrent);
 	}
 
 	public synchronized void refreshSignals() {
-		mPeriodicIO.rotationVelocity = mAngleMotor.getRotorVelocity().getValue();
+		//TODO: might need to add call to StatusSignal.refresh() for each signal in reading before get value
+ 		mPeriodicIO.rotationVelocity = mAngleMotor.getRotorVelocity().getValue();
 		mPeriodicIO.driveVelocity = mDriveMotor.getRotorVelocity().getValue();
 
 		mPeriodicIO.rotationPosition = BaseStatusSignal.getLatencyCompensatedValue(
@@ -125,20 +136,33 @@ public class SwerveModule extends Subsystem {
 		}
 	}
 
+	/*DC.11.14.24. We need to negate the desired steering angle because position reading of our robot's rotation motor 
+	* increases along clock-wise direction vs. CCW assumed in Kinematic.toSwerveModuleStates() to calculate disired moduleState.angle.
+	* For the same reason, we need to negate setPosition() value in resetToAbsolute() too.
+	*/
 	private boolean setSteeringAngleOptimized(Rotation2d steerAngle) {
 		boolean flip = false;
-		final double targetClamped = steerAngle.getDegrees();
+		final double targetClamped = - steerAngle.getDegrees();//See comments above for the negate operation
 		final double angleUnclamped = getCurrentUnboundedDegrees();
 		final Rotation2d angleClamped = Rotation2d.fromDegrees(angleUnclamped);
 		final Rotation2d relativeAngle = Rotation2d.fromDegrees(targetClamped).rotateBy(angleClamped.unaryMinus()); //dc. replace citrus inverse() with wpilib unaryMinus()
 		double relativeDegrees = relativeAngle.getDegrees();
-		if (relativeDegrees > 90.0) {
+ 		if (relativeDegrees > 90.0) {
 			relativeDegrees -= 180.0;
 			flip = true;
 
 		} else if (relativeDegrees < -90.0) {
 			relativeDegrees += 180.0;
 			flip = true;
+		}
+ 		{//todo: debug code, TBR
+//			if (mCounter++ >50){
+//				mCounter =0;
+//				SmartDashboard.putString("Module #"+ kModuleNumber+" setSteeringAngleOpti(), desiredAngle, angleUnclamped", 
+//					String.format("%.2f,%.2f", targetClamped, angleUnclamped));
+//				SmartDashboard.putString("Module #"+ kModuleNumber+" setSteeringAngleOpti(), relativeDegreesPreFlip, relativeDegrees", 			
+//					String.format("%.2f,%.2f", relativeDegreesPreFlip,relativeDegrees));
+//			}
 		}
 		setSteeringAngleRaw(angleUnclamped + relativeDegrees);
 		target_angle = angleUnclamped + relativeDegrees;
@@ -158,14 +182,55 @@ public class SwerveModule extends Subsystem {
 		mDriveMotor.setControl(mPeriodicIO.driveDemand);
 	}
 
+	/*DC.11.14.24. We need to negate setPosition() value because position reading of our robot's rotation motor 
+	* increases along clock-wise direction while CCW assumed in original citrus code. 
+	* So if current position is at the CW side of zero position, it takes a CCW movement (negative delta) 
+	* for motor returns to zero position in setSteeringAngleOptimized; and vice versus. 
+	*/
 	public void resetToAbsolute() {
-		angleEncoder.getAbsolutePosition().waitForUpdate(Constants.kLongCANTimeoutMs);
+ 		angleEncoder.getAbsolutePosition().waitForUpdate(Constants.kLongCANTimeoutMs);
 		double angle = Util.placeInAppropriate0To360Scope(
-				getCurrentUnboundedDegrees(), getCanCoder().getDegrees() - kAngleOffset);
+				getCurrentUnboundedDegrees(), -(getCanCoder().getDegrees() - kAngleOffset)); //see above comments foor the negate operation
 		double absolutePosition = Conversions.degreesToRotation(angle, SwerveConstants.angleGearRatio);
-		Phoenix6Util.checkErrorAndRetry(() -> mAngleMotor.setPosition(absolutePosition, Constants.kLongCANTimeoutMs));
+		//reset CANcoder reading to relative angle to Zero position, does NOT move motor
+		Phoenix6Util.checkErrorAndRetry(() -> mAngleMotor.setPosition(absolutePosition, Constants.kLongCANTimeoutMs)); 
 	}
 
+/* TODO: TBR, keep the two test functions there for now in case we might need them to debug auto-mode
+	public void straightenWheel() {
+		angleEncoder.getAbsolutePosition().waitForUpdate(Constants.kLongCANTimeoutMs);
+		double currAbsPosDegree = getCanCoder().getDegrees();
+		double angle2Turn =  currAbsPosDegree - kAngleOffset;
+		double motor2Rotate = angle2Turn /360 * SwerveConstants.angleGearRatio;
+		double currRotorPos = mAngleMotor.getRotorPosition().getValueAsDouble();
+		double newRotorPos = currRotorPos + motor2Rotate;
+		System.out.println("Module#"+ kModuleNumber+ ".straightenModule(): currAbsPosDegree=" +currAbsPosDegree +",currRotorPos=" +currRotorPos + ", angle2Turn=" + angle2Turn + ", newRotorPos=" + newRotorPos);
+		//mAngleMotor.setControl(new PositionDutyCycle(newRotorPos, 0.0, true, 0.0, 0, false, false, false));		
+		{//TODO: streamline calls used by loop in one function to verify behavior without the cycling. clean up after debug, 
+			mAngleMotor.setPosition(-motor2Rotate, Constants.kLongCANTimeoutMs);
+			try{Thread.sleep(50);}catch(Exception e){}//need to wait 100ms for sensor signal to update back 
+			refreshSignals(); //update rotationPosition signal
+			SmartDashboard.putString("Mod#"+kModuleNumber +" straightenWheel (curr, zero)", 
+					String.format("(%.2f,%.2f)", currAbsPosDegree, kAngleOffset));
+//			SmartDashboard.putString("Mod#"+kModuleNumber +" rotatorPosition (before, after), and turn-wheel degree StraightenWheel().setPosition()", 
+//					String.format("(%.2f,%.2f,%.2f)", currRotorPos, mAngleMotor.getRotorPosition().getValueAsDouble(), angle2Turn));
+//			SmartDashboard.putString("Mod#"+kModuleNumber +"StraightenWheel() mPeriodicIO.rotationPosition", 
+//					String.format("(%.5f)", mPeriodicIO.rotationPosition));
+			Rotation2d targetDegree=Rotation2d.fromDegrees(0.0);
+			setSteeringAngleOptimized(targetDegree);
+			mAngleMotor.setControl(mPeriodicIO.rotationDemand);
+		}		
+	}
+
+	//TODO: debug swerve function, TBR
+	public void swerveModule (Rotation2d swerveAngle){
+		refreshSignals();
+		SmartDashboard.putString("Mod#" + kModuleNumber + " swerveModule() (currAngle, swerveAngle)", 
+			String.format("%.2f,%.2f",getCurrentUnboundedDegrees(), swerveAngle.getDegrees()));
+		setSteeringAngleOptimized(swerveAngle);
+		mAngleMotor.setControl(mPeriodicIO.rotationDemand);
+	}
+*/
 	public void setDriveNeutralBrake(boolean wantBrake) {
 		TalonFXConfiguration t = new TalonFXConfiguration();
 		mDriveMotor.getConfigurator().refresh(t);

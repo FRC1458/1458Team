@@ -32,13 +32,13 @@ public class Robot extends TimedRobot {
    private final Looper m_DisabledLooper = new Looper();
    private DummySubsystem m_ExampleSubsystem;
 
-    
+
   public static final CTREConfigs ctreConfigs = new CTREConfigs();
 
   
   private Command m_autonomousCommand;
 
-  private RobotContainer m_robotContainer;
+  private RobotContainer25 m_robotContainer;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -48,34 +48,14 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
-    m_robotContainer = new RobotContainer();
+    m_robotContainer = new RobotContainer25();
     
 
     for (int port = 5800; port <= 5809; port++) {
       edu.wpi.first.net.PortForwarder.add(port, "limelight.local", port);
-    }
+    } 
     
-
-    //@-@ subystems init code from Framework25
-    m_ExampleSubsystem = DummySubsystem.getInstance();
-    m_SubsystemManager.setSubsystems(
-      m_ExampleSubsystem, 
-      m_robotContainer.s_Swerve.mSwerveMods[0],
-      m_robotContainer.s_Swerve.mSwerveMods[1],
-      m_robotContainer.s_Swerve.mSwerveMods[2],
-      m_robotContainer.s_Swerve.mSwerveMods[3]
-      //Insert instances of additional subsystems here
-		);    
-    m_SubsystemManager.registerEnabledLoops(m_EnabledLooper);
-    m_SubsystemManager.registerDisabledLoops(m_DisabledLooper);
-   // m_robotContainer = new RobotContainer();
-
-  
-
-    //test code to start the enabledlooper here
-    m_EnabledLooper.start();
-    m_DisabledLooper.stop();
-
+    //subsystems and loop framework init code move to RobotContainer25 class
 
   }
 
@@ -97,7 +77,9 @@ public class Robot extends TimedRobot {
 
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    m_robotContainer.initDisabledMode();
+  }
 
   @Override
   public void disabledPeriodic() {}
@@ -111,6 +93,8 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
+    //init auto mode
+    m_robotContainer.initAutoMode();
   }
 
   /** This function is called periodically during autonomous. */
@@ -126,12 +110,17 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+
     mControlBoard.update();
+    //initialize container for teleop mode 
+    m_robotContainer.initManualMode();
+
   }
 
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
+    m_robotContainer.manualModePeriodic();  //run the manual mode loop
     m_robotContainer.updateLimeLightData();
   }
 
@@ -139,6 +128,7 @@ public class Robot extends TimedRobot {
   public void testInit() {
     // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
+    m_robotContainer.initTestMode();
   }
 
   /** This function is called periodically during test mode. */

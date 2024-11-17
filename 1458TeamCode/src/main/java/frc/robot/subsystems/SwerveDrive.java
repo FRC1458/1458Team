@@ -5,6 +5,7 @@ package frc.robot.subsystems;
 import frc.robot.Constants;
 import frc.robot.Constants.Swerve;
 import frc.robot.Constants.SwerveConstants;
+import frc.robot.lib.util.InterpolatingPose2d;
 import frc.robot.lib.util.SwerveModuleConstants;
 /*
 import frc.robot.Constants.SwerveConstants.Mod0;
@@ -35,8 +36,10 @@ import frc.robot.lib.trajectory.TrajectoryIterator;
 //TODO:import com.team254.lib.trajectory.TimedView;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.Trajectory.State;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +55,7 @@ public class SwerveDrive extends Subsystem {
 	}
 
 	private WheelTracker mWheelTracker;
+	private final Field2d m_field = new Field2d();
 	private Pigeon mPigeon = Pigeon.getInstance();
 	public SwerveModule[] mModules;
 
@@ -72,11 +76,13 @@ public class SwerveDrive extends Subsystem {
 
 	private KinematicLimits mKinematicLimits = SwerveConstants.kUncappedLimits;
 
-	private static Drive mInstance;
+	private static SwerveDrive mInstance;
 
-	public static Drive getInstance() {
+	private int mCounter=0;//TODO: code for debug, to be removed 
+
+	public static SwerveDrive getInstance() {
 		if (mInstance == null) {
-			mInstance = new Drive();
+			mInstance = new SwerveDrive();
 		}
 		return mInstance;
 	}
@@ -95,6 +101,8 @@ public class SwerveDrive extends Subsystem {
 
 		mPigeon.setYaw(0.0);
 		mWheelTracker = new WheelTracker(mModules);
+
+		SmartDashboard.putData("Field", m_field);
 	}
 
 	public void setKinematicLimits(KinematicLimits newLimits) {
@@ -104,7 +112,7 @@ public class SwerveDrive extends Subsystem {
 	/**
 	 * Updates drivetrain with latest desired speeds from the joystick, and sets DriveControlState appropriately.
 	 *
-	 * @param speeds ChassisSpeeds object derived from joystick input.
+	 * @param speeds a robot-relative ChassisSpeeds object derived from joystick input
 	 */
 	public void feedTeleopSetpoint(ChassisSpeeds speeds) {
 		if (mControlState == DriveControlState.PATH_FOLLOWING) {
@@ -229,12 +237,13 @@ public class SwerveDrive extends Subsystem {
 					}
 					updateSetpoint();
 
-					RobotState.getInstance()
+/* 					RobotState.getInstance()
 							.addOdometryUpdate(
 									timestamp,
-									mWheelTracker.getRobotPose(),
+									new InterpolatingPose2d(mWheelTracker.getRobotPose()),
 									mPeriodicIO.measured_velocity,
-									mPeriodicIO.predicted_velocity);
+									mPeriodicIO.predicted_velocity);*/
+					m_field.setRobotPose(mWheelTracker.getRobotPose());
 				}
 			}
 
@@ -475,9 +484,34 @@ public class SwerveDrive extends Subsystem {
 					prev_chassis_speeds.vxMetersPerSecond + dx * min_translational_scalar,
 					prev_chassis_speeds.vyMetersPerSecond + dy * min_translational_scalar,
 					prev_chassis_speeds.omegaRadiansPerSecond + domega * min_omega_scalar);
-		}
 
+/*			{//publish wanted_speed (chassis speed) to NetworkTable, plot them in SIM GUI to verify motion profile used by TalonFx motor
+ 				//TODO: clean up at production release
+				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisSpeed/desVx").setDouble(mPeriodicIO.des_chassis_speeds.vxMetersPerSecond);
+				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisSpeed/desVy").setDouble(mPeriodicIO.des_chassis_speeds.vyMetersPerSecond);
+				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisSpeed/vxMPS").setDouble(wanted_speeds.vxMetersPerSecond);
+				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisSpeed/vyMPS").setDouble(wanted_speeds.vyMetersPerSecond);
+				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisSpeed/desOmegaRPS").setDouble(mPeriodicIO.des_chassis_speeds.omegaRadiansPerSecond);
+				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisSpeed/omegaRPS").setDouble(wanted_speeds.omegaRadiansPerSecond);
+				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisAccel/vxMPSS").setDouble(dx * min_translational_scalar);
+				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisAccel/vyMPSS").setDouble(dy * min_translational_scalar);
+				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisAccel/omegaRPSS").setDouble(domega * min_omega_scalar);
+			}*/
+		}
+		
 		SwerveModuleState[] real_module_setpoints = SwerveConstants.kKinematics.toSwerveModuleStates(wanted_speeds);
+/*   	{//TODO: debug code, TBR
+			if (mCounter++ >50){
+				mCounter =0;
+				SmartDashboard.putString("updateSetPoint().wanted_speed (Omega, vx, vy)", 
+						String.format("%.2f,%.2f,%.2f", wanted_speeds.omegaRadiansPerSecond, wanted_speeds.vxMetersPerSecond, wanted_speeds.vyMetersPerSecond));
+
+				for (int i = 0; i < mModules.length; i++) {
+					SmartDashboard.putString("updateSetPoint().real_module_setpoints["+ i +"].angle", 
+						String.format("%.2f",real_module_setpoints[i].angle.getDegrees()));
+				}
+			}
+		}*/
 		SwerveDriveKinematics.desaturateWheelSpeeds(real_module_setpoints, Constants.SwerveConstants.maxSpeed);
 
 		Twist2d pred_twist_vel= new Twist2d(wanted_speeds.vxMetersPerSecond,wanted_speeds.vyMetersPerSecond,wanted_speeds.omegaRadiansPerSecond);
@@ -485,6 +519,41 @@ public class SwerveDrive extends Subsystem {
 				Util.logMap(Util.expMap(pred_twist_vel).rotateBy(getHeading()));//dc modified original citrus code: Pose2d.log(Pose2d.exp(wanted_speeds.toTwist2d()).rotateBy(getHeading()));
 		mPeriodicIO.des_module_states = real_module_setpoints;
 	}
+
+/* 	//TODO: debug swerve only, TBR
+	public void testSwerve(){
+		double wheelBase=23.5;
+		double trackWidth=23.5;
+		Translation2d[] moduleLocations = {
+            new Translation2d(wheelBase / 2.0, trackWidth / 2.0),
+            new Translation2d(wheelBase / 2.0, -trackWidth / 2.0),
+            new Translation2d(-wheelBase / 2.0, trackWidth / 2.0),
+            new Translation2d(-wheelBase / 2.0, -trackWidth / 2.0)
+         };
+         SwerveDriveKinematics wpiKinematics = new SwerveDriveKinematics(
+            moduleLocations[0],
+            moduleLocations[1],
+            moduleLocations[2],
+            moduleLocations[3]);		
+		
+		ChassisSpeeds wanted_speeds= new ChassisSpeeds(0.0,0.0,0.1);
+		SwerveModuleState[] real_module_setpoints = wpiKinematics.toSwerveModuleStates(wanted_speeds);
+//		SmartDashboard.putString("testSwerve().wanted_speed (Omega, vx, vy)", 
+//			String.format("%.2f,%.2f,%.2f", wanted_speeds.omegaRadiansPerSecond, wanted_speeds.vxMetersPerSecond, wanted_speeds.vyMetersPerSecond));
+		for (int i = 0; i < mModules.length; i++) {
+//			SmartDashboard.putString("testSwerve().real_module_setpoints["+ i +"].angle", 
+//				String.format("%.2f",real_module_setpoints[i].angle.getDegrees()));
+//			mModules[i].swerveModule(real_module_setpoints[i].angle.unaryMinus());
+		}
+	}
+*/
+
+/* 	public void straightenAllWheels() {
+		for (SwerveModule module : mModules) {
+			module.straightenWheel();
+		}
+	}
+*/
 
 	public void resetModulesToAbsolute() {
 		for (SwerveModule module : mModules) {
@@ -595,7 +664,7 @@ public class SwerveDrive extends Subsystem {
 	public static class PeriodicIO {
 		// Inputs/Desired States
 		double timestamp;
-		ChassisSpeeds des_chassis_speeds = new ChassisSpeeds(0.0, 0.0, 0.0);
+		ChassisSpeeds des_chassis_speeds = new ChassisSpeeds(0.0, 0.0, 0.0);//a robot-relative chassisSpeeds object
 		Twist2d measured_velocity = new Twist2d();
 		Rotation2d heading = new Rotation2d();
 		Rotation2d pitch = new Rotation2d();
@@ -669,7 +738,7 @@ public class SwerveDrive extends Subsystem {
 		return false;
 	}
 
-	public static class KinematicLimits {
+	public static class KinematicLimits {//TODO: dc.11/9/24, to be merged into global constants. 
 		public double kMaxDriveVelocity = Constants.SwerveConstants.maxSpeed; // m/s
 		public double kMaxAccel = Double.MAX_VALUE; // m/s^2
 		public double kMaxAngularVelocity = Constants.Swerve.maxAngularVelocity; // rad/s

@@ -70,6 +70,7 @@ public class DriveMotionPlanner {
 	}
 
     // update chassis speeds at the specified timestamp based on current Pose2d and Velocity
+	// return a robot-relative chassis_speeds
 	public ChassisSpeeds update(double timestamp, Pose2d current_state, Translation2d current_velocity) {
 		if (mCurrentTrajectory == null) return null;
 

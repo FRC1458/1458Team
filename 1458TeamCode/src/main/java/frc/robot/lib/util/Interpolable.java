@@ -17,5 +17,6 @@ public interface Interpolable<T> {
      * @param x     The requested value. Should be between 0 and 1.
      * @return Interpolable<T> The estimated average between the surrounding data
      */
-    public T interpolate(T other, double x);
+
+    public T Interpolate(T other, double x); //note that this is capitalized because i needed it to different to run for some reason, have fun :skull:
 }

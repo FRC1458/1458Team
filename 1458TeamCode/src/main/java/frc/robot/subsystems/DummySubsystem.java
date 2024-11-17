@@ -19,17 +19,17 @@ public class DummySubsystem extends Subsystem {
 
     @Override
 	public void readPeriodicInputs() {
-        System.out.println("Example Subsystem is reading periodic inputs");
+        //System.out.println("Example Subsystem is reading periodic inputs");
     }
 
     @Override
 	public void writePeriodicOutputs() {
-        System.out.println("Example Subsystem is writing periodic outputs");
+        //System.out.println("Example Subsystem is writing periodic outputs");
     }
 
     @Override
 	public void outputTelemetry() {
-        System.out.println("Example Subsystem is outputting telemetry");
+        //System.out.println("Example Subsystem is outputting telemetry");
     }
 
     @Override
@@ -37,17 +37,17 @@ public class DummySubsystem extends Subsystem {
         enabledLooper.register(new Loop() {
 			@Override
 			public void onStart(double timestamp) {
-				System.out.println("loop has started");
+				//System.out.println("DummySubsystem loop has started");
 			}
 
 			@Override
 			public void onLoop(double timestamp) {
-                System.out.println("on looped");
+                //System.out.println("on looped");
 			}
 
 			@Override
 			public void onStop(double timestamp) {
-				System.out.println("loop has stopped");
+				//System.out.println("DummySubsystem loop has stopped");
             }
 		});
     }

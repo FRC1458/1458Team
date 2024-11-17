@@ -258,4 +258,12 @@ dc.10.21.2024 commented out because wpilib Rotation2d misses .distance () method
 				&& Util.epsilonEquals(speed1.vyMetersPerSecond, other.vyMetersPerSecond, epsilon)
 				&& Util.epsilonEquals(speed1.omegaRadiansPerSecond, other.omegaRadiansPerSecond, epsilon);
 	}
+
+
+	public static Translation2d translateBy(Translation2d a, Translation2d b){
+		return new Translation2d(a.getX()+b.getX(),a.getY()+b.getY());
+	}
+	public static Pose2d translateBy(Pose2d a, Pose2d b){
+		return new Pose2d(translateBy(a.getTranslation(), b.getTranslation()),a.getRotation().plus(b.getRotation()));
+	}
 }
