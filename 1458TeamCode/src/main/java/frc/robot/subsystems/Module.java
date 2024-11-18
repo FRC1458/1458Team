@@ -26,7 +26,7 @@ import frc.robot.lib.util.SwerveModuleConstants;
 import frc.robot.Constants;
 import frc.robot.Robot;
 
-public class Module extends Subsystem {  // Supports looper 
+public class Module extends Subsystem {  // Supports looper
     public int moduleNumber;
     private Rotation2d angleOffset;
 
@@ -46,8 +46,8 @@ public class Module extends Subsystem {  // Supports looper
 	}
     */
 
-    //Table that gets updated every 2 ms 
-    
+    //Table that gets updated every 2 ms
+
     private mPeriodicIO mPeriodicIO = new mPeriodicIO();
 
     public static class mPeriodicIO {
@@ -74,7 +74,6 @@ public class Module extends Subsystem {  // Supports looper
     private final PositionVoltage anglePosition = new PositionVoltage(0);
 
     /* simulation */
-    // private final DifferentialDrivetrainSim mDriveSim;
     private final DCMotorSim mDriveMotorSim;
     private final DCMotorSim mAngleMotorSim;
 
@@ -109,14 +108,12 @@ public class Module extends Subsystem {  // Supports looper
         mAngleMotorSim = new DCMotorSim(DCMotor.getFalcon500(1), Constants.Swerve.angleGearRatio, 0.001);
     }
 
-
-
 	@Override
 	public synchronized void readPeriodicInputs() {
 		mPeriodicIO.timestamp = Timer.getFPGATimestamp();
 		refreshSignals();
 	}
-   
+
 
     public synchronized void refreshSignals() {
 		mPeriodicIO.rotationVelocity = mAngleMotor.getRotorVelocity().getValue();
@@ -132,7 +129,7 @@ public class Module extends Subsystem {  // Supports looper
 
     @Override
 	public synchronized void writePeriodicOutputs() {
-         
+
         //mAngleMotor.getRotorVelocity().getValue();
         //mAngleMotor.setControl(nu
 	}
@@ -190,7 +187,7 @@ public class Module extends Subsystem {  // Supports looper
         double absolutePosition = getCANcoder().getRotations() - angleOffset.getRotations();
        // mAngleMotor.setPosition(absolutePosition);
     }
-      
+
     /** Simulate one module with naive physics model. */
     public void updateSimPeriodic() {
         TalonFXSimState mDriveMotorSimState = mDriveMotor.getSimState();

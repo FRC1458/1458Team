@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 //dc.10.25.2024, ported from com.team1678.frc2024.subsystems.Drive;
 
 import frc.robot.Constants;
+import frc.robot.Robot;
 import frc.robot.Constants.Swerve;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.lib.util.InterpolatingPose2d;
@@ -78,7 +79,7 @@ public class SwerveDrive extends Subsystem {
 
 	private static SwerveDrive mInstance;
 
-	private int mCounter=0;//TODO: code for debug, to be removed 
+	private int mCounter=0;//TODO: code for debug, to be removed
 
 	public static SwerveDrive getInstance() {
 		if (mInstance == null) {
@@ -169,7 +170,7 @@ public class SwerveDrive extends Subsystem {
 	/**
 	 * Enable/disables vision heading control.
 	 *
-	 * @param value Whether or not to override rotation joystick with vision target. 
+	 * @param value Whether or not to override rotation joystick with vision target.
 	 */
 	public synchronized void overrideHeading(boolean value) {
 		mOverrideHeading = value;
@@ -299,10 +300,10 @@ public class SwerveDrive extends Subsystem {
 
 	/**
 	 * Generate and follow a trajectory from the robot-relative points provided.
-	 * 
+	 *
 	 * @param relativeEndPos End position at relative to the current robot pose.
 	 * @param targetHeading End heading relative to the field.
-//dc.zeroReference	  
+//dc.zeroReference
 	 public void setRobotCentricTrajectory(Translation2d relativeEndPos, Rotation2d targetHeading) {
 		Translation2d end_position = getPose().getTranslation().translateBy(relativeEndPos);
 		Rotation2d velocity_dir =
@@ -319,14 +320,14 @@ public class SwerveDrive extends Subsystem {
 				false, waypoints, headings, List.of(), Constants.SwerveConstants.maxAutoSpeed * 0.5, 2.54, 9.0);
 		setTrajectory(new TrajectoryIterator<>(new TimedView<>(traj)));
 	}
-*/ 
-	
+*/
+
 	/**
 	 * Generate and follow a trajectory from the field-relative points provided.
-	 * 
+	 *
 	 * @param fieldRelativeEndPos End position at relative to the field.
 	 * @param targetHeading End heading relative to the field.
-//dc.zeroReference	 
+//dc.zeroReference
 	public void setFieldCentricTrajectory(Translation2d fieldRelativeEndPos, Rotation2d targetHeading) {
 		Translation2d robot_relative_end_pos =
 				fieldRelativeEndPos.translateBy(getPose().getTranslation().inverse());
@@ -358,7 +359,7 @@ public class SwerveDrive extends Subsystem {
 		LogUtil.recordTrajectory("OTF Traj", traj);
 		setTrajectory(new TrajectoryIterator<>(new TimedView<>(traj)));
 	}
-*/ 
+*/
 
 	public synchronized boolean isDoneWithTrajectory() {
 		if (mMotionPlanner == null || mControlState != DriveControlState.PATH_FOLLOWING) {
@@ -370,11 +371,11 @@ public class SwerveDrive extends Subsystem {
 	/**
 	 * Exits trajectory following early.
 	 * @param value Whether to override the current trajectory.
-//dc.zeroReference	 
+//dc.zeroReference
 	public synchronized void overrideTrajectory(boolean value) {
 		mOverrideTrajectory = value;
 	}
-*/ 
+*/
 
 	/**
 	 * If in the Path Following state, updates the
@@ -440,7 +441,7 @@ public class SwerveDrive extends Subsystem {
 					mPeriodicIO.des_module_states.clone(); // Get last setpoint to get differentials
 			ChassisSpeeds prev_chassis_speeds = SwerveConstants.kKinematics.toChassisSpeeds(prev_module_states);
 			SwerveModuleState[] target_module_states = SwerveConstants.kKinematics.toSwerveModuleStates(wanted_speeds);
-			
+
 			// Zero the modules' speeds if want_speeds is less epsilon value
 			if (Util.chassisSpeedsEpsilonEquals(wanted_speeds, new ChassisSpeeds(), Util.kEpsilon)) {
 				for (int i = 0; i < target_module_states.length; i++) {
@@ -498,16 +499,16 @@ public class SwerveDrive extends Subsystem {
 				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisAccel/omegaRPSS").setDouble(domega * min_omega_scalar);
 			}*/
 		}
-		
+
 		SwerveModuleState[] real_module_setpoints = SwerveConstants.kKinematics.toSwerveModuleStates(wanted_speeds);
 /*   	{//TODO: debug code, TBR
 			if (mCounter++ >50){
 				mCounter =0;
-				SmartDashboard.putString("updateSetPoint().wanted_speed (Omega, vx, vy)", 
+				SmartDashboard.putString("updateSetPoint().wanted_speed (Omega, vx, vy)",
 						String.format("%.2f,%.2f,%.2f", wanted_speeds.omegaRadiansPerSecond, wanted_speeds.vxMetersPerSecond, wanted_speeds.vyMetersPerSecond));
 
 				for (int i = 0; i < mModules.length; i++) {
-					SmartDashboard.putString("updateSetPoint().real_module_setpoints["+ i +"].angle", 
+					SmartDashboard.putString("updateSetPoint().real_module_setpoints["+ i +"].angle",
 						String.format("%.2f",real_module_setpoints[i].angle.getDegrees()));
 				}
 			}
@@ -534,14 +535,14 @@ public class SwerveDrive extends Subsystem {
             moduleLocations[0],
             moduleLocations[1],
             moduleLocations[2],
-            moduleLocations[3]);		
-		
+            moduleLocations[3]);
+
 		ChassisSpeeds wanted_speeds= new ChassisSpeeds(0.0,0.0,0.1);
 		SwerveModuleState[] real_module_setpoints = wpiKinematics.toSwerveModuleStates(wanted_speeds);
-//		SmartDashboard.putString("testSwerve().wanted_speed (Omega, vx, vy)", 
+//		SmartDashboard.putString("testSwerve().wanted_speed (Omega, vx, vy)",
 //			String.format("%.2f,%.2f,%.2f", wanted_speeds.omegaRadiansPerSecond, wanted_speeds.vxMetersPerSecond, wanted_speeds.vyMetersPerSecond));
 		for (int i = 0; i < mModules.length; i++) {
-//			SmartDashboard.putString("testSwerve().real_module_setpoints["+ i +"].angle", 
+//			SmartDashboard.putString("testSwerve().real_module_setpoints["+ i +"].angle",
 //				String.format("%.2f",real_module_setpoints[i].angle.getDegrees()));
 //			mModules[i].swerveModule(real_module_setpoints[i].angle.unaryMinus());
 		}
@@ -561,12 +562,12 @@ public class SwerveDrive extends Subsystem {
 		}
 	}
 
-	/* 
+	/*
 //dc.zeroReference
 	public void zeroGyro() {
 		zeroGyro(0.0);
 	}
-*/ 
+*/
 
 	public void zeroGyro(double reset_deg) {
 		mPigeon.setYaw(reset_deg);
@@ -598,6 +599,12 @@ public class SwerveDrive extends Subsystem {
 		for (SwerveModule swerveModule : mModules) {
 			swerveModule.writePeriodicOutputs();
 		}
+
+		if (Robot.isSimulation()) {
+			for (SwerveModule swerveModule : mModules) {
+				swerveModule.updateSimPeriodic();
+			}
+		}
 	}
 
 	public SwerveModuleState[] getModuleStates() {
@@ -608,7 +615,7 @@ public class SwerveDrive extends Subsystem {
 		return states;
 	}
 
-	/* 
+	/*
 //dc.zeroReference
 	public SwerveModulePosition[] getModulePositions() {
 		SwerveModulePosition[] states = new SwerveModulePosition[4];
@@ -617,7 +624,7 @@ public class SwerveDrive extends Subsystem {
 		}
 		return states;
 	}
-*/ 
+*/
 
 /*
 //dc.zeroReference
@@ -639,7 +646,7 @@ public class SwerveDrive extends Subsystem {
 		Pose2d wanted_pose = pose;
 		mWheelTracker.resetPose(wanted_pose);
 	}
-/* 
+/*
 //dc.zeroReference
 	public void resetOdometry(edu.wpi.first.math.geometry.Pose2d pose) {
 		resetOdometry(Util.to254Pose(pose));
@@ -721,8 +728,8 @@ public class SwerveDrive extends Subsystem {
 	*/
 	}
 
-/* 
-//dc.zeroReference	
+/*
+//dc.zeroReference
 	public DriveControlState getControlState() {
 		return mControlState;
 	}
@@ -738,14 +745,14 @@ public class SwerveDrive extends Subsystem {
 		return false;
 	}
 
-	public static class KinematicLimits {//TODO: dc.11/9/24, to be merged into global constants. 
+	public static class KinematicLimits {//TODO: dc.11/9/24, to be merged into global constants.
 		public double kMaxDriveVelocity = Constants.SwerveConstants.maxSpeed; // m/s
 		public double kMaxAccel = Double.MAX_VALUE; // m/s^2
 		public double kMaxAngularVelocity = Constants.Swerve.maxAngularVelocity; // rad/s
 		public double kMaxAngularAccel = Double.MAX_VALUE; // rad/s^2
 	}
 
-	//dc.10.26.2024 util to convert ChassisSpeed into twist2d object 
+	//dc.10.26.2024 util to convert ChassisSpeed into twist2d object
 	public Twist2d toTwist2d(ChassisSpeeds chassisSpeeds) {
 		return new Twist2d(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond, chassisSpeeds.omegaRadiansPerSecond);
 	}

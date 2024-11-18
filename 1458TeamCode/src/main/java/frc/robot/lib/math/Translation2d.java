@@ -117,7 +117,7 @@ public class Translation2d implements ITranslation2d<Translation2d> {
     }
 
     @Override
-    public Translation2d interpolate(final Translation2d other, double x) {
+    public Translation2d Interpolate(final Translation2d other, double x) {
         if (x <= 0) {
             return new Translation2d(this);
         } else if (x >= 1) {

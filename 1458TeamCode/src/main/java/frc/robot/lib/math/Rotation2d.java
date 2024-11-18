@@ -259,7 +259,7 @@ public class Rotation2d implements IRotation2d<Rotation2d> {
     }
 
     @Override
-    public Rotation2d interpolate(final Rotation2d other, double x) {
+    public Rotation2d Interpolate(final Rotation2d other, double x) {
         if (x <= 0.0) {
             return new Rotation2d(this);
         } else if (x >= 1.0) {

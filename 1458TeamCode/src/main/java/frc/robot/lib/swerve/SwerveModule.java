@@ -12,6 +12,8 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.sim.CANcoderSimState;
+import com.ctre.phoenix6.sim.TalonFXSimState;
 
 //dc.10.21.2024 replacing with our own/ported classes
 import frc.robot.Constants;
@@ -22,11 +24,15 @@ import frc.robot.lib.util.Util;
 import frc.robot.lib.drivers.Phoenix6Util;
 import frc.robot.lib.util.SwerveModuleConstants;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 //dc.10.21.2024, replace citrus SwerveModuleState with WPILIB version, the same practice as other Victor & Shaji
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
@@ -60,6 +66,11 @@ public class SwerveModule extends Subsystem {
 		public ControlRequest driveDemand;
 	}
 
+	/* simulation */
+    // private final DifferentialDrivetrainSim mDriveSim;
+    private final DCMotorSim mDriveMotorSim;
+    private final DCMotorSim mAngleMotorSim;
+
 	//dc.10.25.2024 replace citrus SwerveModuleConstants with our own. Just need to angleOffset.getRadians, and disregard CancoderID
 	public SwerveModule(int moduleNumber, SwerveModuleConstants moduleConstants, CANcoder cancoder) {
 		this.kModuleNumber = moduleNumber;
@@ -86,6 +97,10 @@ public class SwerveModule extends Subsystem {
 		mSignals[1] = mDriveMotor.getRotorVelocity();
 		mSignals[2] = mAngleMotor.getRotorPosition();
 		mSignals[3] = mAngleMotor.getRotorVelocity();
+
+		// For simulation
+        mDriveMotorSim = new DCMotorSim(DCMotor.getFalcon500(1), Constants.Swerve.driveGearRatio, 0.001);
+        mAngleMotorSim = new DCMotorSim(DCMotor.getFalcon500(1), Constants.Swerve.angleGearRatio, 0.001);
 	}
 
 	@Override
@@ -326,7 +341,40 @@ public class SwerveModule extends Subsystem {
 		return mSignals;
 	}
 
-/*     //TODO: need to reconcile the following class with lib.util.SwerveModuleConstants class 
+	/** Simulate one module with naive physics model. */
+    public void updateSimPeriodic() {
+        TalonFXSimState mDriveMotorSimState = mDriveMotor.getSimState();
+        TalonFXSimState mAngleMotorSimState = mAngleMotor.getSimState();
+        CANcoderSimState angleEncoderSimState = angleEncoder.getSimState();
+
+        // Pass the robot battery voltage to the simulated devices
+        mDriveMotorSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
+        mAngleMotorSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
+        angleEncoderSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
+
+        // Simulate drive
+        mDriveMotorSim.setInputVoltage(mDriveMotorSimState.getMotorVoltage());
+        mDriveMotorSim.update(TimedRobot.kDefaultPeriod);
+
+        double drivePosition = mDriveMotorSim.getAngularPositionRotations();
+        double driveVelocity = mDriveMotorSim.getAngularVelocityRadPerSec() * Constants.Swerve.wheelCircumference / (2.0 * Math.PI);
+        mDriveMotorSimState.setRawRotorPosition(drivePosition * Constants.Swerve.driveGearRatio);
+        mDriveMotorSimState.setRotorVelocity(driveVelocity * Constants.Swerve.driveGearRatio);
+
+        // Simulate steering
+        mAngleMotorSim.setInputVoltage(mAngleMotorSimState.getMotorVoltage());
+        mAngleMotorSim.update(TimedRobot.kDefaultPeriod);
+
+        double steeringPosition = mAngleMotorSim.getAngularPositionRotations();
+        double steeringVelocity = mAngleMotorSim.getAngularVelocityRadPerSec();
+        mAngleMotorSimState.setRawRotorPosition(steeringPosition * Constants.Swerve.angleGearRatio);
+        mAngleMotorSimState.setRotorVelocity(steeringVelocity * Constants.Swerve.angleGearRatio);
+
+        angleEncoderSimState.setRawPosition(steeringPosition * Constants.Swerve.angleGearRatio);
+        angleEncoderSimState.setVelocity(steeringVelocity * Constants.Swerve.angleGearRatio);
+    }
+
+	/*     //TODO: need to reconcile the following class with lib.util.SwerveModuleConstants class 
 	public static class SwerveModuleConstants { 
 		public final int driveMotorID;
 		public final int angleMotorID;
