@@ -1,6 +1,8 @@
 package frc.robot.lib.trajectory;
 
 import edu.wpi.first.math.trajectory.*;
+import frc.robot.subsystems.DummySubsystem;
+
 import java.nio.file.Paths;
 import java.io.IOException;
 
@@ -12,8 +14,8 @@ public class TrajectoryGenerator {
     private TrajectorySet mTrajectorySet = null;
 
     public class TrajectorySet {
-		public final Trajectory testTrajectory = loadTrajectory("./PathWeaver/output/Path1.json");  //TODO: update with right path of the test json file here. 
-		public final Trajectory testTrajectory2 = loadTrajectory("./PathWeaver/output/Path1.json"); //TODO: update with right path of the test json file here. 
+        
+		public Trajectory testTrajectory = loadTrajectory("./PathWeaver/output/Unnamed_0.wpilib.json"); //TODO: update with right path of the test json file here. 
         /* dc.10.21.2024, additional trajectory can be added similar to the TestTrajectory */
 
         private Trajectory loadTrajectory (String sJsonFile){
@@ -37,6 +39,7 @@ public class TrajectoryGenerator {
     //constructor code
     public TrajectoryGenerator (){
         //dc.to be implemented
+        //TODO: finish trajectory generator constructor
     }
 
     //actually create the trajectory object

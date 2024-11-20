@@ -13,6 +13,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Loops.Looper;
+import frc.robot.autos.AutoModeExecutor;
+import frc.robot.autos.AutoModeSelector;
 import frc.robot.subsystems.Cancoders;
 import frc.robot.subsystems.DummySubsystem;
 import frc.robot.subsystems.SubsystemManager;
@@ -50,6 +52,10 @@ public class RobotContainer25 {
     private DummySubsystem m_ExampleSubsystem;
     private SwerveDrive m_SwerveDrive;
     private Cancoders m_Cancoders;
+    
+    public AutoModeExecutor m_AutoModeExecutor;
+    public static final AutoModeSelector m_AutoModeSelector = new AutoModeSelector();
+	
 
     //contructor
     public RobotContainer25 (){
@@ -121,6 +127,9 @@ public class RobotContainer25 {
 
     // init manual (teleop) mode
     public void initManualMode (){
+        if (m_AutoModeExecutor != null) {
+			m_AutoModeExecutor.stop();
+		}
    		try {
 //          RobotState.getInstance().setIsInAuto(false);
             System.out.println("InitManualMode called");
@@ -137,6 +146,8 @@ public class RobotContainer25 {
         try {
 //          RobotState.getInstance().setIsInAuto(false);
             switchOnLooper(m_EnabledLooper, m_DisabledLooper);
+            
+            m_AutoModeExecutor.start();
 		} catch (Throwable t) {
 //			CrashTracker.logThrowableCrash(t);
 			throw t;
@@ -146,6 +157,12 @@ public class RobotContainer25 {
 
     // init manual (teleop) mode
     public void initDisabledMode (){
+        if (m_AutoModeExecutor != null) {
+			m_AutoModeExecutor.stop();
+		}
+		m_AutoModeSelector.reset();
+		m_AutoModeSelector.updateModeCreator(false);
+		m_AutoModeExecutor = new AutoModeExecutor();
         try {
             switchOnLooper(m_DisabledLooper, m_EnabledLooper);
 		} catch (Throwable t) {
@@ -161,6 +178,9 @@ public class RobotContainer25 {
 //            m_SwerveDrive.straightenAllWheels();
 //            try{Thread.sleep(3000);}catch(Exception e){}
 //            m_SwerveDrive.testSwerve();
+            if (m_AutoModeExecutor != null) {
+			    m_AutoModeExecutor.stop();
+		    }
             m_DisabledLooper.stop();
             m_EnabledLooper.stop();
 		} catch (Throwable t) {
