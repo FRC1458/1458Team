@@ -44,6 +44,9 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.util.ArrayList;
 import java.util.List;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.networktables.StructPublisher;
 
 public class SwerveDrive extends Subsystem {
 
@@ -80,6 +83,13 @@ public class SwerveDrive extends Subsystem {
 	private static SwerveDrive mInstance;
 
 	private int mCounter=0;//TODO: code for debug, to be removed
+
+	private final StructArrayPublisher<SwerveModuleState> statePublisher = NetworkTableInstance.getDefault()
+        .getStructArrayTopic("SmartDashboard/Drive/States", SwerveModuleState.struct).publish();
+    private final StructPublisher<Rotation2d> rotationPublisher = NetworkTableInstance.getDefault()
+        .getStructTopic("SmartDashboard/Drive/Rotation", Rotation2d.struct).publish();
+    private final StructPublisher<ChassisSpeeds> chassisSpeedsPublisher = NetworkTableInstance.getDefault()
+        .getStructTopic("SmartDashboard/Drive/ChassisSpeeds", ChassisSpeeds.struct).publish();
 
 	public static SwerveDrive getInstance() {
 		if (mInstance == null) {
@@ -244,7 +254,7 @@ public class SwerveDrive extends Subsystem {
 					// 				new InterpolatingPose2d(mWheelTracker.getRobotPose()),
 					// 				mPeriodicIO.measured_velocity,
 					// 				mPeriodicIO.predicted_velocity);
-					m_field.setRobotPose(mWheelTracker.getRobotPose());
+					// m_field.setRobotPose(mWheelTracker.getRobotPose());
 				}
 			}
 
@@ -604,6 +614,14 @@ public class SwerveDrive extends Subsystem {
 			for (SwerveModule swerveModule : mModules) {
 				swerveModule.updateSimPeriodic();
 			}
+
+			// mWheelTracker.resetPose(simPose);
+			m_field.setRobotPose(mWheelTracker.getRobotPose());
+
+			// Publish swerve module states and rotaton to smartdashboard
+			statePublisher.set(getModuleStates());
+			Rotation2d rotation = mWheelTracker.getRobotPose().getRotation();
+			rotationPublisher.set(rotation);
 		}
 	}
 

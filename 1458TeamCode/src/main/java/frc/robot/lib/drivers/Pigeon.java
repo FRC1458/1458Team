@@ -10,6 +10,8 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.ctre.phoenix6.sim.Pigeon2SimState;
+
 import frc.robot.Constants;
 import frc.robot.Ports;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -105,5 +107,9 @@ public class Pigeon {
 
 	public StatusSignal<Double> getRateStatusSignal() {
 		return mGyro.getAngularVelocityZDevice();
+	}
+
+	public Pigeon2SimState getSimState() {
+		return mGyro.getSimState();
 	}
 }
