@@ -508,6 +508,21 @@ public class SwerveDrive extends Subsystem {
 				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisAccel/vyMPSS").setDouble(dy * min_translational_scalar);
 				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisAccel/omegaRPSS").setDouble(domega * min_omega_scalar);
 			}*/
+
+			if (Robot.isSimulation()) {
+				for (SwerveModule swerveModule : mModules) {
+					swerveModule.updateSimPeriodic();
+				}
+
+				// mWheelTracker.resetPose(simPose);
+				// m_field.setRobotPose(mWheelTracker.getRobotPose());
+				m_field.setRobotPose(getPose());
+
+				// Publish swerve module states and rotaton to smartdashboard
+				statePublisher.set(SwerveConstants.kKinematics.toSwerveModuleStates(wanted_speeds));
+				Rotation2d rotation = mWheelTracker.getRobotPose().getRotation();
+				rotationPublisher.set(rotation);
+			}
 		}
 
 		SwerveModuleState[] real_module_setpoints = SwerveConstants.kKinematics.toSwerveModuleStates(wanted_speeds);
@@ -608,20 +623,6 @@ public class SwerveDrive extends Subsystem {
 
 		for (SwerveModule swerveModule : mModules) {
 			swerveModule.writePeriodicOutputs();
-		}
-
-		if (Robot.isSimulation()) {
-			for (SwerveModule swerveModule : mModules) {
-				swerveModule.updateSimPeriodic();
-			}
-
-			// mWheelTracker.resetPose(simPose);
-			m_field.setRobotPose(mWheelTracker.getRobotPose());
-
-			// Publish swerve module states and rotaton to smartdashboard
-			statePublisher.set(getModuleStates());
-			Rotation2d rotation = mWheelTracker.getRobotPose().getRotation();
-			rotationPublisher.set(rotation);
 		}
 	}
 
