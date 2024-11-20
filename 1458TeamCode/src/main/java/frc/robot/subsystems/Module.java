@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
-import frc.robot.lib.math.Conversions;
+import frc.robot.lib.util.Conversions;
 import frc.robot.lib.util.SwerveModuleConstants;
 import frc.robot.Constants;
 import frc.robot.Robot;
