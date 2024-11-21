@@ -9,6 +9,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.lib.trajectory.TrajectoryIterator;
+import frc.robot.Constants;
 import frc.robot.lib.control.Lookahead;
 import frc.robot.lib.util.Util;
 
@@ -19,7 +20,7 @@ public class DriveMotionPlanner {
     double mDt = 0.0;   //delta of time
     boolean mIsReversed = false;
 	double mLastTime = Double.POSITIVE_INFINITY;
-/* 	public TimedState<Pose2dWithMotion> mLastSetpoint = null;*/ //dc.10.21.2024, mLastSetpoint seems only to appear on left and zero right-side reference
+ 	public Trajectory.State mLastSetpoint = null; //dc.10.21.2024, mLastSetpoint seems only to appear on left and zero right-side reference
 	public Trajectory.State mSetpoint = new Trajectory.State(0.,0.,0.,new Pose2d(0.,0.,new Rotation2d(0)),0.);
 	Pose2d mError = new Pose2d(0, 0, new Rotation2d(0));
 /*  ErrorTracker mErrorTracker = new ErrorTracker(15 * 100);   */ //dc.10.21.2024, mErrorTracker seems only to appear on left and its getty function has zero reference. 
@@ -34,15 +35,37 @@ public class DriveMotionPlanner {
 
 	Lookahead mSpeedLookahead = null;
 
+	private boolean useDefaultCook = true;
 
+	public static final double kAdaptivePathMinLookaheadDistance = 0.15;
+	public static final double kAdaptivePathMaxLookaheadDistance = 0.61;
 
     //constructor code 
     public DriveMotionPlanner() {}
 
     //set trajectory to traverse
     public void setTrajectory(final TrajectoryIterator trajectory) {
+		System.out.println("Im in your walls");
         mCurrentTrajectory = trajectory;
-        //TODO: actual setTrajectory() to be implemented 
+		mSetpoint = trajectory.advance(0);
+		mLastSetpoint = null;
+		useDefaultCook = true;
+		mSpeedLookahead = new Lookahead(
+				kAdaptivePathMinLookaheadDistance,
+				kAdaptivePathMaxLookaheadDistance,
+				0.0,
+				Constants.SwerveConstants.maxSpeed);
+		mCurrentTrajectoryLength =
+				mCurrentTrajectory.getLastPoint().timeSeconds;
+		for (int i = 0; i < trajectory.trajectory().getStates().size(); ++i) {
+			if (trajectory.trajectory().getStates().get(i).velocityMetersPerSecond > Util.kEpsilon) {
+				mIsReversed = false;
+				break;
+			} else if (trajectory.trajectory().getStates().get(i).velocityMetersPerSecond < -Util.kEpsilon) {
+				mIsReversed = true;
+				break;
+			}
+		}
     }
 
 	public void reset() {

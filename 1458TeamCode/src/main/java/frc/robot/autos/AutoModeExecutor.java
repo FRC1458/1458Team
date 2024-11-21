@@ -25,6 +25,8 @@ public class AutoModeExecutor {
 				public void runCrashTracked() {
 					if (m_auto_mode != null) {
 						m_auto_mode.run();
+	
+		System.out.println("Auto Executor Running!");
 					}
 				}
 			});

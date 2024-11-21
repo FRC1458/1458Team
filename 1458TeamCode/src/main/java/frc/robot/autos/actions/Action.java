@@ -4,7 +4,7 @@ package frc.robot.autos.actions;
  * Action Interface, an interface that describes an iterative action. It is run by an autonomous action, called by the
  * method runAction in AutoModeBase (or more commonly in autonomous modes that extend AutoModeBase)
  *
- * @see com.team1678.frc2023.auto.frc2018.auto.AutoModeBase#runAction
+ * @see frc.robot.autos.AutoModeBase#runAction
  */
 public interface Action {
 	/**

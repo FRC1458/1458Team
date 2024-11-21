@@ -28,6 +28,7 @@ public class SwerveTrajectoryAction implements Action {
 			System.out.println("Reset gyro to " + newRotation);
 			mDrive.zeroGyro(newRotation);
 		}
+		System.out.println("Swerve Trajectory Action Started!");
 		mDrive.setTrajectory(mTrajectory);
 	}
 
