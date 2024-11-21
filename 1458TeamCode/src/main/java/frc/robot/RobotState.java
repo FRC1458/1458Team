@@ -211,5 +211,35 @@ public class RobotState {
 	 */
 	public synchronized boolean getHasRecievedVisionUpdate() {
         return mHasRecievedVisionUpdate;
-	}    
+	}
+	public static class VisionUpdate {
+		private double timestamp;
+		private Translation2d field_to_camera;
+		private Translation2d robot_to_camera;
+		private double xy_stdev;
+
+		public VisionUpdate(
+				double timestamp, Translation2d field_to_camera, Translation2d robot_to_camera, double xy_stdev) {
+			this.timestamp = timestamp;
+			this.field_to_camera = field_to_camera;
+			this.robot_to_camera = robot_to_camera;
+			this.xy_stdev = xy_stdev;
+		}
+
+		public double getTimestamp() {
+			return timestamp;
+		}
+
+		public Translation2d getFieldToVehicle() {
+			return field_to_camera;
+		}
+
+		public Translation2d getRobotToCamera() {
+			return robot_to_camera;
+		}
+
+		public double getXYStdev() {
+			return xy_stdev;
+		}
+	}
 }
