@@ -24,6 +24,7 @@ import frc.robot.subsystems.SubsystemManager;
 import frc.robot.subsystems.SwerveDrive;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.lib.util.Util;
+import frc.robot.lib.trajectory.TrajectoryGenerator;
 
 /**
  * DC 10.28.2024
@@ -94,9 +95,10 @@ public class RobotContainer25 {
             m_SubsystemManager.registerEnabledLoops(m_EnabledLooper);
             m_SubsystemManager.registerDisabledLoops(m_DisabledLooper);
 
-            /* 
-            TrajectoryGenerator.getInstance().generateTrajectories();  //TODO:  complete TrajectoryGenerator to load Trajectories from Json file
-			RobotState.getInstance().resetKalman(); //TODO: complete RobotState classes
+            //load all predefined trajectories  
+            TrajectoryGenerator.getInstance().generateTrajectories();
+			/*
+            RobotState.getInstance().resetKalman(); //TODO: complete RobotState classes
             */
             //set robot to neutral brake
             m_SwerveDrive.setNeutralBrake(true);

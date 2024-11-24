@@ -7,8 +7,8 @@ import frc.robot.lib.trajectory.TrajectoryGenerator;
 import frc.robot.lib.trajectory.TrajectoryGenerator.TrajectorySet;
 
 public class TestPathMode extends AutoModeBase {
-	private TrajectoryGenerator trajectoryGenerator = new TrajectoryGenerator();
-	private TrajectorySet trajectorySet = trajectoryGenerator.new TrajectorySet();
+	private TrajectoryGenerator trajectoryGenerator = TrajectoryGenerator.getInstance();
+	private TrajectorySet trajectorySet = trajectoryGenerator.getTrajectorySet();
 	public TestPathMode() {}
 
 	// spotless:off
