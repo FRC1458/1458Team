@@ -17,7 +17,7 @@ public class WheelTracker {
 	private final Pigeon mPigeon = Pigeon.getInstance();
 	private final SwerveModule[] mModules;
 
-	private WheelProperties[] WheelProperties = new WheelProperties[4];
+	public WheelProperties[] WheelProperties = new WheelProperties[4];
 	private Pose2d mRobotPose = new Pose2d(10,10,new Rotation2d(0));
 	private Translation2d mRobotVelocity = new Translation2d(0, 0);
 	private BaseStatusSignal[] mAllSignals;
@@ -146,6 +146,7 @@ public class WheelTracker {
 			y += w.estimatedRobotPose.getTranslation().getY();
 		}
 		final Pose2d new_pose = new Pose2d(new Translation2d(x / n, y / n), heading);
+		// final Pose2d new_pose = new Pose2d(new Translation2d(0, y / n), heading);
 
 		// Velocity calcs
 		double sample_window = timestamp - last_sample_timestamp;

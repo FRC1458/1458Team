@@ -286,6 +286,30 @@ public class SwerveDrive extends Subsystem {
 				translation_vel.getX(),
 				translation_vel.getY(),
 				twist_vel.dtheta);
+
+
+		// if (Robot.isSimulation()) {
+		// 	for (SwerveModule swerveModule : mModules) {
+		// 		swerveModule.updateSimPeriodic();
+		// 		// swerveModule.refreshSignals();
+		// 	}
+
+		// 	// mWheelTracker.resetPose(simPose);
+		// 	m_field.setRobotPose(mWheelTracker.getRobotPose());
+		// 	// m_field.setRobotPose(getPose());
+
+		// 	// Pose2d robot_pose = new Pose2d(
+		// 	// 	wanted_speeds.vxMetersPerSecond,
+		// 	// 	wanted_speeds.vyMetersPerSecond,
+		// 	// 	Rotation2d.fromRadians(wanted_speeds.omegaRadiansPerSecond));
+		// 	// m_field.setRobotPose(robot_pose);
+
+		// 	// Publish swerve module states and rotaton to smartdashboard
+		// 	// statePublisher.set(SwerveConstants.kKinematics.toSwerveModuleStates(wanted_speeds));
+		// 	statePublisher.set(mPeriodicIO.des_module_states);
+		// 	Rotation2d rotation = mWheelTracker.getRobotPose().getRotation();
+		// 	rotationPublisher.set(rotation);
+		// }
 	}
 
 	public synchronized void setTrajectory(TrajectoryIterator trajectory) {
@@ -508,21 +532,6 @@ public class SwerveDrive extends Subsystem {
 				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisAccel/vyMPSS").setDouble(dy * min_translational_scalar);
 				NetworkTableInstance.getDefault().getEntry("/Telemetry/ChassisAccel/omegaRPSS").setDouble(domega * min_omega_scalar);
 			}*/
-
-			if (Robot.isSimulation()) {
-				for (SwerveModule swerveModule : mModules) {
-					swerveModule.updateSimPeriodic();
-				}
-
-				// mWheelTracker.resetPose(simPose);
-				// m_field.setRobotPose(mWheelTracker.getRobotPose());
-				m_field.setRobotPose(getPose());
-
-				// Publish swerve module states and rotaton to smartdashboard
-				statePublisher.set(SwerveConstants.kKinematics.toSwerveModuleStates(wanted_speeds));
-				Rotation2d rotation = mWheelTracker.getRobotPose().getRotation();
-				rotationPublisher.set(rotation);
-			}
 		}
 
 		SwerveModuleState[] real_module_setpoints = SwerveConstants.kKinematics.toSwerveModuleStates(wanted_speeds);
@@ -544,6 +553,27 @@ public class SwerveDrive extends Subsystem {
 		mPeriodicIO.predicted_velocity =
 				Util.logMap(Util.expMap(pred_twist_vel).rotateBy(getHeading()));//dc modified original citrus code: Pose2d.log(Pose2d.exp(wanted_speeds.toTwist2d()).rotateBy(getHeading()));
 		mPeriodicIO.des_module_states = real_module_setpoints;
+
+		// if (Robot.isSimulation()) {
+		// 	for (SwerveModule swerveModule : mModules) {
+		// 		swerveModule.updateSimPeriodic();
+		// 	}
+
+		// 	// mWheelTracker.resetPose(simPose);
+		// 	m_field.setRobotPose(mWheelTracker.getRobotPose());
+		// 	// m_field.setRobotPose(getPose());
+
+		// 	// Pose2d robot_pose = new Pose2d(
+		// 	// 	wanted_speeds.vxMetersPerSecond,
+		// 	// 	wanted_speeds.vyMetersPerSecond,
+		// 	// 	Rotation2d.fromRadians(wanted_speeds.omegaRadiansPerSecond));
+		// 	// m_field.setRobotPose(robot_pose);
+
+		// 	// Publish swerve module states and rotaton to smartdashboard
+		// 	statePublisher.set(SwerveConstants.kKinematics.toSwerveModuleStates(wanted_speeds));
+		// 	Rotation2d rotation = mWheelTracker.getRobotPose().getRotation();
+		// 	rotationPublisher.set(rotation);
+		// }
 	}
 
 /* 	//TODO: debug swerve only, TBR
@@ -624,6 +654,30 @@ public class SwerveDrive extends Subsystem {
 		for (SwerveModule swerveModule : mModules) {
 			swerveModule.writePeriodicOutputs();
 		}
+
+		if (Robot.isSimulation()) {
+			for (SwerveModule swerveModule : mModules) {
+				swerveModule.updateSimPeriodic();
+				// swerveModule.refreshSignals();
+			}
+
+			// mWheelTracker.resetPose(simPose);
+			m_field.setRobotPose(mWheelTracker.getRobotPose());
+			// m_field.setRobotPose(getPose());
+
+			// Pose2d robot_pose = new Pose2d(
+			// 	wanted_speeds.vxMetersPerSecond,
+			// 	wanted_speeds.vyMetersPerSecond,
+			// 	Rotation2d.fromRadians(wanted_speeds.omegaRadiansPerSecond));
+			// m_field.setRobotPose(robot_pose);
+
+			// Publish swerve module states and rotaton to smartdashboard
+			// statePublisher.set(SwerveConstants.kKinematics.toSwerveModuleStates(wanted_speeds));
+			statePublisher.set(mPeriodicIO.des_module_states);
+			Rotation2d rotation = mWheelTracker.getRobotPose().getRotation();
+			rotationPublisher.set(rotation);
+		}
+
 	}
 
 	public SwerveModuleState[] getModuleStates() {
