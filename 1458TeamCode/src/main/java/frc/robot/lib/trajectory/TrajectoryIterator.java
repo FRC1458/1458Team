@@ -16,9 +16,11 @@ public class TrajectoryIterator {
     //construtor code
     public TrajectoryIterator (Trajectory curTrajectory){
         mCurrentTrajectory=curTrajectory;
+        current_sample_ = curTrajectory.getStates().get(0);
+        //progress_ = view_.first_interpolant();        //dc. is it not zero??
     }
 
-    //preview the trajectory
+    //advance by additional time on the trajectory
     public Trajectory.State advance (double additional_progress){
         progress_ = Math.max(0.0, Math.min(mCurrentTrajectory.getTotalTimeSeconds(), progress_ + additional_progress));
         current_sample_ = mCurrentTrajectory.sample(progress_);
@@ -50,4 +52,10 @@ public class TrajectoryIterator {
 
     //access to the current trajectory properties
     public Trajectory trajectory(){ return mCurrentTrajectory;}
+
+    //get the current state
+    public Trajectory.State getState(){
+        return current_sample_;
+    }
+
 }
