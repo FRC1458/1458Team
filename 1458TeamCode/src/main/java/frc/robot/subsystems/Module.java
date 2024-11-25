@@ -185,7 +185,7 @@ public class Module extends Subsystem {  // Supports looper
         SmartDashboard.putNumber("Module " + moduleNumber + " getRotations", getCANcoder().getRotations());
         SmartDashboard.putNumber("Module " + moduleNumber + " AngleOffset getRotations", angleOffset.getRotations());
         double absolutePosition = getCANcoder().getRotations() - angleOffset.getRotations();
-       // mAngleMotor.setPosition(absolutePosition);
+        mAngleMotor.setPosition(absolutePosition);
     }
 
     /** Simulate one module with naive physics model. */

@@ -7,6 +7,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -111,15 +112,15 @@ public class SwerveModule extends Subsystem {
 
 		//check drive motor's current and voltage and publish to NetworkTable, plot them in SIM GUI to verify motion profile used by TalonFx motor
 		//TODO: clean up at production release
-		double statorCurrent = mDriveMotor.getStatorCurrent().getValueAsDouble();
-		double motorVoltage = mDriveMotor.getMotorVoltage().getValueAsDouble();
-		NetworkTableInstance.getDefault().getEntry("/Telemetry/Module#" + kModuleNumber +"/DriveMotor/Voltage").setDouble(motorVoltage);
-		NetworkTableInstance.getDefault().getEntry("/Telemetry/Module#" + kModuleNumber +"/DriveMotor/Current").setDouble(statorCurrent);
+		double driveMotorStatorCurrent = mDriveMotor.getStatorCurrent().getValueAsDouble();
+		double driveMotorVoltage = mDriveMotor.getMotorVoltage().getValueAsDouble();
+		NetworkTableInstance.getDefault().getEntry("/Telemetry/Module#" + kModuleNumber +"/DriveMotor/Voltage").setDouble(driveMotorVoltage);
+		NetworkTableInstance.getDefault().getEntry("/Telemetry/Module#" + kModuleNumber +"/DriveMotor/Current").setDouble(driveMotorStatorCurrent);
 
-		double astatorCurrent = mAngleMotor.getStatorCurrent().getValueAsDouble();
-		double amotorVoltage = mAngleMotor.getMotorVoltage().getValueAsDouble();
-		NetworkTableInstance.getDefault().getEntry("/Telemetry/Module#" + kModuleNumber +"/AngleMotor/Voltage").setDouble(amotorVoltage);
-		NetworkTableInstance.getDefault().getEntry("/Telemetry/Module#" + kModuleNumber +"/AngleMotor/Current").setDouble(astatorCurrent);
+		double angleMotorStatorCurrent = mAngleMotor.getStatorCurrent().getValueAsDouble();
+		double angleMotorVoltage = mAngleMotor.getMotorVoltage().getValueAsDouble();
+		NetworkTableInstance.getDefault().getEntry("/Telemetry/Module#" + kModuleNumber +"/AngleMotor/Voltage").setDouble(angleMotorVoltage);
+		NetworkTableInstance.getDefault().getEntry("/Telemetry/Module#" + kModuleNumber +"/AngleMotor/Current").setDouble(angleMotorStatorCurrent);
 	}
 
 	public synchronized void refreshSignals() {
@@ -127,9 +128,9 @@ public class SwerveModule extends Subsystem {
  		mPeriodicIO.rotationVelocity = mAngleMotor.getRotorVelocity().getValue();
 		mPeriodicIO.driveVelocity = mDriveMotor.getRotorVelocity().getValue();
 
-		// mPeriodicIO.rotationPosition = BaseStatusSignal.getLatencyCompensatedValue(
-		// 		mAngleMotor.getRotorPosition(), mAngleMotor.getRotorVelocity());
-		mPeriodicIO.rotationPosition = mAngleMotor.getRotorPosition().getValue();
+		mPeriodicIO.rotationPosition = BaseStatusSignal.getLatencyCompensatedValue(
+				mAngleMotor.getRotorPosition(), mAngleMotor.getRotorVelocity());
+		// mPeriodicIO.rotationPosition = mAngleMotor.getRotorPosition().getValue();
 		// mPeriodicIO.rotationPosition = 0;
 		mPeriodicIO.drivePosition = mDriveMotor.getRotorPosition().getValueAsDouble();
 	}
@@ -198,6 +199,14 @@ public class SwerveModule extends Subsystem {
 		double rotorPosition = Conversions.degreesToRotation(angleDegrees, SwerveConstants.angleGearRatio);
 		mPeriodicIO.rotationDemand = new PositionDutyCycle(rotorPosition, 0.0, true, 0.0, 0, false, false, false);
 
+		// // mPeriodicIO.rotationDemand = new PositionVoltage(rotorPosition)
+		// // 	.withEnableFOC(true)
+		// // 	.withOverrideBrakeDurNeutral(false);
+
+		// mPeriodicIO.rotationDemand = new PositionVoltage(0).withPosition(rotorPosition)
+		// 	.withEnableFOC(true)
+		// 	.withOverrideBrakeDurNeutral(false);
+
 		NetworkTableInstance.getDefault().getEntry("/Telemetry/Module#" + kModuleNumber +"/AngleMotor/DemandAngle").setDouble(rotorPosition);
 	}
 
@@ -213,15 +222,19 @@ public class SwerveModule extends Subsystem {
 	* for motor returns to zero position in setSteeringAngleOptimized; and vice versus.
 	*/
 	public void resetToAbsolute() {
- 		angleEncoder.getAbsolutePosition().waitForUpdate(Constants.kLongCANTimeoutMs);
-		double angle = Util.placeInAppropriate0To360Scope(
-				getCurrentUnboundedDegrees(), -(getCanCoder().getDegrees() - kAngleOffset)); //see above comments foor the negate operation
-		// double angle = Util.placeInAppropriate0To360Scope(
-		// 		0, -(getCanCoder().getDegrees() - kAngleOffset)); //see above comments foor the negate operation
-		double absolutePosition = Conversions.degreesToRotation(angle, SwerveConstants.angleGearRatio);
-		//reset CANcoder reading to relative angle to Zero position, does NOT move motor
-		Phoenix6Util.checkErrorAndRetry(() -> mAngleMotor.setPosition(absolutePosition, Constants.kLongCANTimeoutMs));
-		mAngleMotor.setPosition(0, Constants.kLongCANTimeoutMs);
+		if (Robot.isReal()) {
+			angleEncoder.getAbsolutePosition().waitForUpdate(Constants.kLongCANTimeoutMs);
+			double angle = Util.placeInAppropriate0To360Scope(
+					getCurrentUnboundedDegrees(), -(getCanCoder().getDegrees() - kAngleOffset)); //see above comments foor the negate operation
+			// double angle = Util.placeInAppropriate0To360Scope(
+			// 		0, -(getCanCoder().getDegrees() - kAngleOffset)); //see above comments foor the negate operation
+			double absolutePosition = Conversions.degreesToRotation(angle, SwerveConstants.angleGearRatio);
+			//reset CANcoder reading to relative angle to Zero position, does NOT move motor
+			// Phoenix6Util.checkErrorAndRetry(() -> mAngleMotor.setPosition(absolutePosition, Constants.kLongCANTimeoutMs));
+			mAngleMotor.setPosition(absolutePosition, Constants.kLongCANTimeoutMs);
+		} else {
+			mAngleMotor.setPosition(0, Constants.kLongCANTimeoutMs);
+		}
 	}
 
 /* TODO: TBR, keep the two test functions there for now in case we might need them to debug auto-mode
@@ -264,6 +277,7 @@ public class SwerveModule extends Subsystem {
 		mDriveMotor.getConfigurator().refresh(t);
 		t.MotorOutput.NeutralMode = wantBrake ? NeutralModeValue.Brake : NeutralModeValue.Coast;
 		mDriveMotor.getConfigurator().apply(t);
+
 		mAngleMotor.getConfigurator().refresh(t);
 		t.MotorOutput.NeutralMode = !wantBrake ? NeutralModeValue.Brake : NeutralModeValue.Coast;
 		mAngleMotor.getConfigurator().apply(t);
