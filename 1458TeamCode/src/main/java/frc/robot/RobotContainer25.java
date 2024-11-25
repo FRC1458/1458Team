@@ -184,6 +184,16 @@ public class RobotContainer25 {
     // init manual (teleop) mode
     public void initTestMode (){
         try {
+//          RobotState.getInstance().setIsInAuto(false);
+            m_AutoModeSelector.forceModeTo(true);
+            switchOnLooper(m_EnabledLooper, m_DisabledLooper);
+            
+            m_AutoModeExecutor.start();
+		} catch (Throwable t) {
+//			CrashTracker.logThrowableCrash(t);
+			throw t;
+		}
+        /*try {
             System.out.println("InitTestMode called");
 //            m_SwerveDrive.straightenAllWheels();
 //            try{Thread.sleep(3000);}catch(Exception e){}
@@ -196,7 +206,7 @@ public class RobotContainer25 {
 		} catch (Throwable t) {
 //			CrashTracker.logThrowableCrash(t);
 			throw t;
-		}
+		}*/
     }
 
     // manual mode periodic callback 

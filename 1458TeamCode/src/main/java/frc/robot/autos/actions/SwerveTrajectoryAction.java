@@ -24,7 +24,7 @@ public class SwerveTrajectoryAction implements Action {
 	@Override
 	public void start() {
 		if (mResetGyro) {
-			double newRotation = mTrajectory.advance(0).poseMeters.getRotation().getDegrees();
+			double newRotation = mTrajectory.getState().poseMeters.getRotation().getDegrees();
 			System.out.println("Reset gyro to " + newRotation);
 			mDrive.zeroGyro(newRotation);
 		}

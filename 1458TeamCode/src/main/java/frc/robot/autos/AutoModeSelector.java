@@ -20,12 +20,27 @@ public class AutoModeSelector {
 	public AutoModeSelector() {
 		mModeChooser.addOption("Do Nothing", DesiredMode.DO_NOTHING);
 		mModeChooser.addOption("Test Path Mode", DesiredMode.TESTPATHMODE);
-		mModeChooser.setDefaultOption("Do Nothing", DesiredMode.DO_NOTHING);
+		mModeChooser.setDefaultOption("Test Path Mode", DesiredMode.TESTPATHMODE);
 		SmartDashboard.putData("Auto Mode", mModeChooser);
 	}
 
 	public void updateModeCreator(boolean force_regen) {
 		DesiredMode desiredMode = mModeChooser.getSelected();
+
+		if (desiredMode == null) {
+			desiredMode = DesiredMode.DO_NOTHING;
+		}
+		if (mCachedDesiredMode != desiredMode
+		|| force_regen) {
+			System.out.println("Auto selection changed, updating creator: desiredMode-> " + desiredMode.name());
+			
+			mAutoMode = getAutoModeForParams(desiredMode);
+			}
+		mCachedDesiredMode = desiredMode;
+	}
+
+	public void forceModeTo(boolean force_regen){
+		DesiredMode desiredMode = DesiredMode.TESTPATHMODE;
 
 		if (desiredMode == null) {
 			desiredMode = DesiredMode.DO_NOTHING;

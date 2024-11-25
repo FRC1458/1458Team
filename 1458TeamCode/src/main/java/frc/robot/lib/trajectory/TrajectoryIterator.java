@@ -1,7 +1,6 @@
 package frc.robot.lib.trajectory;
 
 import java.util.List;
-
 import edu.wpi.first.math.trajectory.*;
 
 //dc.10.21.2024, rewrite the TrajectoryIterator class based on wpilib Trajectory package, main functions as following
@@ -16,12 +15,18 @@ public class TrajectoryIterator {
     //construtor code
     public TrajectoryIterator (Trajectory curTrajectory){
         mCurrentTrajectory=curTrajectory;
+        current_sample_ = curTrajectory.getStates().get(0);
+        //progress_ = view_.first_interpolant();        //dc. is it not zero??
     }
 
-    //preview the trajectory
+    //advance by additional time on the trajectory
     public Trajectory.State advance (double additional_progress){
+        if(additional_progress == Double.POSITIVE_INFINITY){
+            System.out.println("Oh no");
+        }
         progress_ = Math.max(0.0, Math.min(mCurrentTrajectory.getTotalTimeSeconds(), progress_ + additional_progress));
         current_sample_ = mCurrentTrajectory.sample(progress_);
+        System.out.println("thing:"+additional_progress);
         return current_sample_;
     }
 
@@ -40,6 +45,9 @@ public class TrajectoryIterator {
     }
 
     public double getRemainingProgress() {
+        
+		System.out.println("progress: "+progress_);
+        System.out.println("total time in seconds: "+mCurrentTrajectory.getTotalTimeSeconds());
         return Math.max(0.0, mCurrentTrajectory.getTotalTimeSeconds() - progress_);
     }
 
@@ -50,4 +58,10 @@ public class TrajectoryIterator {
 
     //access to the current trajectory properties
     public Trajectory trajectory(){ return mCurrentTrajectory;}
+
+    //get the current state
+    public Trajectory.State getState(){
+        return current_sample_;
+    }
+
 }
