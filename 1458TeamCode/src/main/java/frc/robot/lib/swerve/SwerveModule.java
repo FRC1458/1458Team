@@ -12,6 +12,8 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.sim.CANcoderSimState;
+import com.ctre.phoenix6.sim.TalonFXSimState;
 
 //dc.10.21.2024 replacing with our own/ported classes
 import frc.robot.Constants;
@@ -22,29 +24,34 @@ import frc.robot.lib.util.Util;
 import frc.robot.lib.drivers.Phoenix6Util;
 import frc.robot.lib.util.SwerveModuleConstants;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 //dc.10.21.2024, replace citrus SwerveModuleState with WPILIB version, the same practice as other Victor & Shaji
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 
 public class SwerveModule extends Subsystem {
-
 	private final int kModuleNumber;
 	private final double kAngleOffset;
 
 	private TalonFX mAngleMotor;
 	private TalonFX mDriveMotor;
 	private CANcoder angleEncoder;
+	private DCMotorSim mDriveMotorSim;
+	private DCMotorSim mAngleMotorSim;
 
 	private BaseStatusSignal[] mSignals = new BaseStatusSignal[4];
 
 	private mPeriodicIO mPeriodicIO = new mPeriodicIO();
-	
-	private int mCounter=0;//TODO: code for debug, to be removed 
+
+	private int mCounter=0;//TODO: code for debug, to be removed
 
 	public static class mPeriodicIO {
 		// Inputs
@@ -79,13 +86,15 @@ public class SwerveModule extends Subsystem {
 				mDriveMotor.getConfigurator().apply(SwerveConstants.DriveFXConfig(), Constants.kLongCANTimeoutMs));
 		mDriveMotor.setInverted(moduleConstants.driveInvert);
 		mDriveMotor.setPosition(0.0);
-		
+
 		resetToAbsolute();
-		
 		mSignals[0] = mDriveMotor.getRotorPosition();
 		mSignals[1] = mDriveMotor.getRotorVelocity();
 		mSignals[2] = mAngleMotor.getRotorPosition();
 		mSignals[3] = mAngleMotor.getRotorVelocity();
+
+		mDriveMotorSim = new DCMotorSim(DCMotor.getFalcon500(1), Constants.Swerve.driveGearRatio, 0.001);
+		mAngleMotorSim = new DCMotorSim(DCMotor.getFalcon500(1), Constants.Swerve.angleGearRatio, 0.001);
 	}
 
 	@Override
@@ -93,12 +102,17 @@ public class SwerveModule extends Subsystem {
 		mPeriodicIO.timestamp = Timer.getFPGATimestamp();
 		refreshSignals();
 
-		//check drive motor's current and voltage and publish to NetworkTable, plot them in SIM GUI to verify motion profile used by TalonFx motor
+		//check drive and angle motor's current and voltage and publish to NetworkTable, plot them in SIM GUI to verify motion profile used by TalonFx motor
 		//TODO: clean up at production release
-		double statorCurrent = mDriveMotor.getStatorCurrent().getValueAsDouble();
-		double motorVoltage = mDriveMotor.getMotorVoltage().getValueAsDouble();
-		NetworkTableInstance.getDefault().getEntry("/Telemetry/Module#" + kModuleNumber +"/DriveMotor/Voltage").setDouble(motorVoltage);
-		NetworkTableInstance.getDefault().getEntry("/Telemetry/Module#" + kModuleNumber +"/DriveMotor/Current").setDouble(statorCurrent);
+		double driveMotorStatorCurrent = mDriveMotor.getStatorCurrent().getValueAsDouble();
+		double driveMotorVoltage = mDriveMotor.getMotorVoltage().getValueAsDouble();
+		NetworkTableInstance.getDefault().getEntry("/Telemetry/Module#" + kModuleNumber +"/DriveMotor/Voltage").setDouble(driveMotorVoltage);
+		NetworkTableInstance.getDefault().getEntry("/Telemetry/Module#" + kModuleNumber +"/DriveMotor/Current").setDouble(driveMotorStatorCurrent);
+
+		double angleMotorStatorCurrent = mAngleMotor.getStatorCurrent().getValueAsDouble();
+		double angleMotorVoltage = mAngleMotor.getMotorVoltage().getValueAsDouble();
+		NetworkTableInstance.getDefault().getEntry("/Telemetry/Module#" + kModuleNumber +"/AngleMotor/Voltage").setDouble(angleMotorVoltage);
+		NetworkTableInstance.getDefault().getEntry("/Telemetry/Module#" + kModuleNumber +"/AngleMotor/Current").setDouble(angleMotorStatorCurrent);
 	}
 
 	public synchronized void refreshSignals() {
@@ -136,7 +150,7 @@ public class SwerveModule extends Subsystem {
 		}
 	}
 
-	/*DC.11.14.24. We need to negate the desired steering angle because position reading of our robot's rotation motor 
+	/*DC.11.14.24. We need to negate the desired steering angle because position reading of our robot's rotation motor
 	* increases along clock-wise direction vs. CCW assumed in Kinematic.toSwerveModuleStates() to calculate disired moduleState.angle.
 	* For the same reason, we need to negate setPosition() value in resetToAbsolute() too.
 	*/
@@ -158,9 +172,9 @@ public class SwerveModule extends Subsystem {
  		{//todo: debug code, TBR
 //			if (mCounter++ >50){
 //				mCounter =0;
-//				SmartDashboard.putString("Module #"+ kModuleNumber+" setSteeringAngleOpti(), desiredAngle, angleUnclamped", 
+//				SmartDashboard.putString("Module #"+ kModuleNumber+" setSteeringAngleOpti(), desiredAngle, angleUnclamped",
 //					String.format("%.2f,%.2f", targetClamped, angleUnclamped));
-//				SmartDashboard.putString("Module #"+ kModuleNumber+" setSteeringAngleOpti(), relativeDegreesPreFlip, relativeDegrees", 			
+//				SmartDashboard.putString("Module #"+ kModuleNumber+" setSteeringAngleOpti(), relativeDegreesPreFlip, relativeDegrees",
 //					String.format("%.2f,%.2f", relativeDegreesPreFlip,relativeDegrees));
 //			}
 		}
@@ -174,6 +188,7 @@ public class SwerveModule extends Subsystem {
 	private void setSteeringAngleRaw(double angleDegrees) {
 		double rotorPosition = Conversions.degreesToRotation(angleDegrees, SwerveConstants.angleGearRatio);
 		mPeriodicIO.rotationDemand = new PositionDutyCycle(rotorPosition, 0.0, true, 0.0, 0, false, false, false);
+		NetworkTableInstance.getDefault().getEntry("/Telemetry/Module#" + kModuleNumber +"/AngleMotor/DemandAngle").setDouble(angleDegrees);
 	}
 
 	@Override
@@ -182,10 +197,10 @@ public class SwerveModule extends Subsystem {
 		mDriveMotor.setControl(mPeriodicIO.driveDemand);
 	}
 
-	/*DC.11.14.24. We need to negate setPosition() value because position reading of our robot's rotation motor 
-	* increases along clock-wise direction while CCW assumed in original citrus code. 
-	* So if current position is at the CW side of zero position, it takes a CCW movement (negative delta) 
-	* for motor returns to zero position in setSteeringAngleOptimized; and vice versus. 
+	/*DC.11.14.24. We need to negate setPosition() value because position reading of our robot's rotation motor
+	* increases along clock-wise direction while CCW assumed in original citrus code.
+	* So if current position is at the CW side of zero position, it takes a CCW movement (negative delta)
+	* for motor returns to zero position in setSteeringAngleOptimized; and vice versus.
 	*/
 	public void resetToAbsolute() {
  		angleEncoder.getAbsolutePosition().waitForUpdate(Constants.kLongCANTimeoutMs);
@@ -193,7 +208,7 @@ public class SwerveModule extends Subsystem {
 				getCurrentUnboundedDegrees(), -(getCanCoder().getDegrees() - kAngleOffset)); //see above comments foor the negate operation
 		double absolutePosition = Conversions.degreesToRotation(angle, SwerveConstants.angleGearRatio);
 		//reset CANcoder reading to relative angle to Zero position, does NOT move motor
-		Phoenix6Util.checkErrorAndRetry(() -> mAngleMotor.setPosition(absolutePosition, Constants.kLongCANTimeoutMs)); 
+		Phoenix6Util.checkErrorAndRetry(() -> mAngleMotor.setPosition(absolutePosition, Constants.kLongCANTimeoutMs));
 	}
 
 /* TODO: TBR, keep the two test functions there for now in case we might need them to debug auto-mode
@@ -205,27 +220,27 @@ public class SwerveModule extends Subsystem {
 		double currRotorPos = mAngleMotor.getRotorPosition().getValueAsDouble();
 		double newRotorPos = currRotorPos + motor2Rotate;
 		System.out.println("Module#"+ kModuleNumber+ ".straightenModule(): currAbsPosDegree=" +currAbsPosDegree +",currRotorPos=" +currRotorPos + ", angle2Turn=" + angle2Turn + ", newRotorPos=" + newRotorPos);
-		//mAngleMotor.setControl(new PositionDutyCycle(newRotorPos, 0.0, true, 0.0, 0, false, false, false));		
-		{//TODO: streamline calls used by loop in one function to verify behavior without the cycling. clean up after debug, 
+		//mAngleMotor.setControl(new PositionDutyCycle(newRotorPos, 0.0, true, 0.0, 0, false, false, false));
+		{//TODO: streamline calls used by loop in one function to verify behavior without the cycling. clean up after debug,
 			mAngleMotor.setPosition(-motor2Rotate, Constants.kLongCANTimeoutMs);
-			try{Thread.sleep(50);}catch(Exception e){}//need to wait 100ms for sensor signal to update back 
+			try{Thread.sleep(50);}catch(Exception e){}//need to wait 100ms for sensor signal to update back
 			refreshSignals(); //update rotationPosition signal
-			SmartDashboard.putString("Mod#"+kModuleNumber +" straightenWheel (curr, zero)", 
+			SmartDashboard.putString("Mod#"+kModuleNumber +" straightenWheel (curr, zero)",
 					String.format("(%.2f,%.2f)", currAbsPosDegree, kAngleOffset));
-//			SmartDashboard.putString("Mod#"+kModuleNumber +" rotatorPosition (before, after), and turn-wheel degree StraightenWheel().setPosition()", 
+//			SmartDashboard.putString("Mod#"+kModuleNumber +" rotatorPosition (before, after), and turn-wheel degree StraightenWheel().setPosition()",
 //					String.format("(%.2f,%.2f,%.2f)", currRotorPos, mAngleMotor.getRotorPosition().getValueAsDouble(), angle2Turn));
-//			SmartDashboard.putString("Mod#"+kModuleNumber +"StraightenWheel() mPeriodicIO.rotationPosition", 
+//			SmartDashboard.putString("Mod#"+kModuleNumber +"StraightenWheel() mPeriodicIO.rotationPosition",
 //					String.format("(%.5f)", mPeriodicIO.rotationPosition));
 			Rotation2d targetDegree=Rotation2d.fromDegrees(0.0);
 			setSteeringAngleOptimized(targetDegree);
 			mAngleMotor.setControl(mPeriodicIO.rotationDemand);
-		}		
+		}
 	}
 
 	//TODO: debug swerve function, TBR
 	public void swerveModule (Rotation2d swerveAngle){
 		refreshSignals();
-		SmartDashboard.putString("Mod#" + kModuleNumber + " swerveModule() (currAngle, swerveAngle)", 
+		SmartDashboard.putString("Mod#" + kModuleNumber + " swerveModule() (currAngle, swerveAngle)",
 			String.format("%.2f,%.2f",getCurrentUnboundedDegrees(), swerveAngle.getDegrees()));
 		setSteeringAngleOptimized(swerveAngle);
 		mAngleMotor.setControl(mPeriodicIO.rotationDemand);
@@ -236,9 +251,6 @@ public class SwerveModule extends Subsystem {
 		mDriveMotor.getConfigurator().refresh(t);
 		t.MotorOutput.NeutralMode = wantBrake ? NeutralModeValue.Brake : NeutralModeValue.Coast;
 		mDriveMotor.getConfigurator().apply(t);
-		mAngleMotor.getConfigurator().refresh(t);
-		t.MotorOutput.NeutralMode = !wantBrake ? NeutralModeValue.Brake : NeutralModeValue.Coast;
-		mAngleMotor.getConfigurator().apply(t);
 	}
 
 	@Override
@@ -326,8 +338,8 @@ public class SwerveModule extends Subsystem {
 		return mSignals;
 	}
 
-/*     //TODO: need to reconcile the following class with lib.util.SwerveModuleConstants class 
-	public static class SwerveModuleConstants { 
+/*     //TODO: need to reconcile the following class with lib.util.SwerveModuleConstants class
+	public static class SwerveModuleConstants {
 		public final int driveMotorID;
 		public final int angleMotorID;
 		public final double angleOffset;
@@ -339,4 +351,35 @@ public class SwerveModule extends Subsystem {
 		}
 	}
 */
+	public void updateSimPeriodic() {
+        TalonFXSimState mDriveMotorSimState = mDriveMotor.getSimState();
+        TalonFXSimState mAngleMotorSimState = mAngleMotor.getSimState();
+        CANcoderSimState angleEncoderSimState = angleEncoder.getSimState();
+
+        // Pass the robot battery voltage to the simulated devices
+        mDriveMotorSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
+        mAngleMotorSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
+        angleEncoderSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
+
+        // Simulate drive
+        mDriveMotorSim.setInputVoltage(mDriveMotorSimState.getMotorVoltage());
+        mDriveMotorSim.update(TimedRobot.kDefaultPeriod);
+
+        double drivePosition = mDriveMotorSim.getAngularPositionRotations();
+        double driveVelocity = mDriveMotorSim.getAngularVelocityRadPerSec() * Constants.Swerve.wheelCircumference / (2.0 * Math.PI);
+        mDriveMotorSimState.setRawRotorPosition(drivePosition * Constants.Swerve.driveGearRatio);
+        mDriveMotorSimState.setRotorVelocity(driveVelocity * Constants.Swerve.driveGearRatio);
+
+        // Simulate steering
+        mAngleMotorSim.setInputVoltage(mAngleMotorSimState.getMotorVoltage());
+        mAngleMotorSim.update(TimedRobot.kDefaultPeriod);
+
+        double steeringPosition = mAngleMotorSim.getAngularPositionRotations();
+        double steeringVelocity = mAngleMotorSim.getAngularVelocityRadPerSec() * Constants.Swerve.wheelCircumference / (2.0 * Math.PI);
+        mAngleMotorSimState.setRawRotorPosition(steeringPosition * Constants.Swerve.angleGearRatio);
+        mAngleMotorSimState.setRotorVelocity(steeringVelocity * Constants.Swerve.angleGearRatio);
+
+        angleEncoderSimState.setRawPosition(steeringPosition * Constants.Swerve.angleGearRatio);
+        angleEncoderSimState.setVelocity(steeringVelocity * Constants.Swerve.angleGearRatio);
+    }
 }

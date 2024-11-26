@@ -1,18 +1,22 @@
 package frc.robot.lib.drivers;
 
 //dc.10.21.2024 ported from com.team1678.lib.drivers;
-//replace citrus Rotation2d class with wpi version, 
+//replace citrus Rotation2d class with wpi version,
 //???therefore, we use unaryMinus() call to replaces inverse() call in original citrus code
 //TODO: check if pigeon gyro is installed inverted on my robot
-//TODO: verify wpilib Rotation2d behaves the same as citrus code 
+//TODO: verify wpilib Rotation2d behaves the same as citrus code
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.ctre.phoenix6.sim.Pigeon2SimState;
+
 import frc.robot.Constants;
 import frc.robot.Ports;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.TimedRobot;
 
 public class Pigeon {
 
@@ -106,4 +110,14 @@ public class Pigeon {
 	public StatusSignal<Double> getRateStatusSignal() {
 		return mGyro.getAngularVelocityZDevice();
 	}
+
+	public void updateSimPeriodic(double angularVelocity) {
+		Pigeon2SimState gyroSimState = mGyro.getSimState();
+
+		gyroSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
+
+		Rotation2d angleChange = Rotation2d.fromRadians(angularVelocity * TimedRobot.kDefaultPeriod);
+		Rotation2d angle = getYaw().plus(angleChange);
+		gyroSimState.setRawYaw(angle.getDegrees());
+    }
 }
