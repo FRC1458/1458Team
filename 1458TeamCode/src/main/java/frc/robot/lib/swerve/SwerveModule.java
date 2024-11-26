@@ -51,7 +51,7 @@ public class SwerveModule extends Subsystem {
 
 	private mPeriodicIO mPeriodicIO = new mPeriodicIO();
 
-	private int mCounter=0;//TODO: code for debug, to be removed
+	private int mCounter = 0;//TODO: code for debug, to be removed
 
 	public static class mPeriodicIO {
 		// Inputs
@@ -88,6 +88,7 @@ public class SwerveModule extends Subsystem {
 		mDriveMotor.setPosition(0.0);
 
 		resetToAbsolute();
+
 		mSignals[0] = mDriveMotor.getRotorPosition();
 		mSignals[1] = mDriveMotor.getRotorVelocity();
 		mSignals[2] = mAngleMotor.getRotorPosition();
@@ -106,13 +107,13 @@ public class SwerveModule extends Subsystem {
 		//TODO: clean up at production release
 		double driveMotorStatorCurrent = mDriveMotor.getStatorCurrent().getValueAsDouble();
 		double driveMotorVoltage = mDriveMotor.getMotorVoltage().getValueAsDouble();
-		NetworkTableInstance.getDefault().getEntry("/Telemetry/Module#" + kModuleNumber +"/DriveMotor/Voltage").setDouble(driveMotorVoltage);
-		NetworkTableInstance.getDefault().getEntry("/Telemetry/Module#" + kModuleNumber +"/DriveMotor/Current").setDouble(driveMotorStatorCurrent);
+		SmartDashboard.putNumber("Drive/Module#" + kModuleNumber +"/DriveMotor/Voltage", driveMotorVoltage);
+		SmartDashboard.putNumber("Drive/Module#" + kModuleNumber +"/DriveMotor/Current", driveMotorStatorCurrent);
 
 		double angleMotorStatorCurrent = mAngleMotor.getStatorCurrent().getValueAsDouble();
 		double angleMotorVoltage = mAngleMotor.getMotorVoltage().getValueAsDouble();
-		NetworkTableInstance.getDefault().getEntry("/Telemetry/Module#" + kModuleNumber +"/AngleMotor/Voltage").setDouble(angleMotorVoltage);
-		NetworkTableInstance.getDefault().getEntry("/Telemetry/Module#" + kModuleNumber +"/AngleMotor/Current").setDouble(angleMotorStatorCurrent);
+		SmartDashboard.putNumber("Drive/Module#" + kModuleNumber +"/AngleMotor/Voltage", angleMotorVoltage);
+		SmartDashboard.putNumber("Drive/Module#" + kModuleNumber +"/AngleMotor/Current", angleMotorStatorCurrent);
 	}
 
 	public synchronized void refreshSignals() {
@@ -188,7 +189,7 @@ public class SwerveModule extends Subsystem {
 	private void setSteeringAngleRaw(double angleDegrees) {
 		double rotorPosition = Conversions.degreesToRotation(angleDegrees, SwerveConstants.angleGearRatio);
 		mPeriodicIO.rotationDemand = new PositionDutyCycle(rotorPosition, 0.0, true, 0.0, 0, false, false, false);
-		NetworkTableInstance.getDefault().getEntry("/Telemetry/Module#" + kModuleNumber +"/AngleMotor/DemandAngle").setDouble(angleDegrees);
+		SmartDashboard.putNumber("Drive/Module#" + kModuleNumber +"/AngleMotor/DemandAngle", angleDegrees);
 	}
 
 	@Override

@@ -22,11 +22,11 @@ import frc.robot.lib.util.Util;
 
 /**
  * DC 10.28.2024
- * This class is where the bulk of the robot (for 2025 FRC season) should be declared, 
+ * This class is where the bulk of the robot (for 2025 FRC season) should be declared,
  * while very little robot logic should actually be handled in the {@link Robot}
  * periodic methods. Instead, the structure of the robot (including
  * subsystems, loopers, control button mappings etc) should be declared here.
- * 
+ *
  */
 
 public class RobotContainer25 {
@@ -44,7 +44,7 @@ public class RobotContainer25 {
 
     /* loop framework objects*/
     private final Looper m_EnabledLooper = new Looper();
-    private final Looper m_DisabledLooper = new Looper();   
+    private final Looper m_DisabledLooper = new Looper();
     public final SubsystemManager m_SubsystemManager = SubsystemManager.getInstance();
     /* Subsystems instance */
     private DummySubsystem m_ExampleSubsystem;
@@ -59,7 +59,7 @@ public class RobotContainer25 {
             m_Cancoders = Cancoders.getInstance();//Cancoders shall be initialized before SwerveDrive as Cancoders are used by Module constructor and initialization code
             m_SwerveDrive = SwerveDrive.getInstance();
 
-            // init cancoders 
+            // init cancoders
             if (Robot.isReal()) {
                 m_Cancoders = Cancoders.getInstance();
                 double startInitTs = Timer.getFPGATimestamp();
@@ -77,22 +77,22 @@ public class RobotContainer25 {
 
             //add subsystems to its manager
             m_SubsystemManager.setSubsystems(
-                m_SwerveDrive, 
+                m_SwerveDrive,
                 m_ExampleSubsystem
                 //Insert instances of additional subsystems here
             );
-            //register subsystems to loopers 
+            //register subsystems to loopers
             m_SubsystemManager.registerEnabledLoops(m_EnabledLooper);
             m_SubsystemManager.registerDisabledLoops(m_DisabledLooper);
 
-            /* 
+            /*
             TrajectoryGenerator.getInstance().generateTrajectories();  //TODO:  complete TrajectoryGenerator to load Trajectories from Json file
 			RobotState.getInstance().resetKalman(); //TODO: complete RobotState classes
             */
             //set robot to neutral brake
             m_SwerveDrive.setNeutralBrake(true);
 
-            //binds single-button events 
+            //binds single-button events
 //            bindSingleButtonCmds ();
 		} catch (Throwable t) {
 			//CrashTracker.logThrowableCrash(t);    //TODO: CrashTracker needs to be ported. to log crash/exception
@@ -109,9 +109,9 @@ public class RobotContainer25 {
     private void bindSingleButtonCmds() {
         System.out.println("-->binding single button commands");
 //        m_btnZeroGyro.onTrue(new InstantCommand(() -> m_SwerveDrive.resetModulesToAbsolute())); //TODO: zeroGyro() vs zeroHeading()? check with victor
-        // additional command bindings for single-event buttons        
+        // additional command bindings for single-event buttons
     }
-    
+
 
     // switch between two loopers
     public void switchOnLooper (Looper onLooper, Looper offLooper){
@@ -169,8 +169,8 @@ public class RobotContainer25 {
 		}
     }
 
-    // manual mode periodic callback 
-    public void manualModePeriodic (){        
+    // manual mode periodic callback
+    public void manualModePeriodic (){
 		try {
 //			mControlBoard.update();
 
@@ -179,16 +179,16 @@ public class RobotContainer25 {
 				System.out.println("keyY is pressed, zero the wheels!");
                 m_SwerveDrive.zeroGyro(0);
 			}
-            
+
                 //dc.11.9.24, to scale up joystick input to max-speed
-                double translationVal = -MathUtil.applyDeadband(m_JoyStick.getRawAxis(translationAxis), Constants.stickDeadband)*Constants.SwerveConstants.maxSpeed; 
+                double translationVal = -MathUtil.applyDeadband(m_JoyStick.getRawAxis(translationAxis), Constants.stickDeadband)*Constants.SwerveConstants.maxSpeed;
                 double strafeVal = - MathUtil.applyDeadband(m_JoyStick.getRawAxis(strafeAxis), Constants.stickDeadband)*Constants.SwerveConstants.maxSpeed;
-                double rotationVal = MathUtil.applyDeadband(m_JoyStick.getRawAxis(rotationAxis), Constants.stickDeadband)* Constants.Swerve.maxAngularVelocity;  
+                double rotationVal = MathUtil.applyDeadband(m_JoyStick.getRawAxis(rotationAxis), Constants.stickDeadband)* Constants.Swerve.maxAngularVelocity;
     //                System.out.println("DC: manualModePeriodc() translationVal=" + translationVal + ", StrafeVal=" + strafeVal + ", rotationVal=" + rotationVal);
                     m_SwerveDrive.feedTeleopSetpoint(ChassisSpeeds.fromFieldRelativeSpeeds(
                         translationVal, strafeVal, rotationVal,
                         Util.robotToFieldRelative(m_SwerveDrive.getHeading(), is_red_alliance)));
-            
+
 
 //			mDriverControls.oneControllerMode();
 
@@ -205,6 +205,4 @@ public class RobotContainer25 {
     }
     public void updateLimeLightData() {
     }
-
-    
 }

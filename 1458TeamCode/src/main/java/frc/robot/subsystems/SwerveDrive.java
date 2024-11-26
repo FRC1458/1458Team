@@ -487,7 +487,8 @@ public class SwerveDrive extends Subsystem {
 				min_omega_scalar *= max_omega_step;
 			}
 
-			SmartDashboard.putNumber("Accel", min_translational_scalar);
+			SmartDashboard.putNumber("Drive/Acceleration", min_translational_scalar);
+
 			// cap accelerations of both translation and rotation velocities
 			wanted_speeds = new ChassisSpeeds(
 					prev_chassis_speeds.vxMetersPerSecond + dx * min_translational_scalar,
@@ -776,5 +777,4 @@ public class SwerveDrive extends Subsystem {
 	public Twist2d toTwist2d(ChassisSpeeds chassisSpeeds) {
 		return new Twist2d(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond, chassisSpeeds.omegaRadiansPerSecond);
 	}
-
 }

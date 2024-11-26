@@ -139,7 +139,7 @@ public class WheelTracker {
 
 		int n = accurateModules.size();
 
-		SmartDashboard.putNumber("Modules Used For Odometry", n);
+		SmartDashboard.putNumber("Drive/Modules Used For Odometry", n);
 
 		for (WheelProperties w : accurateModules) {
 			x += w.estimatedRobotPose.getTranslation().getX();
@@ -191,7 +191,7 @@ public class WheelTracker {
 		}
 
 		SmartDashboard.putString(
-				"Correction Factors", String.valueOf(xCorrectionFactor) + ":" + String.valueOf(yCorrectionFactor));
+				"Drive/Correction Factors", String.valueOf(xCorrectionFactor) + ":" + String.valueOf(yCorrectionFactor));
 
 		deltaPosition = new Translation2d(deltaPosition.getX() * xCorrectionFactor, deltaPosition.getY() * yCorrectionFactor);
 		Translation2d updatedPosition = props.position.plus(deltaPosition);

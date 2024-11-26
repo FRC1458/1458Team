@@ -300,7 +300,4 @@ public final class Constants {
 
     // Timeout constants
 	public static final int kLongCANTimeoutMs = 100;
-
-    
-
 }
