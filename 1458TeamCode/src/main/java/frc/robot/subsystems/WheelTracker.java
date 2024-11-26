@@ -146,7 +146,7 @@ public class WheelTracker {
 			y += w.estimatedRobotPose.getTranslation().getY();
 		}
 		final Pose2d new_pose = new Pose2d(new Translation2d(x / n, y / n), heading);
-		// final Pose2d new_pose = new Pose2d(new Translation2d(0, y / n), heading);
+		// final Pose2d new_pose = new Pose2d(new Translation2d(x / n, y / n), new Rotation2d(0));
 
 		// Velocity calcs
 		double sample_window = timestamp - last_sample_timestamp;

@@ -52,6 +52,8 @@ public class SwerveModule extends Subsystem {
 
 	private mPeriodicIO mPeriodicIO = new mPeriodicIO();
 
+    // private final PositionVoltage anglePosition = new PositionVoltage(0);
+
 	private int mCounter=0;//TODO: code for debug, to be removed
 
 	public static class mPeriodicIO {
@@ -126,13 +128,17 @@ public class SwerveModule extends Subsystem {
 	public synchronized void refreshSignals() {
 		//TODO: might need to add call to StatusSignal.refresh() for each signal in reading before get value
  		mPeriodicIO.rotationVelocity = mAngleMotor.getRotorVelocity().getValue();
+ 		// mPeriodicIO.rotationVelocity = mAngleMotor.getVelocity().getValue();
 		mPeriodicIO.driveVelocity = mDriveMotor.getRotorVelocity().getValue();
+		// mPeriodicIO.driveVelocity = mDriveMotor.getVelocity().getValue();
 
 		mPeriodicIO.rotationPosition = BaseStatusSignal.getLatencyCompensatedValue(
 				mAngleMotor.getRotorPosition(), mAngleMotor.getRotorVelocity());
+		// mPeriodicIO.rotationPosition = mAngleMotor.getPosition().getValue();
 		// mPeriodicIO.rotationPosition = mAngleMotor.getRotorPosition().getValue();
 		// mPeriodicIO.rotationPosition = 0;
 		mPeriodicIO.drivePosition = mDriveMotor.getRotorPosition().getValueAsDouble();
+		// mPeriodicIO.drivePosition = mDriveMotor.getPosition().getValue();
 	}
 
 	public void setOpenLoop(SwerveModuleState desiredState) {
@@ -203,11 +209,11 @@ public class SwerveModule extends Subsystem {
 		// // 	.withEnableFOC(true)
 		// // 	.withOverrideBrakeDurNeutral(false);
 
-		// mPeriodicIO.rotationDemand = new PositionVoltage(0).withPosition(rotorPosition)
+		// mPeriodicIO.rotationDemand = anglePosition.withPosition(rotorPosition)
 		// 	.withEnableFOC(true)
 		// 	.withOverrideBrakeDurNeutral(false);
 
-		NetworkTableInstance.getDefault().getEntry("/Telemetry/Module#" + kModuleNumber +"/AngleMotor/DemandAngle").setDouble(rotorPosition);
+		NetworkTableInstance.getDefault().getEntry("/Telemetry/Module#" + kModuleNumber +"/AngleMotor/DemandAngle").setDouble(angleDegrees);
 	}
 
 	@Override
@@ -222,7 +228,7 @@ public class SwerveModule extends Subsystem {
 	* for motor returns to zero position in setSteeringAngleOptimized; and vice versus.
 	*/
 	public void resetToAbsolute() {
-		if (Robot.isReal()) {
+		// if (Robot.isReal()) {
 			angleEncoder.getAbsolutePosition().waitForUpdate(Constants.kLongCANTimeoutMs);
 			double angle = Util.placeInAppropriate0To360Scope(
 					getCurrentUnboundedDegrees(), -(getCanCoder().getDegrees() - kAngleOffset)); //see above comments foor the negate operation
@@ -230,11 +236,11 @@ public class SwerveModule extends Subsystem {
 			// 		0, -(getCanCoder().getDegrees() - kAngleOffset)); //see above comments foor the negate operation
 			double absolutePosition = Conversions.degreesToRotation(angle, SwerveConstants.angleGearRatio);
 			//reset CANcoder reading to relative angle to Zero position, does NOT move motor
-			// Phoenix6Util.checkErrorAndRetry(() -> mAngleMotor.setPosition(absolutePosition, Constants.kLongCANTimeoutMs));
-			mAngleMotor.setPosition(absolutePosition, Constants.kLongCANTimeoutMs);
-		} else {
-			mAngleMotor.setPosition(0, Constants.kLongCANTimeoutMs);
-		}
+			Phoenix6Util.checkErrorAndRetry(() -> mAngleMotor.setPosition(absolutePosition, Constants.kLongCANTimeoutMs));
+			// mAngleMotor.setPosition(absolutePosition, Constants.kLongCANTimeoutMs);
+		// } else {
+		// 	mAngleMotor.setPosition(0, Constants.kLongCANTimeoutMs);
+		// }
 	}
 
 /* TODO: TBR, keep the two test functions there for now in case we might need them to debug auto-mode
@@ -278,9 +284,9 @@ public class SwerveModule extends Subsystem {
 		t.MotorOutput.NeutralMode = wantBrake ? NeutralModeValue.Brake : NeutralModeValue.Coast;
 		mDriveMotor.getConfigurator().apply(t);
 
-		mAngleMotor.getConfigurator().refresh(t);
-		t.MotorOutput.NeutralMode = !wantBrake ? NeutralModeValue.Brake : NeutralModeValue.Coast;
-		mAngleMotor.getConfigurator().apply(t);
+		// mAngleMotor.getConfigurator().refresh(t);
+		// t.MotorOutput.NeutralMode = !wantBrake ? NeutralModeValue.Brake : NeutralModeValue.Coast;
+		// mAngleMotor.getConfigurator().apply(t);
 	}
 
 	@Override
@@ -354,7 +360,6 @@ public class SwerveModule extends Subsystem {
 
 	public double getCurrentUnboundedDegrees() {
 		return Conversions.rotationsToDegrees(mPeriodicIO.rotationPosition, SwerveConstants.angleGearRatio);
-		// return 45;
 	}
 
 	public double getTimestamp() {
@@ -369,7 +374,7 @@ public class SwerveModule extends Subsystem {
 		return mSignals;
 	}
 
-	/** Simulate one module with naive physics model. */
+	/** Simulate module with naive physics model. */
     public void updateSimPeriodic() {
         TalonFXSimState mDriveMotorSimState = mDriveMotor.getSimState();
         TalonFXSimState mAngleMotorSimState = mAngleMotor.getSimState();
@@ -394,7 +399,7 @@ public class SwerveModule extends Subsystem {
         mAngleMotorSim.update(TimedRobot.kDefaultPeriod);
 
         double steeringPosition = mAngleMotorSim.getAngularPositionRotations();
-        double steeringVelocity = mAngleMotorSim.getAngularVelocityRadPerSec();
+        double steeringVelocity = mAngleMotorSim.getAngularVelocityRadPerSec() * Constants.Swerve.wheelCircumference / (2.0 * Math.PI);
         mAngleMotorSimState.setRawRotorPosition(steeringPosition * Constants.Swerve.angleGearRatio);
         mAngleMotorSimState.setRotorVelocity(steeringVelocity * Constants.Swerve.angleGearRatio);
 

@@ -52,6 +52,8 @@ public class RobotContainer25 {
     private SwerveDrive m_SwerveDrive;
     private Cancoders m_Cancoders;
 
+    // public static final CTREConfigs ctreConfigs = new CTREConfigs();
+
     //contructor
     public RobotContainer25 (){
         try{

@@ -287,7 +287,6 @@ public class SwerveDrive extends Subsystem {
 				translation_vel.getY(),
 				twist_vel.dtheta);
 
-
 		// if (Robot.isSimulation()) {
 		// 	for (SwerveModule swerveModule : mModules) {
 		// 		swerveModule.updateSimPeriodic();
@@ -653,6 +652,10 @@ public class SwerveDrive extends Subsystem {
 
 		for (SwerveModule swerveModule : mModules) {
 			swerveModule.writePeriodicOutputs();
+
+			// if (Robot.isSimulation()) {
+			// 	swerveModule.updateSimPeriodic();
+			// }
 		}
 
 		if (Robot.isSimulation()) {
@@ -660,24 +663,27 @@ public class SwerveDrive extends Subsystem {
 				swerveModule.updateSimPeriodic();
 				// swerveModule.refreshSignals();
 			}
-
-			// mWheelTracker.resetPose(simPose);
-			m_field.setRobotPose(mWheelTracker.getRobotPose());
-			// m_field.setRobotPose(getPose());
-
-			// Pose2d robot_pose = new Pose2d(
-			// 	wanted_speeds.vxMetersPerSecond,
-			// 	wanted_speeds.vyMetersPerSecond,
-			// 	Rotation2d.fromRadians(wanted_speeds.omegaRadiansPerSecond));
-			// m_field.setRobotPose(robot_pose);
-
-			// Publish swerve module states and rotaton to smartdashboard
-			// statePublisher.set(SwerveConstants.kKinematics.toSwerveModuleStates(wanted_speeds));
-			statePublisher.set(mPeriodicIO.des_module_states);
-			Rotation2d rotation = mWheelTracker.getRobotPose().getRotation();
-			rotationPublisher.set(rotation);
+			mPigeon.updateSimPeriodic(mPeriodicIO.des_chassis_speeds.omegaRadiansPerSecond);
 		}
 
+		// mWheelTracker.resetPose(simPose);
+		m_field.setRobotPose(mWheelTracker.getRobotPose());
+		// m_field.setRobotPose(getPose());
+
+		// Pose2d robot_pose = new Pose2d(
+		// 	wanted_speeds.vxMetersPerSecond,
+		// 	wanted_speeds.vyMetersPerSecond,
+		// 	Rotation2d.fromRadians(wanted_speeds.omegaRadiansPerSecond));
+		// m_field.setRobotPose(robot_pose);
+
+		// Publish swerve module states and rotaton to smartdashboard
+		// statePublisher.set(SwerveConstants.kKinematics.toSwerveModuleStates(wanted_speeds));
+		statePublisher.set(mPeriodicIO.des_module_states);
+
+		chassisSpeedsPublisher.set(mPeriodicIO.des_chassis_speeds);
+
+		Rotation2d rotation = mWheelTracker.getRobotPose().getRotation();
+		rotationPublisher.set(rotation);
 	}
 
 	public SwerveModuleState[] getModuleStates() {
