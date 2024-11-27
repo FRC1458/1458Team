@@ -119,5 +119,5 @@ public class Pigeon {
 		Rotation2d angleChange = Rotation2d.fromRadians(angularVelocity * TimedRobot.kDefaultPeriod);
 		Rotation2d angle = getYaw().plus(angleChange);
 		gyroSimState.setRawYaw(angle.getDegrees());
-    }
+	}
 }
