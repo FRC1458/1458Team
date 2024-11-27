@@ -353,34 +353,34 @@ public class SwerveModule extends Subsystem {
 	}
 */
 	public void updateSimPeriodic() {
-        TalonFXSimState mDriveMotorSimState = mDriveMotor.getSimState();
-        TalonFXSimState mAngleMotorSimState = mAngleMotor.getSimState();
-        CANcoderSimState angleEncoderSimState = angleEncoder.getSimState();
+		TalonFXSimState mDriveMotorSimState = mDriveMotor.getSimState();
+		TalonFXSimState mAngleMotorSimState = mAngleMotor.getSimState();
+		CANcoderSimState angleEncoderSimState = angleEncoder.getSimState();
 
-        // Pass the robot battery voltage to the simulated devices
-        mDriveMotorSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
-        mAngleMotorSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
-        angleEncoderSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
+		// Pass the robot battery voltage to the simulated devices
+		mDriveMotorSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
+		mAngleMotorSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
+		angleEncoderSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
 
-        // Simulate drive
-        mDriveMotorSim.setInputVoltage(mDriveMotorSimState.getMotorVoltage());
-        mDriveMotorSim.update(TimedRobot.kDefaultPeriod);
+		// Simulate drive
+		mDriveMotorSim.setInputVoltage(mDriveMotorSimState.getMotorVoltage());
+		mDriveMotorSim.update(TimedRobot.kDefaultPeriod);
 
-        double drivePosition = mDriveMotorSim.getAngularPositionRotations();
-        double driveVelocity = mDriveMotorSim.getAngularVelocityRadPerSec() * Constants.Swerve.wheelCircumference / (2.0 * Math.PI);
-        mDriveMotorSimState.setRawRotorPosition(drivePosition * Constants.Swerve.driveGearRatio);
-        mDriveMotorSimState.setRotorVelocity(driveVelocity * Constants.Swerve.driveGearRatio);
+		double drivePosition = mDriveMotorSim.getAngularPositionRotations();
+		double driveVelocity = mDriveMotorSim.getAngularVelocityRadPerSec() * Constants.Swerve.wheelCircumference / (2.0 * Math.PI);
+		mDriveMotorSimState.setRawRotorPosition(drivePosition * Constants.Swerve.driveGearRatio);
+		mDriveMotorSimState.setRotorVelocity(driveVelocity * Constants.Swerve.driveGearRatio);
 
-        // Simulate steering
-        mAngleMotorSim.setInputVoltage(mAngleMotorSimState.getMotorVoltage());
-        mAngleMotorSim.update(TimedRobot.kDefaultPeriod);
+		// Simulate steering
+		mAngleMotorSim.setInputVoltage(mAngleMotorSimState.getMotorVoltage());
+		mAngleMotorSim.update(TimedRobot.kDefaultPeriod);
 
-        double steeringPosition = mAngleMotorSim.getAngularPositionRotations();
-        double steeringVelocity = mAngleMotorSim.getAngularVelocityRadPerSec() * Constants.Swerve.wheelCircumference / (2.0 * Math.PI);
-        mAngleMotorSimState.setRawRotorPosition(steeringPosition * Constants.Swerve.angleGearRatio);
-        mAngleMotorSimState.setRotorVelocity(steeringVelocity * Constants.Swerve.angleGearRatio);
+		double steeringPosition = mAngleMotorSim.getAngularPositionRotations();
+		double steeringVelocity = mAngleMotorSim.getAngularVelocityRadPerSec() * Constants.Swerve.wheelCircumference / (2.0 * Math.PI);
+		mAngleMotorSimState.setRawRotorPosition(steeringPosition * Constants.Swerve.angleGearRatio);
+		mAngleMotorSimState.setRotorVelocity(steeringVelocity * Constants.Swerve.angleGearRatio);
 
-        angleEncoderSimState.setRawPosition(steeringPosition * Constants.Swerve.angleGearRatio);
-        angleEncoderSimState.setVelocity(steeringVelocity * Constants.Swerve.angleGearRatio);
-    }
+		angleEncoderSimState.setRawPosition(steeringPosition * Constants.Swerve.angleGearRatio);
+		angleEncoderSimState.setVelocity(steeringVelocity * Constants.Swerve.angleGearRatio);
+	}
 }
