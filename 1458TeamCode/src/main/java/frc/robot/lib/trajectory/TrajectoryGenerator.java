@@ -18,6 +18,8 @@ public class TrajectoryGenerator {
     public class TrajectorySet {
         
 		public Trajectory testTrajectory = loadTrajectory("paths/output/pathweaver1.wpilib.json"); //the parent folder NEED to be "./src/main/deploy/"
+        public Trajectory testTrajectoryZigzag = loadTrajectory("paths/output/s.0.0.zigzag.wpilib.json"); //the parent folder NEED to be "./src/main/deploy/"
+        public Trajectory testTrajectoryBackForth = loadTrajectory("paths/output/s.0.0.back.n.forth.wpilib.json"); //the parent folder NEED to be "./src/main/deploy/"
         /* dc.10.21.2024, additional trajectory can be added similar to the TestTrajectory */
 
         private Trajectory loadTrajectory (String sJsonFile){

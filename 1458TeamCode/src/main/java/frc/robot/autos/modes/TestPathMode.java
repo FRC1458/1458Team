@@ -15,7 +15,7 @@ public class TestPathMode extends AutoModeBase {
 	@Override
 	protected void routine() throws AutoModeEndedException {
 		System.out.println("Running test mode auto!");
-		runAction(new SwerveTrajectoryAction(trajectorySet.testTrajectory, true));
+		runAction(new SwerveTrajectoryAction(trajectorySet.testTrajectoryZigzag, true));
 		System.out.println("Finished auto!");
 	}
 	// spotless:on
