@@ -22,11 +22,9 @@ public class TrajectoryIterator {
     //advance by additional time on the trajectory
     public Trajectory.State advance (double additional_progress){
         if(additional_progress == Double.POSITIVE_INFINITY){
-            System.out.println("Oh no");
         }
         progress_ = Math.max(0.0, Math.min(mCurrentTrajectory.getTotalTimeSeconds(), progress_ + additional_progress));
         current_sample_ = mCurrentTrajectory.sample(progress_);
-        System.out.println("thing:"+additional_progress);
         return current_sample_;
     }
 
@@ -45,9 +43,6 @@ public class TrajectoryIterator {
     }
 
     public double getRemainingProgress() {
-        
-		System.out.println("progress: "+progress_);
-        System.out.println("total time in seconds: "+mCurrentTrajectory.getTotalTimeSeconds());
         return Math.max(0.0, mCurrentTrajectory.getTotalTimeSeconds() - progress_);
     }
 

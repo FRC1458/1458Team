@@ -118,8 +118,6 @@ public class DriveMotionPlanner {
 	// return a robot-relative chassis_speeds
 	public ChassisSpeeds update(double timestamp, Pose2d current_pose, Translation2d current_velocity) {
 		if (mCurrentTrajectory == null) return null;
-		System.out.println("1");
-		System.out.println("mdt"+mDt);
 		if (!Double.isFinite(mLastTime)) mLastTime = timestamp;
 		mDt = timestamp - mLastTime;
 		mLastTime = timestamp;
@@ -130,7 +128,6 @@ public class DriveMotionPlanner {
 
 		if (!isDone()) {
 			
-		System.out.println("2");
 			// Compute error in robot frame
 			mPrevHeadingError = mError.getRotation();
 			mError = current_pose.relativeTo(mSetpoint.poseMeters);	//delta = mSetpoint - current_pose, in robot's local frame
@@ -189,7 +186,6 @@ public class DriveMotionPlanner {
 				mOutput = updatePIDChassis(chassis_speeds, pid_error);
 			} else if (mFollowerType == FollowerType.PURE_PURSUIT) {
 				
-		System.out.println("5");
 				double searchStepSize = 1.0;	// these search steps are temporal, in seconds 
 				double previewQuantity = 0.0;
 				double searchDirection = 1.0;
@@ -208,7 +204,6 @@ public class DriveMotionPlanner {
 				}
 				SmartDashboard.putNumber("PurePursuit/PreviewQtd", previewQuantity);
 				
-		System.out.println("Preview Quantity: "+previewQuantity);
 				sample_point = mCurrentTrajectory.advance(previewQuantity);
 				// RobotState.getInstance().setDisplaySetpointPose(Pose2d.fromTranslation(RobotState.getInstance().getFieldToOdom(timestamp)).transformBy(sample_point.state().state().getPose()));
 				mSetpoint = sample_point;
@@ -226,11 +221,8 @@ public class DriveMotionPlanner {
     // check if we complete the current trajectory
     public boolean isDone() {
 		if (mCurrentTrajectory!=null){
-			
-		System.out.println("3");
 		}
 		if(mCurrentTrajectory.isDone()){
-		System.out.println("4");
 		}
 		return mCurrentTrajectory != null && mCurrentTrajectory.isDone();
 	}

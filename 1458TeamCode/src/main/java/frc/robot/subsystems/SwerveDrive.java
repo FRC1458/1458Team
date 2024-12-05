@@ -37,6 +37,7 @@ import frc.robot.lib.trajectory.TrajectoryIterator;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -78,6 +79,8 @@ public class SwerveDrive extends Subsystem {
 
 	private static SwerveDrive mInstance;
 
+	private final StructArrayPublisher<SwerveModuleState> publisher;
+
 	private int mCounter=0;//TODO: code for debug, to be removed 
 
 	public static SwerveDrive getInstance() {
@@ -103,6 +106,7 @@ public class SwerveDrive extends Subsystem {
 		mWheelTracker = new WheelTracker(mModules);
 
 		SmartDashboard.putData("Field", m_field);
+		publisher = NetworkTableInstance.getDefault().getStructArrayTopic("/SwerveStates", SwerveModuleState.struct).publish();
 	}
 
 	public void setKinematicLimits(KinematicLimits newLimits) {
@@ -384,8 +388,9 @@ public class SwerveDrive extends Subsystem {
 		if (mControlState == DriveControlState.PATH_FOLLOWING) {
 			final double now = Timer.getFPGATimestamp();
 			ChassisSpeeds output = mMotionPlanner.update(now, getPose(), mWheelTracker.getMeasuredVelocity());
+			ChassisSpeeds negatedOutput = new ChassisSpeeds(-output.vxMetersPerSecond,output.vyMetersPerSecond,output.omegaRadiansPerSecond);
 			if (output != null) {
-				mPeriodicIO.des_chassis_speeds = output;
+				mPeriodicIO.des_chassis_speeds = negatedOutput;
 			}
 
 			mPeriodicIO.translational_error = mMotionPlanner.getTranslationalError();
@@ -499,8 +504,9 @@ public class SwerveDrive extends Subsystem {
 			}*/
 		}
 		
+
 		SwerveModuleState[] real_module_setpoints = SwerveConstants.kKinematics.toSwerveModuleStates(wanted_speeds);
-/*   	{//TODO: debug code, TBR
+   	{//TODO: debug code, TBR
 			if (mCounter++ >50){
 				mCounter =0;
 				SmartDashboard.putString("updateSetPoint().wanted_speed (Omega, vx, vy)", 
@@ -511,7 +517,13 @@ public class SwerveDrive extends Subsystem {
 						String.format("%.2f",real_module_setpoints[i].angle.getDegrees()));
 				}
 			}
-		}*/
+			
+			for (int i = 0; i < real_module_setpoints.length; i++) {
+				publisher.set(real_module_setpoints);
+			}
+			
+		}
+
 		SwerveDriveKinematics.desaturateWheelSpeeds(real_module_setpoints, Constants.SwerveConstants.maxSpeed);
 
 		Twist2d pred_twist_vel= new Twist2d(wanted_speeds.vxMetersPerSecond,wanted_speeds.vyMetersPerSecond,wanted_speeds.omegaRadiansPerSecond);
