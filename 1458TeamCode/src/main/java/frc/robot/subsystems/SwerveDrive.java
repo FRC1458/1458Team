@@ -483,7 +483,7 @@ public class SwerveDrive extends Subsystem {
 				min_omega_scalar *= max_omega_step;
 			}
 
-			SmartDashboard.putNumber("Accel", min_translational_scalar);
+//			SmartDashboard.putNumber("Accel", min_translational_scalar);
 			// cap accelerations of both translation and rotation velocities
 			wanted_speeds = new ChassisSpeeds(
 					prev_chassis_speeds.vxMetersPerSecond + dx * min_translational_scalar,
@@ -506,17 +506,21 @@ public class SwerveDrive extends Subsystem {
 		
 
 		SwerveModuleState[] real_module_setpoints = SwerveConstants.kKinematics.toSwerveModuleStates(wanted_speeds);
-   	{//TODO: debug code, TBR
-			if (mCounter++ >50){
-				mCounter =0;
-				SmartDashboard.putString("updateSetPoint().wanted_speed (Omega, vx, vy)", 
-						String.format("%.2f,%.2f,%.2f", wanted_speeds.omegaRadiansPerSecond, wanted_speeds.vxMetersPerSecond, wanted_speeds.vyMetersPerSecond));
-
-				for (int i = 0; i < mModules.length; i++) {
-					SmartDashboard.putString("updateSetPoint().real_module_setpoints["+ i +"].angle", 
-						String.format("%.2f",real_module_setpoints[i].angle.getDegrees()));
-				}
-			}
+   		{
+			//TODO: debug code, TBR
+//			if (mCounter++ >50){
+//				mCounter =0;
+//				SmartDashboard.putString("updateSetPoint().wanted_speed (Omega, vx, vy)", 
+//						String.format("%.2f,%.2f,%.2f", wanted_speeds.omegaRadiansPerSecond, wanted_speeds.vxMetersPerSecond, wanted_speeds.vyMetersPerSecond));
+//
+//				for (int i = 0; i < mModules.length; i++) {
+//					SmartDashboard.putString("updateSetPoint().real_module_setpoints["+ i +"].angle", 
+//						String.format("%.2f",real_module_setpoints[i].angle.getDegrees()));
+//				}
+//			}
+			SmartDashboard.putNumber("updateSetPoint().wanted_speed.Omega)", wanted_speeds.omegaRadiansPerSecond);
+			SmartDashboard.putNumber("updateSetPoint().wanted_speed.vx)", wanted_speeds.vxMetersPerSecond);
+			SmartDashboard.putNumber("updateSetPoint().wanted_speed.vy)", wanted_speeds.vyMetersPerSecond);
 			
 			for (int i = 0; i < real_module_setpoints.length; i++) {
 				publisher.set(real_module_setpoints);

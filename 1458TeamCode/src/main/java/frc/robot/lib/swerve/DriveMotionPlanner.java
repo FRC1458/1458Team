@@ -130,7 +130,8 @@ public class DriveMotionPlanner {
 			
 			// Compute error in robot frame
 			mPrevHeadingError = mError.getRotation();
-			mError = current_pose.relativeTo(mSetpoint.poseMeters);	//delta = mSetpoint - current_pose, in robot's local frame
+			mError = current_pose.relativeTo(mSetpoint.poseMeters);
+//			mError = mSetpoint.poseMeters.relativeTo(current_pose);	//delta = mSetpoint - current_pose, in robot's local frame, dc.12.7.2024 bugfix, error shall = target - current
 			pid_error = current_pose.log(mSetpoint.poseMeters);//* calculate the Twist2d delta/error between actual pose and the desired pose.  citrus original code is //Pose2d.log(mError);			
 //dc.10.21.2024			mErrorTracker.addObservation(mError);
 			if (mFollowerType == FollowerType.FEEDFORWARD_ONLY) {
@@ -193,7 +194,7 @@ public class DriveMotionPlanner {
 				double reverseDistance = distance(current_pose, previewQuantity - searchStepSize);
 				searchDirection = Math.signum(reverseDistance - forwardDistance);
 				while (searchStepSize > 0.001) {
-					SmartDashboard.putNumber("PurePursuit/PreviewDist", distance(current_pose, previewQuantity));
+					SmartDashboard.putNumber("PurePursuit/PreviewDist(m)", distance(current_pose, previewQuantity));
 					if (Util.epsilonEquals(distance(current_pose, previewQuantity), 0.0, 0.0003937)) break;
 					while (distance(current_pose, previewQuantity + searchStepSize * searchDirection) 
 							< distance(current_pose, previewQuantity)) { 		/* next trajectory point is closer to current_pose than current trajectory point */ 
@@ -202,7 +203,7 @@ public class DriveMotionPlanner {
 					searchStepSize /= 10.0;	//further refine search steps
 					searchDirection *= -1;
 				}
-				SmartDashboard.putNumber("PurePursuit/PreviewQtd", previewQuantity);
+				SmartDashboard.putNumber("PurePursuit/PreviewQuantity(s)", previewQuantity);
 				
 				sample_point = mCurrentTrajectory.advance(previewQuantity);
 				// RobotState.getInstance().setDisplaySetpointPose(Pose2d.fromTranslation(RobotState.getInstance().getFieldToOdom(timestamp)).transformBy(sample_point.state().state().getPose()));
@@ -245,14 +246,16 @@ public class DriveMotionPlanner {
 		final double kLookaheadSearchDt = 0.01;
 		Trajectory.State lookahead_state = mCurrentTrajectory.preview(lookahead_time);
 		double actual_lookahead_distance = distance(mSetpoint.poseMeters, lookahead_state.poseMeters);
-		double adaptive_lookahead_distance = mSpeedLookahead.getLookaheadForSpeed(mSetpoint.velocityMetersPerSecond)
-				+ kAdaptiveErrorLookaheadCoefficient * mError.getTranslation().getNorm();
-		SmartDashboard.putNumber("PurePursuit/Error", mError.getTranslation().getNorm());
+		double adaptive_lookahead_distance = mSpeedLookahead.getLookaheadForSpeed(mSetpoint.velocityMetersPerSecond);
+				//+ kAdaptiveErrorLookaheadCoefficient * mError.getTranslation().getNorm(); //TODO: TB restored, dc.12.7.24, turn off mError compensation
+		SmartDashboard.putNumber("PurePursuit/Error.dx", mError.getTranslation().getX());
+		SmartDashboard.putNumber("PurePursuit/Error.dy", mError.getTranslation().getY());
+		SmartDashboard.putNumber("PurePursuit/Error.Radians", mError.getRotation().getRadians());
 		
 		// Find the Point on the Trajectory that is Lookahead Distance Away
 		while (actual_lookahead_distance < adaptive_lookahead_distance
 				&& mCurrentTrajectory.getRemainingProgress() > lookahead_time) {
-			lookahead_time += kLookaheadSearchDt;
+			lookahead_time += kLookaheadSearchDt;	//+10ms
 			lookahead_state = mCurrentTrajectory.preview(lookahead_time);
 			actual_lookahead_distance = distance(mSetpoint.poseMeters, lookahead_state.poseMeters);
 		}
@@ -269,32 +272,37 @@ public class DriveMotionPlanner {
 					lookahead_state.accelerationMetersPerSecondSq, 
 					lookahead_state.poseMeters.transformBy(transform),
 					lookahead_state.curvatureRadPerMeter);
+			System.out.println("PurePursuit().lookahead_distance actual < adaptive happened at lookahead_state.timeSeconds=" + lookahead_state.timeSeconds);
+
 		}
-		SmartDashboard.putNumber("PurePursuit/ActualLookaheadDist", actual_lookahead_distance);
-		SmartDashboard.putNumber("PurePursuit/AdaptiveLookahead", adaptive_lookahead_distance);
+		SmartDashboard.putNumber("PurePursuit/ActualLookaheadDist(m)", actual_lookahead_distance);
+		SmartDashboard.putNumber("PurePursuit/AdaptiveLookahead(m)", adaptive_lookahead_distance);
 //		LogUtil.recordPose2d(
 //				"PurePursuit/LookaheadState", lookahead_state.state().getPose());
-		SmartDashboard.putNumber("PurePursuit/RemainingProgress", mCurrentTrajectory.getRemainingProgress());
-		SmartDashboard.putNumber("PurePursuit/PathVelocity", lookahead_state.velocityMetersPerSecond);
+		SmartDashboard.putNumber("PurePursuit/RemainingProgress(s)", mCurrentTrajectory.getRemainingProgress());
+		SmartDashboard.putNumber("PurePursuit/PathVelocity(m/s)", lookahead_state.velocityMetersPerSecond);
 
 		if (lookahead_state.velocityMetersPerSecond == 0.0) {
 			mCurrentTrajectory.advance(Double.POSITIVE_INFINITY); //advance to the end of Trajectory
 			return new ChassisSpeeds();
 		}
 
-		// Find the vector between robot's current position and the lookahead state
+		// Find the vector between robot's current position and the lookahead state = lookahead_state - current_pose
 		Translation2d lookaheadTranslation = current_pose.getTranslation().minus(lookahead_state.poseMeters.getTranslation());
+		SmartDashboard.putNumber("PurePursuit/lookAheadTranslation.dx", lookaheadTranslation.getX());
+		SmartDashboard.putNumber("PurePursuit/lookAheadTranslation.dy", lookaheadTranslation.getY());
+//		Translation2d lookaheadTranslation = lookahead_state.poseMeters.getTranslation().minus(current_pose.getTranslation());//dc.12.7.24, bugfix, flip the vector
 		/* original citrus code = "new Translation2d(
 				current_pose.getTranslation(), lookahead_state.state().getTranslation());"*/		
 
 		// Set the steering direction as the direction of the vector
 		Rotation2d steeringDirection = lookaheadTranslation.getAngle();// original citrus code = "".direction();"
 
-		// Convert from field-relative steering direction to robot-relative
+		// Convert from field-relative steering direction to robot-relative = steeringDirection - current_pose.getRotation()
 		steeringDirection = steeringDirection.rotateBy(Util.inversePose2d(current_pose).getRotation());//.inverse().getRotation());
 
 		// Use the Velocity Feedforward of the Closest Point on the Trajectory
-		double normalizedSpeed = Math.abs(mSetpoint.velocityMetersPerSecond) / Constants.SwerveConstants.maxAutoSpeed;
+		double normalizedSpeed = Math.abs(mSetpoint.velocityMetersPerSecond) / Constants.SwerveConstants.maxAutoSpeed; 
 
 		// The Default Cook is the minimum speed to use. So if a feedforward speed is less than defaultCook, the robot
 		// will drive at the defaultCook speed
@@ -304,7 +312,6 @@ public class DriveMotionPlanner {
 		if (useDefaultCook) {
 			normalizedSpeed = defaultCook;
 		}
-
 		SmartDashboard.putNumber("PurePursuit/NormalizedSpeed", normalizedSpeed);
 
 		// Convert the Polar Coordinate (speed, direction) into a Rectangular Coordinate (Vx, Vy) in Robot Frame
@@ -315,10 +322,11 @@ public class DriveMotionPlanner {
 				steeringVector.getY() * Constants.SwerveConstants.maxAutoSpeed,
 				feedforwardOmegaRadiansPerSecond);
 
+/* 
 		// Use the PD-Controller for To Follow the Time-Parametrized Heading
-		final double kThetakP = 3.5;
+		final double kThetakP = 0.0; //TODO: TB restored, dc.12.7.24, turn off PD controller, citrus orignal value = 3.5;
 		final double kThetakD = 0.0;
-		final double kPositionkP = 2.0;
+		final double kPositionkP = 0.0; //TODO: TB restored, dc.12.7.24, turn off PD controller,  citrus orignal value = 2.0;
 
 		chassisSpeeds.vxMetersPerSecond = chassisSpeeds.vxMetersPerSecond
 				+ kPositionkP * mError.getTranslation().getX();
@@ -327,6 +335,7 @@ public class DriveMotionPlanner {
 		chassisSpeeds.omegaRadiansPerSecond = chassisSpeeds.omegaRadiansPerSecond
 				+ (kThetakP * mError.getRotation().getRadians())
 				+ kThetakD * ((mError.getRotation().getRadians() - mPrevHeadingError.getRadians()) / mDt);
+*/
 		return chassisSpeeds;
 	}
 
