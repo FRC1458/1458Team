@@ -136,7 +136,8 @@ public class SwerveModule extends Subsystem {
 		}
 	}
 
-	/*DC.11.14.24. We need to negate the desired steering angle because position reading of our robot's rotation motor 
+	/*DC.11.14.24. bugfix to turn wheels in right direction in teleop swerve mode
+	* We need to negate the desired steering angle because position reading of our robot's rotation motor 
 	* increases along clock-wise direction vs. CCW assumed in Kinematic.toSwerveModuleStates() to calculate disired moduleState.angle.
 	* For the same reason, we need to negate setPosition() value in resetToAbsolute() too.
 	*/
@@ -182,7 +183,8 @@ public class SwerveModule extends Subsystem {
 		mDriveMotor.setControl(mPeriodicIO.driveDemand);
 	}
 
-	/*DC.11.14.24. We need to negate setPosition() value because position reading of our robot's rotation motor 
+	/*DC.11.14.24. Bugfix for set wheel to straight forward position at teleop init positions
+	* We need to negate setPosition() value because position reading of our robot's rotation motor 
 	* increases along clock-wise direction while CCW assumed in original citrus code. 
 	* So if current position is at the CW side of zero position, it takes a CCW movement (negative delta) 
 	* for motor returns to zero position in setSteeringAngleOptimized; and vice versus. 

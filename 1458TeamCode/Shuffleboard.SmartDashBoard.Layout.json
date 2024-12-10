@@ -27,10 +27,10 @@
               "Visuals/Show Outside Circles": false
             }
           },
-          "6,0": {
+          "0,9": {
             "size": [
-              2,
-              1
+              3,
+              2
             ],
             "content": {
               "_type": "Grid Layout",
@@ -42,37 +42,23 @@
               "Layout/Label position": "BOTTOM",
               "_children": {
                 "0,0": {
-                  "_type": "Graph",
+                  "_type": "Text View",
                   "_source0": "network_table:///SmartDashboard/PurePursuit/RemainingProgress(s)",
                   "_title": "PurePursuit/RemainingProgress(s)",
                   "_glyph": 148,
-                  "_showGlyph": false,
-                  "Graph/Visible time": 30.0,
-                  "Graph/X-axis auto scrolling": true,
-                  "Y-axis/Automatic bounds": true,
-                  "Y-axis/Upper bound": 1.0,
-                  "Y-axis/Lower bound": -1.0,
-                  "Y-axis/Unit": "ul",
-                  "Visible data/SmartDashboard/PurePursuit/RemainingProgress(s)": true
+                  "_showGlyph": false
                 },
                 "0,1": {
-                  "_type": "Graph",
+                  "_type": "Text View",
                   "_source0": "network_table:///SmartDashboard/PurePursuit/PathVelocity(m/s)",
                   "_title": "PurePursuit/PathVelocity(m/s)",
                   "_glyph": 148,
-                  "_showGlyph": false,
-                  "Graph/Visible time": 30.0,
-                  "Graph/X-axis auto scrolling": true,
-                  "Y-axis/Automatic bounds": true,
-                  "Y-axis/Upper bound": 1.0,
-                  "Y-axis/Lower bound": -1.0,
-                  "Y-axis/Unit": "ul",
-                  "Visible data/SmartDashboard/PurePursuit/PathVelocity(m/s)": true
+                  "_showGlyph": false
                 }
               }
             }
           },
-          "11,0": {
+          "26,0": {
             "size": [
               5,
               11
@@ -119,8 +105,8 @@
           },
           "21,0": {
             "size": [
-              2,
-              1
+              5,
+              16
             ],
             "content": {
               "_type": "Grid Layout",
@@ -176,7 +162,7 @@
               }
             }
           },
-          "26,0": {
+          "11,0": {
             "size": [
               5,
               16
@@ -294,7 +280,20 @@
               }
             }
           },
-          "1,11": {
+          "2,6": {
+            "size": [
+              2,
+              1
+            ],
+            "content": {
+              "_type": "Network Table Tree",
+              "_source0": "network_table:///SmartDashboard/Auto Mode",
+              "_title": "Auto Mode",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "0,8": {
             "size": [
               2,
               1
@@ -307,20 +306,7 @@
               "_showGlyph": false
             }
           },
-          "1,9": {
-            "size": [
-              2,
-              1
-            ],
-            "content": {
-              "_type": "Text View",
-              "_source0": "network_table:///SmartDashboard/limelight-c_Stream",
-              "_title": "limelight-c_Stream",
-              "_glyph": 148,
-              "_showGlyph": false
-            }
-          },
-          "1,10": {
+          "2,8": {
             "size": [
               2,
               1
@@ -333,15 +319,74 @@
               "_showGlyph": false
             }
           },
-          "1,6": {
+          "6,0": {
             "size": [
-              2,
-              2
+              5,
+              5
             ],
             "content": {
-              "_type": "ComboBox Chooser",
-              "_source0": "network_table:///SmartDashboard/Auto Mode",
-              "_title": "Auto Mode",
+              "_type": "Grid Layout",
+              "_title": "LookAheadTranslation",
+              "_glyph": 149,
+              "_showGlyph": false,
+              "Layout/Number of columns": 3,
+              "Layout/Number of rows": 3,
+              "Layout/Label position": "BOTTOM",
+              "_children": {
+                "0,0": {
+                  "_type": "Graph",
+                  "_source0": "network_table:///SmartDashboard/PurePursuit/lookAheadTranslation.dx",
+                  "_title": "PurePursuit/lookAheadTranslation.dx",
+                  "_glyph": 148,
+                  "_showGlyph": false,
+                  "Graph/Visible time": 30.0,
+                  "Graph/X-axis auto scrolling": true,
+                  "Y-axis/Automatic bounds": true,
+                  "Y-axis/Upper bound": 1.0,
+                  "Y-axis/Lower bound": -1.0,
+                  "Y-axis/Unit": "ul",
+                  "Visible data/SmartDashboard/PurePursuit/lookAheadTranslation.dx": true
+                },
+                "0,1": {
+                  "_type": "Graph",
+                  "_source0": "network_table:///SmartDashboard/PurePursuit/lookAheadTranslation.dy",
+                  "_title": "PurePursuit/lookAheadTranslation.dy",
+                  "_glyph": 148,
+                  "_showGlyph": false,
+                  "Graph/Visible time": 30.0,
+                  "Graph/X-axis auto scrolling": true,
+                  "Y-axis/Automatic bounds": true,
+                  "Y-axis/Upper bound": 1.0,
+                  "Y-axis/Lower bound": -1.0,
+                  "Y-axis/Unit": "ul",
+                  "Visible data/SmartDashboard/PurePursuit/lookAheadTranslation.dy": true
+                },
+                "0,2": {
+                  "_type": "Graph",
+                  "_source0": "network_table:///SmartDashboard/Mod0setSteeringAngle",
+                  "_title": "Mod0setSteeringAngle",
+                  "_glyph": 148,
+                  "_showGlyph": false,
+                  "Graph/Visible time": 30.0,
+                  "Graph/X-axis auto scrolling": false,
+                  "Y-axis/Automatic bounds": true,
+                  "Y-axis/Upper bound": 1.0,
+                  "Y-axis/Lower bound": -1.0,
+                  "Y-axis/Unit": "ul",
+                  "Visible data/SmartDashboard/Mod0setSteeringAngle": true
+                }
+              }
+            }
+          },
+          "23,0": {
+            "size": [
+              2,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/limelight-c_Stream",
+              "_title": "limelight-c_Stream",
               "_glyph": 148,
               "_showGlyph": false
             }

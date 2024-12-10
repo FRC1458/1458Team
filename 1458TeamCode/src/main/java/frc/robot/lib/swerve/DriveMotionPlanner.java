@@ -288,10 +288,10 @@ public class DriveMotionPlanner {
 		}
 
 		// Find the vector between robot's current position and the lookahead state = lookahead_state - current_pose
-		Translation2d lookaheadTranslation = current_pose.getTranslation().minus(lookahead_state.poseMeters.getTranslation());
+//		Translation2d lookaheadTranslation = current_pose.getTranslation().minus(lookahead_state.poseMeters.getTranslation());
+		Translation2d lookaheadTranslation = lookahead_state.poseMeters.getTranslation().minus(current_pose.getTranslation());//dc.12.7.24, bugfix, flip the vector
 		SmartDashboard.putNumber("PurePursuit/lookAheadTranslation.dx", lookaheadTranslation.getX());
 		SmartDashboard.putNumber("PurePursuit/lookAheadTranslation.dy", lookaheadTranslation.getY());
-//		Translation2d lookaheadTranslation = lookahead_state.poseMeters.getTranslation().minus(current_pose.getTranslation());//dc.12.7.24, bugfix, flip the vector
 		/* original citrus code = "new Translation2d(
 				current_pose.getTranslation(), lookahead_state.state().getTranslation());"*/		
 

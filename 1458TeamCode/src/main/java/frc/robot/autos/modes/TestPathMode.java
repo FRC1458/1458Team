@@ -16,13 +16,16 @@ public class TestPathMode extends AutoModeBase {
 	@Override
 	protected void routine() throws AutoModeEndedException {
 		System.out.println("TestPathMode: Running test mode auto!");
-		runAction(new SwerveTrajectoryAction(trajectorySet.testTrajectoryZigzag, true));
-//		runAction(new SwerveTrajectoryAction(trajectorySet.testTrajectoryBackForth, true));
-/*TODO: chain other test actions here 
-		System.out.println("TestPathMode: wait for 3 seconds!");
-		runAction(new WaitAction(3));
+//		runAction(new SwerveTrajectoryAction(trajectorySet.testTrajectoryAlmostStraight, true));
+//		runAction(new SwerveTrajectoryAction(trajectorySet.testTrajectoryZigzag, true));
+		runAction(new SwerveTrajectoryAction(trajectorySet.testTrajectoryBackForth, true));
+//		runAction(new SwerveTrajectoryAction(trajectorySet.testTrajectoryBigLoopCW, true));
+//		runAction(new SwerveTrajectoryAction(trajectorySet.testTrajectoryBigLoopCCWZigzag, true));
+/*//TODO: chain other test actions here 
+		System.out.println("TestPathMode: wait for 1 seconds!");
+		runAction(new WaitAction(1));
 		System.out.println("TestPathMode: start returning Trajectory!");
-		runAction(new SwerveTrajectoryAction(trajectorySet.testTrajectoryBackForth_Return, true));
+		runAction(new SwerveTrajectoryAction(trajectorySet.testTrajectoryBackForth_Return, false));
 */		System.out.println("Finished auto!");
 	}
 	// spotless:on

@@ -388,9 +388,8 @@ public class SwerveDrive extends Subsystem {
 		if (mControlState == DriveControlState.PATH_FOLLOWING) {
 			final double now = Timer.getFPGATimestamp();
 			ChassisSpeeds output = mMotionPlanner.update(now, getPose(), mWheelTracker.getMeasuredVelocity());
-			ChassisSpeeds negatedOutput = new ChassisSpeeds(-output.vxMetersPerSecond,output.vyMetersPerSecond,output.omegaRadiansPerSecond);
 			if (output != null) {
-				mPeriodicIO.des_chassis_speeds = negatedOutput;
+				mPeriodicIO.des_chassis_speeds = output;
 			}
 
 			mPeriodicIO.translational_error = mMotionPlanner.getTranslationalError();
