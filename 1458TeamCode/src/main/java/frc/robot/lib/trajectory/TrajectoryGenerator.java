@@ -24,6 +24,7 @@ public class TrajectoryGenerator {
         public Trajectory testTrajectoryBigLoopCW = loadTrajectory("paths/output/s.0.0.bigloop.cw.wpilib.json"); 
         public Trajectory testTrajectoryBigLoopCCW = loadTrajectory("paths/output/s.0.0.bigLoop.ccw.wpilib.json"); 
         public Trajectory testTrajectoryBigLoopCCWZigzag = loadTrajectory("paths/output/s.0.0.bigLoop.ccw.zigzag.wpilib.json"); 
+        public Trajectory testTrajectoryBeeDancing = loadTrajectory("paths/output/s.0.0.BeeDancing.wpilib.json");         
         /* dc.10.21.2024, additional trajectory can be added similar to the TestTrajectory */
 
         private Trajectory loadTrajectory (String sJsonFile){

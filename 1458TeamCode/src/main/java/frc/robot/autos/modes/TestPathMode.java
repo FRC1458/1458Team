@@ -18,9 +18,10 @@ public class TestPathMode extends AutoModeBase {
 		System.out.println("TestPathMode: Running test mode auto!");
 //		runAction(new SwerveTrajectoryAction(trajectorySet.testTrajectoryAlmostStraight, true));
 //		runAction(new SwerveTrajectoryAction(trajectorySet.testTrajectoryZigzag, true));
-		runAction(new SwerveTrajectoryAction(trajectorySet.testTrajectoryBackForth, true));
+//		runAction(new SwerveTrajectoryAction(trajectorySet.testTrajectoryBackForth, true));
 //		runAction(new SwerveTrajectoryAction(trajectorySet.testTrajectoryBigLoopCW, true));
 //		runAction(new SwerveTrajectoryAction(trajectorySet.testTrajectoryBigLoopCCWZigzag, true));
+		runAction(new SwerveTrajectoryAction(trajectorySet.testTrajectoryBeeDancing, true));
 /*//TODO: chain other test actions here 
 		System.out.println("TestPathMode: wait for 1 seconds!");
 		runAction(new WaitAction(1));
