@@ -224,7 +224,7 @@
           "16,0": {
             "size": [
               5,
-              11
+              16
             ],
             "content": {
               "_type": "Grid Layout",
@@ -236,20 +236,6 @@
               "Layout/Label position": "BOTTOM",
               "_children": {
                 "0,0": {
-                  "_type": "Graph",
-                  "_source0": "network_table:///SmartDashboard/PurePursuit/Error.Radians",
-                  "_title": "PurePursuit/Error.Radians",
-                  "_glyph": 148,
-                  "_showGlyph": false,
-                  "Graph/Visible time": 30.0,
-                  "Graph/X-axis auto scrolling": true,
-                  "Y-axis/Automatic bounds": true,
-                  "Y-axis/Upper bound": 1.0,
-                  "Y-axis/Lower bound": -1.0,
-                  "Y-axis/Unit": "ul",
-                  "Visible data/SmartDashboard/PurePursuit/Error.Radians": true
-                },
-                "0,1": {
                   "_type": "Graph",
                   "_source0": "network_table:///SmartDashboard/PurePursuit/Error.dx",
                   "_title": "PurePursuit/Error.dx",
@@ -263,7 +249,7 @@
                   "Y-axis/Unit": "ul",
                   "Visible data/SmartDashboard/PurePursuit/Error.dx": true
                 },
-                "0,2": {
+                "0,1": {
                   "_type": "Graph",
                   "_source0": "network_table:///SmartDashboard/PurePursuit/Error.dy",
                   "_title": "PurePursuit/Error.dy",
@@ -276,6 +262,20 @@
                   "Y-axis/Lower bound": -1.0,
                   "Y-axis/Unit": "ul",
                   "Visible data/SmartDashboard/PurePursuit/Error.dy": true
+                },
+                "0,2": {
+                  "_type": "Graph",
+                  "_source0": "network_table:///SmartDashboard/PurePursuit/Error.Radians",
+                  "_title": "PurePursuit/Error.Radians",
+                  "_glyph": 148,
+                  "_showGlyph": false,
+                  "Graph/Visible time": 30.0,
+                  "Graph/X-axis auto scrolling": true,
+                  "Y-axis/Automatic bounds": true,
+                  "Y-axis/Upper bound": 1.0,
+                  "Y-axis/Lower bound": -1.0,
+                  "Y-axis/Unit": "ul",
+                  "Visible data/SmartDashboard/PurePursuit/Error.Radians": true
                 }
               }
             }
@@ -372,8 +372,7 @@
                   "Y-axis/Automatic bounds": true,
                   "Y-axis/Upper bound": 1.0,
                   "Y-axis/Lower bound": -1.0,
-                  "Y-axis/Unit": "ul",
-                  "Visible data/SmartDashboard/Mod0setSteeringAngle": true
+                  "Y-axis/Unit": "ul"
                 }
               }
             }
