@@ -130,8 +130,8 @@ public class DriveMotionPlanner {
 			
 			// Compute error in robot frame
 			mPrevHeadingError = mError.getRotation();
-			mError = current_pose.relativeTo(mSetpoint.poseMeters);
-//			mError = mSetpoint.poseMeters.relativeTo(current_pose);	//delta = mSetpoint - current_pose, in robot's local frame, dc.12.7.2024 bugfix, error shall = target - current
+//			mError = current_pose.relativeTo(mSetpoint.poseMeters);
+			mError = mSetpoint.poseMeters.relativeTo(current_pose);	//delta = mSetpoint - current_pose, in robot's local frame, dc.12.7.2024 bugfix, error shall = target - current
 			pid_error = current_pose.log(mSetpoint.poseMeters);//* calculate the Twist2d delta/error between actual pose and the desired pose.  citrus original code is //Pose2d.log(mError);			
 //dc.10.21.2024			mErrorTracker.addObservation(mError);
 			if (mFollowerType == FollowerType.FEEDFORWARD_ONLY) {
