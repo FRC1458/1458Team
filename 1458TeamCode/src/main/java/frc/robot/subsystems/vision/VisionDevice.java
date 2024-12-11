@@ -176,7 +176,7 @@ public class VisionDevice extends Subsystem {
 			xyStdDev = Math.max(0.02, xyStdDev);
 
 			// LogUtil.recordPose3d("Vision " + mConstants.kTableName + "/Tag Poses",
-			// tagPoses.toArray(new Pose3d[0]));
+			tagPoses.toArray(new Pose3d[0]);
 			SmartDashboard.putNumber("Vision " + mConstants.kTableName + "/N Tags Seen", tagPoses.size());
 			SmartDashboard.putNumber("Vision " + mConstants.kTableName + "/Calculated STDev", xyStdDev);
 			// LogUtil.recordPose2d("Vision " + mConstants.kTableName + "/Camera Pose",
@@ -192,12 +192,15 @@ public class VisionDevice extends Subsystem {
 				continue;
 			}
 
-			// RobotState.getInstance()
-			// .addVisionUpdate(new VisionUpdate(
-			// timestamp,
-			// camera_pose.getTranslation(),
-			// mConstants.kRobotToCamera.getTranslation(),
-			// xyStdDev));
+			RobotState.getInstance()
+				.addVisionUpdate(
+					new VisionUpdate(
+						timestamp,
+						camera_pose.getTranslation(),
+						mConstants.kRobotToCamera.getTranslation(),
+						xyStdDev
+					)
+				);
 
 			double rotation_degrees = camera_pose
 					.transformBy(mConstants.kRobotToCamera)

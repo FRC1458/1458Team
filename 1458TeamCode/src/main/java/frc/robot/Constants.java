@@ -184,12 +184,12 @@ public final class Constants {
     public static VisionDeviceConstants kRightVisionDevice = new VisionDeviceConstants(); // dot 12
 
     static {
-        kLeftVisionDevice.kTableName = "PolarisLeft";
+        kLeftVisionDevice.kTableName = "limelight-c";
         kLeftVisionDevice.kRobotToCamera = new edu.wpi.first.math.geometry.Transform2d(
                 new Translation2d(Units.inchesToMeters(3.071), Units.inchesToMeters(7.325)),
                 Rotation2d.fromDegrees(-27));
 
-        kRightVisionDevice.kTableName = "PolarisRight";
+        kRightVisionDevice.kTableName = "limelight-bw";
         kRightVisionDevice.kRobotToCamera = new edu.wpi.first.math.geometry.Transform2d(
                 new Translation2d(Units.inchesToMeters(3.071), Units.inchesToMeters(-7.325)),
                 Rotation2d.fromDegrees(27.0));
@@ -202,7 +202,7 @@ public final class Constants {
         public static final double kMaxNoteTrackingDistance = 6.75;
         public static final double kNoteTrackEpsilon = 1.0;
 
-        public static final String kName = "limelight";
+        public static final String kName = "limelight-c";
         public static final Translation2d kRobotToCameraTranslation = new Translation2d(0.0, 0.0);
         public static final double kCameraHeightMeters = isEpsilon ? 0.59 : 0.65;
         public static final Rotation2d kCameraPitch = Rotation2d.fromDegrees(-18.0);
