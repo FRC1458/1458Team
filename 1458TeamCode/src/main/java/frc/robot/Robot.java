@@ -52,7 +52,8 @@ public class Robot extends TimedRobot {
     
 
     for (int port = 5800; port <= 5809; port++) {
-      edu.wpi.first.net.PortForwarder.add(port, "limelight.local", port);
+      edu.wpi.first.net.PortForwarder.add(port, "limelight-c.local", port);
+      edu.wpi.first.net.PortForwarder.add(port, "limelight-bw.local", port);
     } 
     
     //subsystems and loop framework init code move to RobotContainer25 class

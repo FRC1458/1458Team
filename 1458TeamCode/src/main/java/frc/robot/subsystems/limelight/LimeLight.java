@@ -14,7 +14,7 @@ public class LimeLight extends SubsystemBase {
     private final GoalTracker goalTracker;
 
     public LimeLight() {
-        limelightTable = NetworkTableInstance.getDefault().getTable("limelight");
+        limelightTable = NetworkTableInstance.getDefault().getTable("limelight-c");
         GoalTracker.Configuration config = new GoalTracker.Configuration();
         goalTracker = new GoalTracker(config);
     }

@@ -208,6 +208,10 @@ dc.10.21.2024 commented out because wpilib Rotation2d misses .distance () method
 		return new Pose2d(inverseTranslation, inverseRotation);
 	}
 
+	public static Translation2d inverseTranslation2d (Translation2d translation) {
+		return new Translation2d(-translation.getX(), -translation.getY());
+	}
+
 	/**
 	 * Ported from Citrus Pose2d static function exp() and log. 
      * Obtain a new Pose2d from a (constant curvature=arc) velocity. See:
