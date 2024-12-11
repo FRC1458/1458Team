@@ -19,11 +19,10 @@ public class TrajectoryGenerator {
 		//the parent folder NEEDs to be "./src/main/deploy/"
         public Trajectory testTrajectoryZigzag = loadTrajectory("paths/output/s.0.0.zigzag.wpilib.json"); 
         public Trajectory testTrajectoryBackForth = loadTrajectory("paths/output/s.0.0.back.n.forth.n.return.wpilib.json"); 
-        public Trajectory testTrajectoryAlmostStraight = loadTrajectory("paths/output/s.0.0.AlmostStraight.wpilib.json"); 
+        public Trajectory testTrajectoryStraightForward = loadTrajectory("paths/output/s.0.0.StraightForward.n.return.wpilib.json"); 
         public Trajectory testTrajectorySlowCurve = loadTrajectory("paths/output/s.0.0.SlowCurve.wpilib.json"); 
-        public Trajectory testTrajectoryBigLoopCW = loadTrajectory("paths/output/s.0.0.bigloop.cw.wpilib.json"); 
-        public Trajectory testTrajectoryBigLoopCCW = loadTrajectory("paths/output/s.0.0.bigLoop.ccw.wpilib.json"); 
-        public Trajectory testTrajectoryBigLoopCCWZigzag = loadTrajectory("paths/output/s.0.0.bigLoop.ccw.zigzag.wpilib.json"); 
+        public Trajectory testTrajectoryOneCircle = loadTrajectory("paths/output/s.0.0.oneCircle.cw.wpilib.json"); 
+        public Trajectory testTrajectoryTwoCircle = loadTrajectory("paths/output/s.0.0.twoCircle.wpilib.json"); 
         public Trajectory testTrajectoryBeeDancing = loadTrajectory("paths/output/s.0.0.BeeDancing.wpilib.json");         
         /* dc.10.21.2024, additional trajectory can be added similar to the TestTrajectory */
 
