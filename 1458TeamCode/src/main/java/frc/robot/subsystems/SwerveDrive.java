@@ -237,13 +237,13 @@ public class SwerveDrive extends Subsystem {
 					}
 					updateSetpoint();
 
- 					// RobotState.getInstance()
-					// 		.addOdometryUpdate(
-					// 				timestamp,
-					// 				new InterpolatingPose2d(mWheelTracker.getRobotPose()),
-					// 				mPeriodicIO.measured_velocity,
-					// 				mPeriodicIO.predicted_velocity);
-					m_field.setRobotPose(mWheelTracker.getRobotPose());
+ 					RobotState.getInstance()
+							.addOdometryUpdate(
+									timestamp,
+									new InterpolatingPose2d(mWheelTracker.getRobotPose()),
+									mPeriodicIO.measured_velocity,
+									mPeriodicIO.predicted_velocity);
+					m_field.setRobotPose(mWheelTracker.getRobotPose());`
 				}
 			}
 
