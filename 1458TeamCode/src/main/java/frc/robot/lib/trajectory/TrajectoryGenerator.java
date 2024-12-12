@@ -15,7 +15,7 @@ public class TrajectoryGenerator {
     //the trajectories used in auto mode
     private TrajectorySet mTrajectorySet = null;
 
-    public class TrajectorySet {        
+    public class TrajectorySet {
 		//the parent folder NEEDs to be "./src/main/deploy/"
         public Trajectory testTrajectoryZigzag = loadTrajectory("paths/output/s.0.0.zigzag.wpilib.json"); 
         public Trajectory testTrajectoryBackForth = loadTrajectory("paths/output/s.0.0.back.n.forth.n.return.wpilib.json"); 
@@ -24,6 +24,9 @@ public class TrajectoryGenerator {
         public Trajectory testTrajectoryOneCircle = loadTrajectory("paths/output/s.0.0.oneCircle.cw.wpilib.json"); 
         public Trajectory testTrajectoryTwoCircle = loadTrajectory("paths/output/s.0.0.twoCircle.wpilib.json"); 
         public Trajectory testTrajectoryBeeDancing = loadTrajectory("paths/output/s.0.0.BeeDancing.wpilib.json");         
+        public Trajectory testTrajectorySmallLoop = loadTrajectory("paths/output/s.0.0.smallloop.wpilib.json");         
+        public Trajectory testTrajectoryOhNo = loadTrajectory("paths/output/s.0.0.oh.no.wpilib.json");
+        public Trajectory testTrajectoryForwardBack = loadTrajectory("paths/output/s.0.0.shrimple.wpilib.json");
         /* dc.10.21.2024, additional trajectory can be added similar to the TestTrajectory */
 
         private Trajectory loadTrajectory (String sJsonFile){

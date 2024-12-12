@@ -16,10 +16,11 @@ public class TestPathMode extends AutoModeBase {
 	@Override
 	protected void routine() throws AutoModeEndedException {
 		System.out.println("TestPathMode: Running test mode auto!");
-//		runAction(new SwerveTrajectoryAction(trajectorySet.testTrajectoryAlmostStraight, true));
+		runAction(new SwerveTrajectoryAction(trajectorySet.testTrajectorySmallLoop, true));
 //		runAction(new SwerveTrajectoryAction(trajectorySet.testTrajectoryZigzag, true));
+//		runAction(new SwerveTrajectoryAction(trajectorySet.testTrajectorySlowCurve, true));
 //		runAction(new SwerveTrajectoryAction(trajectorySet.testTrajectoryBackForth, true));
-		runAction(new SwerveTrajectoryAction(trajectorySet.testTrajectoryOneCircle, true));
+//		runAction(new SwerveTrajectoryAction(trajectorySet.testTrajectoryOneCircle, true));
 //		runAction(new SwerveTrajectoryAction(trajectorySet.testTrajectoryTwoCircle, true));
 //		runAction(new SwerveTrajectoryAction(trajectorySet.testTrajectoryBeeDancing, true));
 /*//TODO: chain other test actions here 
