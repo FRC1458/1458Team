@@ -85,10 +85,9 @@ public class RobotContainer25 {
             m_SubsystemManager.registerEnabledLoops(m_EnabledLooper);
             m_SubsystemManager.registerDisabledLoops(m_DisabledLooper);
 
-            /* 
-            TrajectoryGenerator.getInstance().generateTrajectories();  //TODO:  complete TrajectoryGenerator to load Trajectories from Json file
+
+            // TrajectoryGenerator.getInstance().generateTrajectories();  //TODO:  complete TrajectoryGenerator to load Trajectories from Json file
 			RobotState.getInstance().resetKalman(); //TODO: complete RobotState classes
-            */
             //set robot to neutral brake
             m_SwerveDrive.setNeutralBrake(true);
 

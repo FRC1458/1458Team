@@ -243,7 +243,7 @@ public class SwerveDrive extends Subsystem {
 									new InterpolatingPose2d(mWheelTracker.getRobotPose()),
 									mPeriodicIO.measured_velocity,
 									mPeriodicIO.predicted_velocity);
-					m_field.setRobotPose(mWheelTracker.getRobotPose());`
+					m_field.setRobotPose(mWheelTracker.getRobotPose());
 				}
 			}
 
