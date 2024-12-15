@@ -389,6 +389,45 @@
               "_glyph": 148,
               "_showGlyph": false
             }
+          },
+          "0,6": {
+            "size": [
+              2,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Correction Factors",
+              "_title": "Correction Factors",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "4,6": {
+            "size": [
+              2,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Modules Used For Odometry",
+              "_title": "Modules Used For Odometry",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "6,6": {
+            "size": [
+              2,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Accel",
+              "_title": "Accel",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
           }
         }
       }

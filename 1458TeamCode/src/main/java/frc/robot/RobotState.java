@@ -86,6 +86,21 @@ public class RobotState {
 		// mPoseAcceptor = new VisionPoseAcceptor();
 	}
 
+	/**
+	 * Reconstructs Kalman Filter.
+	 */
+	public synchronized void resetKalman() {
+		mKalmanFilter = new ExtendedKalmanFilter<N2, N2, N2>(
+				Nat.N2(), // Dimensions of output (x, y)
+				Nat.N2(), // Dimensions of predicted error shift (dx, dy) (always 0)
+				Nat.N2(), // Dimensions of vision (x, y)
+				(x, u) -> u, // The derivative of the output is predicted shift (always 0)
+				(x, u) -> x, // The output is position (x, y)
+				kStateStdDevs, // Standard deviation of position (uncertainty propagation with no vision)
+				kLocalMeasurementStdDevs, // Standard deviation of vision measurements
+				Constants.kLooperDt);
+	}
+
 	public synchronized void addOdometryUpdate(
 			double now, InterpolatingPose2d odometry_pose, Twist2d measured_velocity, Twist2d predicted_velocity) {
 		odometry_to_vehicle.put(new InterpolatingDouble(now), odometry_pose);
