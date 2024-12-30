@@ -25,7 +25,7 @@ import frc.robot.subsystems.SwerveDrive;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.lib.util.Util;
 import frc.robot.lib.trajectory.TrajectoryGenerator;
-
+import frc.robot.Loops.CrashTracker;
 /**
  * DC 10.28.2024
  * This class is where the bulk of the robot (for 2025 FRC season) should be declared, 
@@ -106,7 +106,7 @@ public class RobotContainer25 {
             //binds single-button events 
 //            bindSingleButtonCmds ();
 		} catch (Throwable t) {
-			//CrashTracker.logThrowableCrash(t);    //TODO: CrashTracker needs to be ported. to log crash/exception
+			CrashTracker.logThrowableCrash(t);    //TODO: CrashTracker needs to be ported. to log crash/exception
 			throw t;
 		}
     }
@@ -141,7 +141,7 @@ public class RobotContainer25 {
  			m_SwerveDrive.feedTeleopSetpoint(new ChassisSpeeds(0.0, 0.0, 0.0));
             switchOnLooper(m_EnabledLooper, m_DisabledLooper);
 		} catch (Throwable t) {
-//			CrashTracker.logThrowableCrash(t);
+            CrashTracker.logThrowableCrash(t);
 			throw t;
 		}
 
@@ -154,7 +154,7 @@ public class RobotContainer25 {
             
             m_AutoModeExecutor.start();
 		} catch (Throwable t) {
-//			CrashTracker.logThrowableCrash(t);
+			CrashTracker.logThrowableCrash(t);
 			throw t;
 		}
 
@@ -176,7 +176,7 @@ public class RobotContainer25 {
         try {
             switchOnLooper(m_DisabledLooper, m_EnabledLooper);
 		} catch (Throwable t) {
-//			CrashTracker.logThrowableCrash(t);
+			CrashTracker.logThrowableCrash(t);
 			throw t;
 		}
     }
@@ -185,12 +185,12 @@ public class RobotContainer25 {
     public void initTestMode (){
         try {
 //          RobotState.getInstance().setIsInAuto(false);
-            m_AutoModeSelector.forceModeTo(true);
-            switchOnLooper(m_EnabledLooper, m_DisabledLooper);
-            
-            m_AutoModeExecutor.start();
+            if (m_AutoModeExecutor != null) {
+			    m_AutoModeExecutor.stop();
+		    }
+            CrashTracker.logTest("Testing crashtracker - if you see this it works");
 		} catch (Throwable t) {
-//			CrashTracker.logThrowableCrash(t);
+			CrashTracker.logThrowableCrash(t);
 			throw t;
 		}
         /*try {
@@ -236,7 +236,7 @@ public class RobotContainer25 {
 //			mDriverControls.oneControllerMode();
 
 		} catch (Throwable t) {
-//			CrashTracker.logThrowableCrash(t);
+			CrashTracker.logThrowableCrash(t);
 			throw t;
 		}
 
