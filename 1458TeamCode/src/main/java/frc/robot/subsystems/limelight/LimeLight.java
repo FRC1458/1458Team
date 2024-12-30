@@ -86,4 +86,10 @@ public class LimeLight extends SubsystemBase {
     public boolean hasTarget() {
         return limelightTable.getEntry("tv").getDouble(0.0) == 1.0;
     }
+
+    public void getPose2d() {
+        double botpose = limelightTable.getEntry("botpose").getDouble(0.0);
+
+        System.out.println(botpose);
+    }  
 }

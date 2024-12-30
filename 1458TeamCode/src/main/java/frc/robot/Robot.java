@@ -4,7 +4,11 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -13,6 +17,9 @@ import frc.robot.controlboard.ControlBoard;
 import frc.robot.controlboard.DriverControls;
 import frc.robot.subsystems.DummySubsystem;
 import frc.robot.subsystems.SubsystemManager;
+import frc.robot.LimelightHelpers;
+import frc.robot.LimelightHelpers.LimelightResults;
+import frc.robot.LimelightHelpers.LimelightTarget_Fiducial;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -32,6 +39,8 @@ public class Robot extends TimedRobot {
    private final Looper m_DisabledLooper = new Looper();
    private DummySubsystem m_ExampleSubsystem;
 
+   private Field2d m_limelightField;
+   private Pose2d m_limelightPose;
 
   public static final CTREConfigs ctreConfigs = new CTREConfigs();
 
@@ -49,12 +58,17 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer25();
-    
+    m_limelightPose = new Pose2d();
+    m_limelightField = new Field2d();
 
     for (int port = 5800; port <= 5809; port++) {
       edu.wpi.first.net.PortForwarder.add(port, "limelight-c.local", port);
       edu.wpi.first.net.PortForwarder.add(port, "limelight-bw.local", port);
-    } 
+    }
+    
+    m_limelightField.setRobotPose(m_limelightPose);
+
+    SmartDashboard.putData(m_limelightField);
     
     //subsystems and loop framework init code move to RobotContainer25 class
 
@@ -74,6 +88,8 @@ public class Robot extends TimedRobot {
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
+    
+    m_limelightPose = LimelightHelpers.getBotPose2d("limelight-c");
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
