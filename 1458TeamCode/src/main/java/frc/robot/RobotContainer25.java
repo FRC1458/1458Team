@@ -9,6 +9,9 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -17,6 +20,7 @@ import frc.robot.subsystems.Cancoders;
 import frc.robot.subsystems.DummySubsystem;
 import frc.robot.subsystems.SubsystemManager;
 import frc.robot.subsystems.SwerveDrive;
+import frc.robot.subsystems.limelight.LimeLight;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.lib.util.Util;
 
@@ -49,6 +53,7 @@ public class RobotContainer25 {
     /* Subsystems instance */
     private DummySubsystem m_ExampleSubsystem;
     private SwerveDrive m_SwerveDrive;
+    private final LimeLight mLimeLight = new LimeLight();
     private Cancoders m_Cancoders;
 
     //contructor
@@ -202,8 +207,34 @@ public class RobotContainer25 {
     public Command getAutonomousCommand() {
         return null;
     }
-    public void updateLimeLightData() {
+
+    // Method to display Limelight data on SmartDashboard
+    public void displayLimeLightData() {
+        SmartDashboard.putBoolean("Limelight Has Target", mLimeLight.hasTarget());
+        SmartDashboard.putNumber("Limelight X", mLimeLight.getX());
+        SmartDashboard.putNumber("Limelight Y", mLimeLight.getY());
+        SmartDashboard.putNumber("Limelight Area", mLimeLight.getArea());
     }
 
-    
+    // Call this method periodically (e.g., in a periodic method in your main robot class)
+    public void updateLimeLightData() {
+        SmartDashboard.putBoolean("Limelight Has Target", mLimeLight.hasTarget());
+        SmartDashboard.putNumber("Limelight X", mLimeLight.getX());
+        SmartDashboard.putNumber("Limelight Y", mLimeLight.getY());
+        SmartDashboard.putNumber("Limelight Area", mLimeLight.getArea());
+        SmartDashboard.putNumber("Red TIe R", mLimeLight.getArea());
+        Shuffleboard.update();
+    }
+
+    private void configureShuffleboard() {
+        ShuffleboardTab tab = Shuffleboard.getTab("LimeLight Data");
+        tab.addBoolean("Limelight Has Target", mLimeLight::hasTarget);
+        tab.addNumber("Limelight X", mLimeLight::getX);
+        tab.addNumber("Limelight Y", mLimeLight::getY);
+        tab.addNumber("Limelight Area", mLimeLight::getArea);
+        tab.addNumber("Red TIe R", mLimeLight::getArea);
+
+        ShuffleboardTab tab1 = Shuffleboard.getTab("Module");
+        tab1.addNumber("Module", mLimeLight::getX);
+    }
 }
