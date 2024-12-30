@@ -6,6 +6,12 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.networktables.DoubleArraySubscriber;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -40,6 +46,7 @@ public class Robot extends TimedRobot {
    private DummySubsystem m_ExampleSubsystem;
 
    private Field2d m_limelightField;
+   private DoubleArraySubscriber botPoseSubscriber;
    private Pose2d m_limelightPose;
 
   public static final CTREConfigs ctreConfigs = new CTREConfigs();
@@ -70,8 +77,8 @@ public class Robot extends TimedRobot {
 
     SmartDashboard.putData(m_limelightField);
     
-    //subsystems and loop framework init code move to RobotContainer25 class
-
+    NetworkTable limelightC = NetworkTableInstance.getDefault().getTable("limelight-c");
+    botPoseSubscriber = limelightC.getDoubleArrayTopic("botpose").subscribe(new double[] {});
   }
 
   /**
@@ -89,7 +96,9 @@ public class Robot extends TimedRobot {
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
     
-    m_limelightPose = LimelightHelpers.getBotPose2d("limelight-c");
+    double[] pose = botPoseSubscriber.get();
+
+    m_limelightPose = new Pose2d(new Translation2d(pose[0], pose[1]), new Rotation3d(pose[3], pose[4], pose[5]).toRotation2d());
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
