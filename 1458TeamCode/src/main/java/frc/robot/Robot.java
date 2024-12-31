@@ -73,12 +73,10 @@ public class Robot extends TimedRobot {
       edu.wpi.first.net.PortForwarder.add(port, "limelight-bw.local", port);
     }
     
-    m_limelightField.setRobotPose(m_limelightPose);
-
-    SmartDashboard.putData(m_limelightField);
+    SmartDashboard.putData("LimeLightField",m_limelightField);
     
     NetworkTable limelightC = NetworkTableInstance.getDefault().getTable("limelight-c");
-    botPoseSubscriber = limelightC.getDoubleArrayTopic("botpose").subscribe(new double[] {});
+    botPoseSubscriber = limelightC.getDoubleArrayTopic("botpose_wpiblue").subscribe(new double[6]);
   }
 
   /**
@@ -98,7 +96,8 @@ public class Robot extends TimedRobot {
     
     double[] pose = botPoseSubscriber.get();
 
-    m_limelightPose = new Pose2d(new Translation2d(pose[0], pose[1]), new Rotation3d(pose[3], pose[4], pose[5]).toRotation2d());
+    m_limelightPose = new Pose2d(new Translation2d(pose[0], pose[1]), new Rotation2d(pose[3] * Math.PI / 180));
+    m_limelightField.setRobotPose(m_limelightPose);
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
