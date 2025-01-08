@@ -12,7 +12,7 @@ public abstract class CrashTrackingRunnable implements Runnable {
 		try {
 			runCrashTracked();
 		} catch (Throwable t) {
-			//CrashTracker.logThrowableCrash(t); //Replace using own log system
+			CrashTracker.logThrowableCrash(t); //Replace using own log system
 			throw t;
 		}
 	}

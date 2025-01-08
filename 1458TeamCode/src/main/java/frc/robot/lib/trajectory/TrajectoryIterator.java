@@ -1,7 +1,6 @@
 package frc.robot.lib.trajectory;
 
 import java.util.List;
-
 import edu.wpi.first.math.trajectory.*;
 
 //dc.10.21.2024, rewrite the TrajectoryIterator class based on wpilib Trajectory package, main functions as following
@@ -22,6 +21,8 @@ public class TrajectoryIterator {
 
     //advance by additional time on the trajectory
     public Trajectory.State advance (double additional_progress){
+        if(additional_progress == Double.POSITIVE_INFINITY){
+        }
         progress_ = Math.max(0.0, Math.min(mCurrentTrajectory.getTotalTimeSeconds(), progress_ + additional_progress));
         current_sample_ = mCurrentTrajectory.sample(progress_);
         return current_sample_;

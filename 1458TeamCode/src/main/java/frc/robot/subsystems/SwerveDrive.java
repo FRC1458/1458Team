@@ -37,6 +37,7 @@ import frc.robot.lib.trajectory.TrajectoryIterator;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -78,6 +79,8 @@ public class SwerveDrive extends Subsystem {
 
 	private static SwerveDrive mInstance;
 
+	private final StructArrayPublisher<SwerveModuleState> publisher;
+
 	private int mCounter=0;//TODO: code for debug, to be removed 
 
 	public static SwerveDrive getInstance() {
@@ -103,6 +106,7 @@ public class SwerveDrive extends Subsystem {
 		mWheelTracker = new WheelTracker(mModules);
 
 		SmartDashboard.putData("Field", m_field);
+		publisher = NetworkTableInstance.getDefault().getStructArrayTopic("/SwerveStates", SwerveModuleState.struct).publish();
 	}
 
 	public void setKinematicLimits(KinematicLimits newLimits) {
@@ -237,13 +241,13 @@ public class SwerveDrive extends Subsystem {
 					}
 					updateSetpoint();
 
- 					// RobotState.getInstance()
-					// 		.addOdometryUpdate(
-					// 				timestamp,
-					// 				new InterpolatingPose2d(mWheelTracker.getRobotPose()),
-					// 				mPeriodicIO.measured_velocity,
-					// 				mPeriodicIO.predicted_velocity);
-					m_field.setRobotPose(mWheelTracker.getRobotPose());
+					RobotState.getInstance()
+							.addOdometryUpdate(
+									timestamp,
+									new InterpolatingPose2d(mWheelTracker.getRobotPose()),
+									mPeriodicIO.measured_velocity,
+									mPeriodicIO.predicted_velocity);
+					m_field.setRobotPose(mWheelTracker.getRobotPose());//it works i think but i really cant tell
 				}
 			}
 
@@ -478,7 +482,7 @@ public class SwerveDrive extends Subsystem {
 				min_omega_scalar *= max_omega_step;
 			}
 
-			SmartDashboard.putNumber("Accel", min_translational_scalar);
+//			SmartDashboard.putNumber("Accel", min_translational_scalar);
 			// cap accelerations of both translation and rotation velocities
 			wanted_speeds = new ChassisSpeeds(
 					prev_chassis_speeds.vxMetersPerSecond + dx * min_translational_scalar,
@@ -499,19 +503,30 @@ public class SwerveDrive extends Subsystem {
 			}*/
 		}
 		
-		SwerveModuleState[] real_module_setpoints = SwerveConstants.kKinematics.toSwerveModuleStates(wanted_speeds);
-/*   	{//TODO: debug code, TBR
-			if (mCounter++ >50){
-				mCounter =0;
-				SmartDashboard.putString("updateSetPoint().wanted_speed (Omega, vx, vy)", 
-						String.format("%.2f,%.2f,%.2f", wanted_speeds.omegaRadiansPerSecond, wanted_speeds.vxMetersPerSecond, wanted_speeds.vyMetersPerSecond));
 
-				for (int i = 0; i < mModules.length; i++) {
-					SmartDashboard.putString("updateSetPoint().real_module_setpoints["+ i +"].angle", 
-						String.format("%.2f",real_module_setpoints[i].angle.getDegrees()));
-				}
+		SwerveModuleState[] real_module_setpoints = SwerveConstants.kKinematics.toSwerveModuleStates(wanted_speeds);
+   		{
+			//TODO: debug code, TBR
+//			if (mCounter++ >50){
+//				mCounter =0;
+//				SmartDashboard.putString("updateSetPoint().wanted_speed (Omega, vx, vy)", 
+//						String.format("%.2f,%.2f,%.2f", wanted_speeds.omegaRadiansPerSecond, wanted_speeds.vxMetersPerSecond, wanted_speeds.vyMetersPerSecond));
+//
+//				for (int i = 0; i < mModules.length; i++) {
+//					SmartDashboard.putString("updateSetPoint().real_module_setpoints["+ i +"].angle", 
+//						String.format("%.2f",real_module_setpoints[i].angle.getDegrees()));
+//				}
+//			}
+			SmartDashboard.putNumber("updateSetPoint().wanted_speed.Omega)", wanted_speeds.omegaRadiansPerSecond);
+			SmartDashboard.putNumber("updateSetPoint().wanted_speed.vx)", wanted_speeds.vxMetersPerSecond);
+			SmartDashboard.putNumber("updateSetPoint().wanted_speed.vy)", wanted_speeds.vyMetersPerSecond);
+			
+			for (int i = 0; i < real_module_setpoints.length; i++) {
+				publisher.set(real_module_setpoints);
 			}
-		}*/
+			
+		}
+
 		SwerveDriveKinematics.desaturateWheelSpeeds(real_module_setpoints, Constants.SwerveConstants.maxSpeed);
 
 		Twist2d pred_twist_vel= new Twist2d(wanted_speeds.vxMetersPerSecond,wanted_speeds.vyMetersPerSecond,wanted_speeds.omegaRadiansPerSecond);

@@ -25,12 +25,16 @@ public class AutoModeExecutor {
 				public void runCrashTracked() {
 					if (m_auto_mode != null) {
 						m_auto_mode.run();
+	
+		System.out.println("Auto Executor Running!");
 					}
 				}
 			});
 
 			m_thread.start();
 		}
+
+		System.out.println("Auto Executor Started!");
 	}
 
 	public void stop() {
@@ -39,5 +43,6 @@ public class AutoModeExecutor {
 		}
 
 		m_thread = null;
+		System.out.println("Auto Executor Stopped!");
 	}
 }

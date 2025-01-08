@@ -1,6 +1,8 @@
 package frc.robot;
 
 
+import java.util.Optional;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -13,13 +15,17 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Loops.Looper;
+import frc.robot.autos.AutoModeBase;
+import frc.robot.autos.AutoModeExecutor;
+import frc.robot.autos.AutoModeSelector;
 import frc.robot.subsystems.Cancoders;
 import frc.robot.subsystems.DummySubsystem;
 import frc.robot.subsystems.SubsystemManager;
 import frc.robot.subsystems.SwerveDrive;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.lib.util.Util;
-
+import frc.robot.lib.trajectory.TrajectoryGenerator;
+import frc.robot.Loops.CrashTracker;
 /**
  * DC 10.28.2024
  * This class is where the bulk of the robot (for 2025 FRC season) should be declared, 
@@ -50,6 +56,10 @@ public class RobotContainer25 {
     private DummySubsystem m_ExampleSubsystem;
     private SwerveDrive m_SwerveDrive;
     private Cancoders m_Cancoders;
+    
+    public AutoModeExecutor m_AutoModeExecutor;
+    public static final AutoModeSelector m_AutoModeSelector = new AutoModeSelector();
+	
 
     //contructor
     public RobotContainer25 (){
@@ -85,9 +95,10 @@ public class RobotContainer25 {
             m_SubsystemManager.registerEnabledLoops(m_EnabledLooper);
             m_SubsystemManager.registerDisabledLoops(m_DisabledLooper);
 
-            /* 
-            TrajectoryGenerator.getInstance().generateTrajectories();  //TODO:  complete TrajectoryGenerator to load Trajectories from Json file
-			RobotState.getInstance().resetKalman(); //TODO: complete RobotState classes
+            //load all predefined trajectories  
+            TrajectoryGenerator.getInstance().generateTrajectories();
+			/*
+            RobotState.getInstance().resetKalman(); //TODO: complete RobotState classes
             */
             //set robot to neutral brake
             m_SwerveDrive.setNeutralBrake(true);
@@ -95,7 +106,7 @@ public class RobotContainer25 {
             //binds single-button events 
 //            bindSingleButtonCmds ();
 		} catch (Throwable t) {
-			//CrashTracker.logThrowableCrash(t);    //TODO: CrashTracker needs to be ported. to log crash/exception
+			CrashTracker.logThrowableCrash(t);    //TODO: CrashTracker needs to be ported. to log crash/exception
 			throw t;
 		}
     }
@@ -121,13 +132,16 @@ public class RobotContainer25 {
 
     // init manual (teleop) mode
     public void initManualMode (){
+        if (m_AutoModeExecutor != null) {
+			m_AutoModeExecutor.stop();
+		}
    		try {
 //          RobotState.getInstance().setIsInAuto(false);
             System.out.println("InitManualMode called");
  			m_SwerveDrive.feedTeleopSetpoint(new ChassisSpeeds(0.0, 0.0, 0.0));
             switchOnLooper(m_EnabledLooper, m_DisabledLooper);
 		} catch (Throwable t) {
-//			CrashTracker.logThrowableCrash(t);
+            CrashTracker.logThrowableCrash(t);
 			throw t;
 		}
 
@@ -137,8 +151,10 @@ public class RobotContainer25 {
         try {
 //          RobotState.getInstance().setIsInAuto(false);
             switchOnLooper(m_EnabledLooper, m_DisabledLooper);
+            
+            m_AutoModeExecutor.start();
 		} catch (Throwable t) {
-//			CrashTracker.logThrowableCrash(t);
+			CrashTracker.logThrowableCrash(t);
 			throw t;
 		}
 
@@ -146,10 +162,21 @@ public class RobotContainer25 {
 
     // init manual (teleop) mode
     public void initDisabledMode (){
+        if (m_AutoModeExecutor != null) {
+			m_AutoModeExecutor.stop();
+		}
+		m_AutoModeSelector.reset();
+		m_AutoModeSelector.updateModeCreator(false);
+        Optional<AutoModeBase> autoMode = m_AutoModeSelector.getAutoMode();
+
+		m_AutoModeExecutor = new AutoModeExecutor();
+        if (autoMode.isPresent() && (autoMode.get() != m_AutoModeExecutor.getAutoMode())) {
+            m_AutoModeExecutor.setAutoMode(autoMode.get());
+        }
         try {
             switchOnLooper(m_DisabledLooper, m_EnabledLooper);
 		} catch (Throwable t) {
-//			CrashTracker.logThrowableCrash(t);
+			CrashTracker.logThrowableCrash(t);
 			throw t;
 		}
     }
@@ -157,16 +184,29 @@ public class RobotContainer25 {
     // init manual (teleop) mode
     public void initTestMode (){
         try {
+//          RobotState.getInstance().setIsInAuto(false);
+            if (m_AutoModeExecutor != null) {
+			    m_AutoModeExecutor.stop();
+		    }
+            CrashTracker.logTest("Testing crashtracker - if you see this it works");
+		} catch (Throwable t) {
+			CrashTracker.logThrowableCrash(t);
+			throw t;
+		}
+        /*try {
             System.out.println("InitTestMode called");
 //            m_SwerveDrive.straightenAllWheels();
 //            try{Thread.sleep(3000);}catch(Exception e){}
 //            m_SwerveDrive.testSwerve();
+            if (m_AutoModeExecutor != null) {
+			    m_AutoModeExecutor.stop();
+		    }
             m_DisabledLooper.stop();
             m_EnabledLooper.stop();
 		} catch (Throwable t) {
 //			CrashTracker.logThrowableCrash(t);
 			throw t;
-		}
+		}*/
     }
 
     // manual mode periodic callback 
@@ -193,7 +233,7 @@ public class RobotContainer25 {
 //			mDriverControls.oneControllerMode();
 
 		} catch (Throwable t) {
-//			CrashTracker.logThrowableCrash(t);
+			CrashTracker.logThrowableCrash(t);
 			throw t;
 		}
 

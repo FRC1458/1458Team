@@ -96,9 +96,9 @@ public final class Constants {
 
         /* Swerve Profiling Values */
         /** Meters per Second */
-        public static final double maxSpeed = 0.1; //TODO: dc 11.9.24, increase max speed so that we can observe amplified drivetrain bahavior 
+        public static final double maxSpeed = 4; //TODO: dc 11.9.24, increase max speed so that we can observe amplified drivetrain bahavior 
         /** Radians per Second */
-        public static final double maxAngularVelocity = 0.25; //TODO: This must be tuned to specific robot
+        public static final double maxAngularVelocity = 3.14; //TODO: This must be tuned to specific robot
 
         /* Neutral Modes */
         public static final NeutralModeValue angleNeutralMode = NeutralModeValue.Coast;
@@ -224,7 +224,9 @@ public final class Constants {
         public static final double maxSpeed = Swerve.maxSpeed; 
         public static final double maxAngularVelocity = Swerve.maxAngularVelocity;
         public static final double kV = 12 * Math.PI * wheelDiameter / (driveGearRatio * maxSpeed); //TODO: need to finetune with the actual robot
-		public static final double maxAutoSpeed = maxSpeed * 0.85; // Max out at 85% to ensure attainable speeds
+        public static final double maxAutoSpeed = maxSpeed * 0.85;  // Max out at 85% to ensure attainable speeds, 
+                                                                    // This max_speed needs to be consistent with the max_velocity used by pathweaver 
+                                                                    // It will be used to normalize velocity on trajectory point
         public static final double kCancoderBootAllowanceSeconds = 10.0;
 
         public static final KinematicLimits kUncappedLimits = new KinematicLimits();

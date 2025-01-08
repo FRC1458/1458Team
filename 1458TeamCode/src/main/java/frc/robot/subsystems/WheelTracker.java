@@ -139,7 +139,7 @@ public class WheelTracker {
 
 		int n = accurateModules.size();
 
-		SmartDashboard.putNumber("Modules Used For Odometry", n);
+//		SmartDashboard.putNumber("Modules Used For Odometry", n);
 
 		for (WheelProperties w : accurateModules) {
 			x += w.estimatedRobotPose.getTranslation().getX();
@@ -166,12 +166,19 @@ public class WheelTracker {
 		resetModulePoses(mRobotPose);
 	}
 
+	/*DC.12.9.24. Bugfix for wheel odometry update
+	* We need to negate deltaPosition.dy value because position reading of our robot's rotation motor 
+	* increases along clock-wise direction while CCW assumed in original citrus code. 
+	* So if rotation motor turns to positive degree (relative to zero position), robot is actually turning right side, 
+	* which translates into a negative strafe (y-direction) movement, and vice versus. 
+	* similar fixes also apply to setSteeringAngleOptimized(), resetToAbsolute() in SwerveModule();
+	*/
 	private void updateWheelOdometry(SwerveModule module, WheelProperties props) {
 		double currentEncDistance = module.getDriveDistanceMeters();
 		double deltaEncDistance = currentEncDistance - props.previousEncDistance;
 		Rotation2d wheelAngle = module.getModuleAngle().rotateBy(Rotation2d.fromRadians(robotHeading));
 		Translation2d deltaPosition = new Translation2d(wheelAngle.getCos() * deltaEncDistance,
-				wheelAngle.getSin() * deltaEncDistance);
+				-wheelAngle.getSin() * deltaEncDistance); //negate the strafe movement as are rotation motor is clockwise as positive, see comments above for detail.
 
 		double xCorrectionFactor = 1.0;
 		double yCorrectionFactor = 1.0;
@@ -190,10 +197,12 @@ public class WheelTracker {
 			yCorrectionFactor = (3.660 / 4.0);
 		}
 
-		SmartDashboard.putString(
-				"Correction Factors", String.valueOf(xCorrectionFactor) + ":" + String.valueOf(yCorrectionFactor));
+//		SmartDashboard.putString(
+//				"Correction Factors", String.valueOf(xCorrectionFactor) + ":" + String.valueOf(yCorrectionFactor));
 
 		deltaPosition = new Translation2d(deltaPosition.getX() * xCorrectionFactor, deltaPosition.getY() * yCorrectionFactor);
+//		SmartDashboard.putNumber("Mod" + module.moduleNumber() + " updateWheelOdometry.deltaPosition.dx", deltaPosition.getX());
+//		SmartDashboard.putNumber("Mod" + module.moduleNumber() + " updateWheelOdometry.deltaPosition.dy", deltaPosition.getY());
 		Translation2d updatedPosition = props.position.plus(deltaPosition);
 		Pose2d wheelPose = new Pose2d(updatedPosition, Rotation2d.fromRadians(robotHeading));
 		props.estimatedRobotPose = new Pose2d(wheelPose.getTranslation().plus(props.startingPosition.unaryMinus()), wheelPose.getRotation());
