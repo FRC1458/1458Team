@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj.Timer;
 import frc.robot.lib.util.Util;
 import frc.robot.lib.trajectory.TrajectoryGenerator;
 import frc.robot.Loops.CrashTracker;
+import frc.robot.subsystems.Elevator;
 /**
  * DC 10.28.2024
  * This class is where the bulk of the robot (for 2025 FRC season) should be declared,
@@ -56,6 +57,7 @@ public class RobotContainer25 {
     private DummySubsystem m_ExampleSubsystem;
     private SwerveDrive m_SwerveDrive;
     private Cancoders m_Cancoders;
+    private Elevator m_Elevator;
     
     public AutoModeExecutor m_AutoModeExecutor;
     public static final AutoModeSelector m_AutoModeSelector = new AutoModeSelector();
@@ -68,7 +70,7 @@ public class RobotContainer25 {
             m_ExampleSubsystem = DummySubsystem.getInstance();
             m_Cancoders = Cancoders.getInstance();//Cancoders shall be initialized before SwerveDrive as Cancoders are used by Module constructor and initialization code
             m_SwerveDrive = SwerveDrive.getInstance();
-
+            m_Elevator = Elevator.getInstance();
             // init cancoders
             if (Robot.isReal()) {
                 m_Cancoders = Cancoders.getInstance();
@@ -88,7 +90,8 @@ public class RobotContainer25 {
             //add subsystems to its manager
             m_SubsystemManager.setSubsystems(
                 m_SwerveDrive,
-                m_ExampleSubsystem
+                m_ExampleSubsystem,
+                m_Elevator
                 //Insert instances of additional subsystems here
             );
             //register subsystems to loopers
