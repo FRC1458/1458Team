@@ -94,6 +94,9 @@
     }
   },
   "NetworkTables Info": {
+    "AdvantageScope@1": {
+      "open": true
+    },
     "Clients": {
       "open": true
     },
@@ -106,7 +109,8 @@
       },
       "Subscribers": {
         "open": true
-      }
+      },
+      "open": true
     },
     "visible": true
   },

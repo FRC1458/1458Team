@@ -27,6 +27,8 @@ import frc.robot.lib.util.Util;
 import frc.robot.lib.trajectory.TrajectoryGenerator;
 import frc.robot.Loops.CrashTracker;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Shooter;
 /**
  * DC 10.28.2024
  * This class is where the bulk of the robot (for 2025 FRC season) should be declared,
