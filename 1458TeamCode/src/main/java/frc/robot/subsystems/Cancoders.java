@@ -135,7 +135,11 @@ public class Cancoders {
 		return mFrontLeftObserver.hasUpdate()
 				&& mFrontRightObserver.hasUpdate()
 				&& mBackLeftObserver.hasUpdate()
-				&& mBackRightObserver.hasUpdate();
+				&& mBackRightObserver.hasUpdate()
+				&& mElevatorLeftObserver.hasUpdate()
+				&& mElevatorRightObserver.hasUpdate()
+				&& mShooterLeftObserver.hasUpdate()
+				&& mShooterRightObserver.hasUpdate();
 	}
 
 	public CANcoder getFrontLeft() {
