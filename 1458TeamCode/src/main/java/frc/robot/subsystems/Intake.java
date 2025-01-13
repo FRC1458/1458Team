@@ -1,14 +1,13 @@
 package frc.robot.subsystems;
 
-import com.revrobotics.CANSparkLowLevel.MotorType;
-import com.revrobotics.CANSparkMax;
-
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.hardware.CANcoder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.util.Color;
 import frc.robot.Constants;
 //import frc.robot.Helpers;
 //import frc.robot.subsystems.leds.LEDs;
@@ -23,7 +22,7 @@ public class Intake extends Subsystem {
 
   private final PIDController m_pivotPID = new PIDController(k_pivotMotorP, k_pivotMotorI, k_pivotMotorD);
 
-  private final DutyCycleEncoder m_pivotEncoder = new DutyCycleEncoder(Constants.Intake.k_pivotEncoderId);
+  private final CANcoder m_pivotEncoder = new CANcoder(Constants.Intake.k_pivotEncoderId);
   private final DigitalInput m_IntakeLimitSwitch = new DigitalInput(Constants.Intake.k_intakeLimitSwitchId);
 
   //public final LEDs m_leds = LEDs.getInstance();
@@ -39,21 +38,32 @@ public class Intake extends Subsystem {
     return mInstance;
   }
 
-  private CANSparkMax mIntakeMotor;
-  private CANSparkMax mPivotMotor;
+  private TalonFX mIntakeMotor;
+  private TalonFX mPivotMotor;
 
   private Intake() {
     //super("Intake");
 
-    mIntakeMotor = new CANSparkMax(Constants.Intake.kIntakeMotorId, MotorType.kBrushless);
-    mIntakeMotor.restoreFactoryDefaults();
-    mIntakeMotor.setIdleMode(CANSparkMax.IdleMode.kCoast);
+    mIntakeMotor = new TalonFX(Constants.Intake.kIntakeMotorId/* , MotorType.kBrushless*/);
+    //mIntakeMotor.restoreFactoryDefaults();
+    mIntakeMotor.setNeutralMode(NeutralModeValue.Coast);
 
-    mPivotMotor = new CANSparkMax(Constants.Intake.kPivotMotorId, MotorType.kBrushless);
-    mPivotMotor.restoreFactoryDefaults();
-    mPivotMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
-    mPivotMotor.setSmartCurrentLimit(10);
+    mPivotMotor = new TalonFX(Constants.Intake.kPivotMotorId/*  MotorType.kBrushless*/);
+    //mPivotMotor.restoreFactoryDefaults();
+    mPivotMotor.setNeutralMode(NeutralModeValue.Coast);
+    TalonFXConfiguration config = new TalonFXConfiguration();
+    
+    config.CurrentLimits.StatorCurrentLimitEnable = true;
+    config.CurrentLimits.StatorCurrentLimit = 10;
 
+    config.CurrentLimits.SupplyCurrentLimitEnable = true;
+    config.CurrentLimits.SupplyCurrentLimit = 10;
+    config.CurrentLimits.SupplyCurrentThreshold = 15;
+    config.CurrentLimits.SupplyTimeThreshold = 0.5;
+
+    config.Voltage.PeakForwardVoltage = 12.0;
+    config.Voltage.PeakReverseVoltage = -12.0;
+    mPivotMotor.getConfigurator().apply(config,Constants.kLongCANTimeoutMs);
     m_periodicIO = new PeriodicIO();
   }
 
@@ -102,9 +112,11 @@ public class Intake extends Subsystem {
           m_periodicIO.intake_pivot_voltage = m_pivotPID.calculate(getPivotAngleDegrees(), pivot_angle);
 
           // If the pivot is at exactly 0.0, it's probably not connected, so disable it
-          if (m_pivotEncoder.get() == 0.0) {
+          //TODO: re-enable this in future
+          /* 
+          if (m_pivotEncoder.getAbsolutePosition().getValue() == 0.0) {
             m_periodicIO.intake_pivot_voltage = 0.0;
-          }
+          }*/
 
           // Intake control
           m_periodicIO.intake_speed = intakeStateToSpeed(m_periodicIO.intake_state);
@@ -135,13 +147,13 @@ public class Intake extends Subsystem {
   @Override
   public void outputTelemetry() {
     SmartDashboard.putNumber("Speed", intakeStateToSpeed(m_periodicIO.intake_state));
-    SmartDashboard.putNumber("Pivot/Abs Enc (get)", m_pivotEncoder.get());
-    SmartDashboard.putNumber("Pivot/Abs Enc (getAbsolutePosition)", m_pivotEncoder.getAbsolutePosition());
+    //TODO: figure out what SmartDashboard.putNumber("Pivot/Abs Enc (get)", m_pivotEncoder.get()); does
+    SmartDashboard.putNumber("Pivot/Abs Enc (getAbsolutePosition)", m_pivotEncoder.getAbsolutePosition().getValueAsDouble());
     SmartDashboard.putNumber("Pivot/Abs Enc (getPivotAngleDegrees)", getPivotAngleDegrees());
     SmartDashboard.putNumber("Pivot/Setpoint", pivotTargetToAngle(m_periodicIO.pivot_target));
 
     SmartDashboard.putNumber("Pivot/Power", m_periodicIO.intake_pivot_voltage);
-    SmartDashboard.putNumber("Pivot/Current", mPivotMotor.getOutputCurrent());
+    SmartDashboard.putNumber("Pivot/Current", mPivotMotor.getTorqueCurrent().getValue());
 
     SmartDashboard.putBoolean("Limit Switch", getIntakeHasNote());
   }
@@ -196,7 +208,7 @@ public class Intake extends Subsystem {
   }
 
   public double getPivotAngleDegrees() {
-    double value = m_pivotEncoder.getAbsolutePosition() -
+    double value = m_pivotEncoder.getAbsolutePosition().getValueAsDouble() -
         Constants.Intake.k_pivotEncoderOffset + 0.5;
 
     return Units.rotationsToDegrees(modRotations(value));

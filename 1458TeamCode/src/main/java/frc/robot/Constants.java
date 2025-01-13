@@ -310,7 +310,7 @@ public final class Constants {
     
         public static final double kMaxVelocity = 65;
         public static final double kMaxAcceleration = 200;
-    
+        public static final int kCurrentThreshold = 45;
         public static final int kMaxCurrent = 40;
         public static final double kMaxPowerUp = 0.1;
         public static final double kMaxPowerDown = 0.1;

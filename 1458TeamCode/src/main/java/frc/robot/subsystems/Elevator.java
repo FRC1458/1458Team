@@ -1,17 +1,16 @@
 package frc.robot.subsystems;
 
-import com.revrobotics.CANSparkBase.IdleMode;
-import com.revrobotics.CANSparkLowLevel.MotorType;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkPIDController;
-import com.revrobotics.SparkPIDController.ArbFFUnits;
-
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.hardware.CANcoder;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
-import frc.robot.lib.util.SimulatableCANSparkMax;
+import com.ctre.phoenix6.hardware.TalonFX;
+
 
 public class Elevator extends Subsystem {
 
@@ -29,17 +28,16 @@ public class Elevator extends Subsystem {
     return mInstance;
   }
 
-  private SimulatableCANSparkMax mLeftMotor;
-  private RelativeEncoder mLeftEncoder;
-  private SparkPIDController mLeftPIDController;
+  private TalonFX mLeftMotor;
+  private CANcoder mLeftEncoder;
 
-  private SimulatableCANSparkMax mRightMotor;
-  private RelativeEncoder mRightEncoder;
-  private SparkPIDController mRightPIDController;
+  private TalonFX mRightMotor;
+  private CANcoder mRightEncoder;
 
   private TrapezoidProfile mProfile;
   private TrapezoidProfile.State mCurState = new TrapezoidProfile.State();
   private TrapezoidProfile.State mGoalState = new TrapezoidProfile.State();
+  private PositionVoltage m_request = new PositionVoltage(0).withSlot(0);
   private double prevUpdateTime = Timer.getFPGATimestamp();
 
   // private RelativeEncoder mLeftEncoder;
@@ -48,27 +46,31 @@ public class Elevator extends Subsystem {
 
   // private SlewRateLimiter mSpeedLimiter = new SlewRateLimiter(1000);
 
-  private void setUpElevatorMotor(SimulatableCANSparkMax motor, SparkPIDController pidController) {
-    motor.restoreFactoryDefaults();
-    motor.setIdleMode(IdleMode.kBrake);
-    motor.setSmartCurrentLimit(Constants.Elevator.kMaxCurrent);
-    // mLeftEncoder = motor.getEncoder();
+  private void setUpElevatorMotor(TalonFX motor) {
+    
+    TalonFXConfiguration config = new TalonFXConfiguration();
+    
+    config.CurrentLimits.StatorCurrentLimitEnable = true;
+    config.CurrentLimits.StatorCurrentLimit = Constants.Elevator.kMaxCurrent;//citrus code value = 110;
 
-    pidController.setP(Constants.Elevator.kP);
-    pidController.setI(Constants.Elevator.kI);
-    pidController.setD(Constants.Elevator.kD);
-    pidController.setIZone(Constants.Elevator.kIZone);
-    // pidController.setIMaxAccum(0.001, 0)
+    config.CurrentLimits.SupplyCurrentLimitEnable = true;
+    config.CurrentLimits.SupplyCurrentLimit = Constants.Elevator.kMaxCurrent;//citrus value = 90;
+    config.CurrentLimits.SupplyCurrentThreshold = Constants.Elevator.kCurrentThreshold;//add this to limit current spiking 
+    config.CurrentLimits.SupplyTimeThreshold = 0.5;
 
-    // mLeftPIDController.setOutputRange(Constants.Elevator.kMaxPowerUp,
-    // Constants.Elevator.kMaxPowerDown);
+    config.Voltage.PeakForwardVoltage = 12.0;
+    config.Voltage.PeakReverseVoltage = -12.0;
 
-    // motor.setClosedLoopRampRate(kExtensionCLRampRate);
-
-    // mLowerLimit = mLeftMotor.getReverseLimitSwitch(Type.kNormallyOpen);
-    // mUpperLimit = mLeftMotor.getForwardLimitSwitch(Type.kNormallyOpen);
-  }
-
+    // Set PID values for the elevator motor
+    config.Slot0.kP = Constants.Elevator.kP;
+    config.Slot0.kI = Constants.Elevator.kI;
+    config.Slot0.kD = Constants.Elevator.kD;
+    config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    motor.getConfigurator().apply(config,Constants.kLongCANTimeoutMs);
+    
+    // Set the motor to brake mode (will hold its position when powered off)
+    motor.setNeutralMode(NeutralModeValue.Brake);
+}
   private Elevator() {
     //super("Elevator");
 	//TODO:figure out what this does
@@ -76,23 +78,21 @@ public class Elevator extends Subsystem {
     mPeriodicIO = new PeriodicIO();
 
     // LEFT ELEVATOR MOTOR
-    mLeftMotor = new SimulatableCANSparkMax(Constants.Elevator.kElevatorLeftMotorId, MotorType.kBrushless);
-    mLeftEncoder = mLeftMotor.getEncoder();
-    mLeftPIDController = mLeftMotor.getPIDController();
-    setUpElevatorMotor(mLeftMotor, mLeftPIDController);
+    mLeftMotor = new TalonFX(Constants.Elevator.kElevatorLeftMotorId);
+    mLeftEncoder = Cancoders.getInstance().getElevatorLeft();
+    setUpElevatorMotor(mLeftMotor);
 
     // RIGHT ELEVATOR MOTOR
-    mRightMotor = new SimulatableCANSparkMax(Constants.Elevator.kElevatorRightMotorId, MotorType.kBrushless);
-    mRightEncoder = mRightMotor.getEncoder();
-    mRightPIDController = mRightMotor.getPIDController();
-    setUpElevatorMotor(mRightMotor, mRightPIDController);
+    mRightMotor = new TalonFX(Constants.Elevator.kElevatorRightMotorId);
+    mRightEncoder = Cancoders.getInstance().getElevatorRight();
+    setUpElevatorMotor(mRightMotor);
 
     // mRightMotor.setInverted(true);
-    mRightMotor.follow(mLeftMotor, true);
+    mRightMotor.setControl(new DutyCycleOut(mLeftMotor.getDutyCycle().getValue()));
 
-    mLeftMotor.burnFlash();
-    mRightMotor.burnFlash();
-
+    //mLeftMotor.burnFlash();
+    //mRightMotor.burnFlash();
+    //TODO: figure out burnflash equivalent
     mProfile = new TrapezoidProfile(
         new TrapezoidProfile.Constraints(Constants.Elevator.kMaxVelocity, Constants.Elevator.kMaxAcceleration));
   }
@@ -142,14 +142,15 @@ public class Elevator extends Subsystem {
       mCurState = mProfile.calculate(dt, mCurState, mGoalState);
 
       // Set PID controller to new state
-      mLeftPIDController.setReference(
+      /*mLeftPIDController.setReference(
           mCurState.position,
           CANSparkMax.ControlType.kPosition,
           0,
           Constants.Elevator.kG,
-          ArbFFUnits.kVoltage);
+          ArbFFUnits.kVoltage);*/ //TODO: verify if this patch works
+      mLeftMotor.setControl(m_request.withPosition(mCurState.position));
     } else {
-      mCurState.position = mLeftEncoder.getPosition();
+      mCurState.position = mLeftEncoder.getPosition().getValueAsDouble();
       mCurState.velocity = 0;
       mLeftMotor.set(mPeriodicIO.elevator_power);
     }
@@ -165,18 +166,18 @@ public class Elevator extends Subsystem {
 
   @Override
   public void outputTelemetry() {
-    SmartDashboard.putNumber("Position/Current", mLeftEncoder.getPosition());
+    SmartDashboard.putNumber("Position/Current", mLeftEncoder.getPosition().getValueAsDouble());
     SmartDashboard.putNumber("Position/Target", mPeriodicIO.elevator_target);
-    SmartDashboard.putNumber("Velocity/Current", mLeftEncoder.getVelocity());
+    SmartDashboard.putNumber("Velocity/Current", mLeftEncoder.getVelocity().getValueAsDouble());
 
     SmartDashboard.putNumber("Position/Setpoint", mCurState.position);
     SmartDashboard.putNumber("Velocity/Setpoint", mCurState.velocity);
 
-    SmartDashboard.putNumber("Current/Left", mLeftMotor.getOutputCurrent());
-    SmartDashboard.putNumber("Current/Right", mRightMotor.getOutputCurrent());
+    SmartDashboard.putNumber("Current/Left", mLeftMotor.getSupplyCurrent().getValueAsDouble());
+    SmartDashboard.putNumber("Current/Right", mRightMotor.getSupplyCurrent().getValueAsDouble());
 
-    SmartDashboard.putNumber("Output/Left", mLeftMotor.getAppliedOutput());
-    SmartDashboard.putNumber("Output/Right", mRightMotor.getAppliedOutput());
+    SmartDashboard.putNumber("Output/Left", mLeftMotor.getMotorOutputStatus().getValueAsDouble());
+    SmartDashboard.putNumber("Output/Right", mRightMotor.getMotorOutputStatus().getValueAsDouble());
 
     //SmartDashboard.putNumber("State", mPeriodicIO.state);
 	//TODO: figure out how to put a state in smart dashbaord

@@ -52,6 +52,10 @@ public class Ports {
 	public static final CanDeviceId CLIMBER_MAIN = new CanDeviceId(18, "CV");
 	public static final CanDeviceId CLIMBER_FOLLOWER = new CanDeviceId(19, "CV");
  */
+
+	public static final CanDeviceId EL_CANCODER = new CanDeviceId(13, "CV");
+	public static final CanDeviceId ER_CANCODER = new CanDeviceId(14, "CV");
+
 	public static final int PIGEON = 20;
 	
 	public static final CanDeviceId LEDS = new CanDeviceId(21, "rio");
