@@ -38,6 +38,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
+import frc.robot.lib.trajectory.PathPlannerTrajectoryIterator;
 import frc.robot.lib.trajectory.TrajectoryIterator;
 //TODO:import com.team254.lib.trajectory.TimedView;
 import edu.wpi.first.math.trajectory.Trajectory;
@@ -303,6 +304,15 @@ public class SwerveDrive extends Subsystem {
 	}
 
 	public synchronized void setTrajectory(TrajectoryIterator trajectory) {
+		if (mMotionPlanner != null) {
+			mOverrideTrajectory = false;
+			mMotionPlanner.reset();
+			mMotionPlanner.setTrajectory(trajectory);
+			mControlState = DriveControlState.PATH_FOLLOWING;
+		}
+	}
+
+	public synchronized void setTrajectory(PathPlannerTrajectoryIterator trajectory) {
 		if (mMotionPlanner != null) {
 			mOverrideTrajectory = false;
 			mMotionPlanner.reset();
