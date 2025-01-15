@@ -82,7 +82,6 @@ public class PathPlannerTrajectoryIterator {
         int high = stateList.size() - 1;
         while (low != high) {
             int mid = (low + high) / 2;
-            
             if (stateList.get(mid).timeSeconds < progress) {
                 low = mid + 1;
             } else {
