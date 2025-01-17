@@ -178,9 +178,9 @@ public class Drive extends SubsystemBase {
             SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Angle", ((mod.mAngleMotor.getPosition().getValue() * 360) % 360 + 360) % 360); // This is super specific, don't break this pls
         }
 
-        // gyroSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
-        // double angleChange = Constants.Swerve.swerveKinematics.toChassisSpeeds(getModuleStates()).omegaRadiansPerSecond * TimedRobot.kDefaultPeriod;
-        // lastAngle = lastAngle.plus(Rotation2d.fromRadians(angleChange));
-        // gyroSimState.setRawYaw(lastAngle.getDegrees());
+        gyroSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
+        double angleChange = Constants.Swerve.swerveKinematics.toChassisSpeeds(getModuleStates()).omegaRadiansPerSecond * TimedRobot.kDefaultPeriod;
+        lastAngle = lastAngle.plus(Rotation2d.fromRadians(angleChange));
+        gyroSimState.setRawYaw(lastAngle.getDegrees());
     }
 }
